@@ -11,7 +11,7 @@ type Document struct {
 
 // NewDocument creates a document with auto-generated UUID and initialized data map.
 // Initializes empty map if data is nil.
-func NewDocument(data map[string]any) *Document {
+func NewDocument(data map[string]any) *Document { // FIXME: Replace pointer on simple struct
 	if data == nil {
 		data = make(map[string]any)
 	}
@@ -24,7 +24,7 @@ func NewDocument(data map[string]any) *Document {
 
 // DeepCopy creates a fully independent duplicate of the document.
 // Recursively copies all nested data structures.
-func (d *Document) DeepCopy() *Document {
+func (d *Document) DeepCopy() *Document { // TODO: use existing library for making deep copy
 	return &Document{
 		ID:   d.ID,
 		Data: deepCopyMap(d.Data),

@@ -289,3 +289,11 @@ func TestCollection_Exists(t *testing.T) {
 		})
 	}
 }
+
+func TestCollection_GetChangesSince(t *testing.T) {
+	// TODO: Implement testing of GetChangesSince
+}
+
+func TestCollection_TruncateChanges(t *testing.T) {
+	// TODO: Implement testing of TruncateChanges
+}

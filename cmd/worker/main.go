@@ -8,11 +8,9 @@ import (
 )
 
 func main() {
-	// TODO: read configuration file
 	cfg := config.MustLoad()
 	fmt.Println(cfg)
 
-	// TODO: initialize logger
 	log := logging.NewLogger(cfg.Logging.Format, cfg.Logging.Level)
 	log.Info("starting worker node #1")
 

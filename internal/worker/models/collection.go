@@ -13,6 +13,8 @@ type Collection struct {
 	name      string
 	documents map[uuid.UUID]*Document
 	mu        sync.RWMutex
+	seq       uint64
+	changes   []Change
 }
 
 // NewCollection creates empty document collection with specified name
@@ -20,6 +22,8 @@ func NewCollection(name string) *Collection {
 	return &Collection{
 		name:      name,
 		documents: make(map[uuid.UUID]*Document),
+		changes:   make([]Change, 0),
+		seq:       0,
 	}
 }
 
@@ -39,6 +43,7 @@ func (c *Collection) Insert(doc *Document) error {
 	}
 
 	c.documents[doc.ID] = doc
+	c.changes = append(c.changes, NewChange(c.seq, InsertOp, doc.DeepCopy(), uuid.Nil))
 	return nil
 }
 
@@ -72,6 +77,7 @@ func (c *Collection) Update(id uuid.UUID, newData map[string]any) error {
 	}
 
 	doc.Data = deepCopyMap(newData)
+	c.changes = append(c.changes, NewChange(c.seq, UpdateOp, doc.DeepCopy(), uuid.Nil))
 	return nil
 }
 
@@ -86,6 +92,7 @@ func (c *Collection) Delete(id uuid.UUID) error {
 	}
 
 	delete(c.documents, id)
+	c.changes = append(c.changes, NewChange(c.seq, DeleteOp, nil, id))
 	return nil
 }
 
@@ -96,4 +103,36 @@ func (c *Collection) Exists(id uuid.UUID) bool {
 
 	_, exists := c.documents[id]
 	return exists
+}
+
+func (c *Collection) GetChangesSince(seq uint64) []Change {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	result := make([]Change, 0)
+	for _, ch := range c.changes {
+		if ch.Sequence > seq {
+			result = append(result, ch.copy())
+		}
+	}
+	return result
+}
+
+func (c *Collection) CurrentSequence() uint64 {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.seq
+}
+
+func (c *Collection) TruncateChanges(seq uint64) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	newChanges := make([]Change, 0)
+	for _, ch := range c.changes {
+		if ch.Sequence > seq {
+			newChanges = append(newChanges, ch)
+		}
+	}
+	c.changes = newChanges
 }
