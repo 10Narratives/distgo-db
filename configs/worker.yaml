@@ -4,4 +4,4 @@ grpc:
 logging:
   level: "info"
   dir: "dir"
-  format: "json"
+  format: "pretty"
