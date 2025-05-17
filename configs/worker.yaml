@@ -1,0 +1,12 @@
+logging:
+  level: "info"
+  format: "plain"
+  output: "file"
+  file_path: "./logs/workers/worker.log"
+  max_size: 10
+  max_age: 4
+  compress: true
+
+grpc:
+  bind_address: "0.0.0.0:5000"
+  timeout: 5s
