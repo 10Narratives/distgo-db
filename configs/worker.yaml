@@ -1,7 +1,0 @@
-grpc:
-  port: 4000
-  timeout: 4s
-logging:
-  level: "info"
-  dir: "dir"
-  format: "pretty"
