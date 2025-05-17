@@ -5,10 +5,171 @@ import (
 
 	"githib.com/10Narratives/distgo-db/internal/worker/models"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestDocument_DeepCopy(t *testing.T) {
+func TestDocument_Get(t *testing.T) {
+	t.Parallel()
+
+	type fields struct {
+		id   uuid.UUID
+		data map[string]any
+	}
+
+	type args struct {
+		path string
+	}
+
+	tests := []struct {
+		name      string
+		fields    fields
+		args      args
+		wantValue require.ValueAssertionFunc
+		wantError require.ErrorAssertionFunc
+	}{
+		{
+			name: "get string",
+			fields: fields{
+				id: uuid.New(),
+				data: map[string]any{
+					"nickname": "User",
+					"email":    "awesome_user@mail.com",
+				},
+			},
+			args: args{path: "nickname"},
+			wantValue: func(tt require.TestingT, got any, _ ...any) {
+				nickname, ok := got.(string)
+				require.True(t, ok)
+				require.Equal(t, "User", nickname)
+			},
+			wantError: require.NoError,
+		},
+		{
+			name: "get map",
+			fields: fields{
+				id: uuid.New(),
+				data: map[string]any{
+					"nickname": "User",
+					"email":    "awesome_user@mail.com",
+					"address": map[string]any{
+						"city":   "Moscow",
+						"street": "Some Moscow street",
+						"house":  "007",
+					},
+				},
+			},
+			args: args{path: "address"},
+			wantValue: func(tt require.TestingT, got any, _ ...any) {
+				address, ok := got.(map[string]any)
+				require.True(t, ok)
+
+				require.Contains(t, address, "city")
+				require.Contains(t, address, "street")
+				require.Contains(t, address, "house")
+			},
+			wantError: require.NoError,
+		},
+		{
+			name: "empty path",
+			fields: fields{
+				id: uuid.New(),
+				data: map[string]any{
+					"nickname": "User",
+					"email":    "awesome_user@mail.com",
+					"address": map[string]any{
+						"city":   "Moscow",
+						"street": "Some Moscow street",
+						"house":  "007",
+					},
+				},
+			},
+			args:      args{path: ""},
+			wantValue: require.Empty,
+			wantError: func(tt require.TestingT, err error, _ ...any) {
+				require.EqualError(t, err, models.ErrIncorrectPath.Error())
+			},
+		},
+		{
+			name: "first level is empty",
+			fields: fields{
+				id: uuid.New(),
+				data: map[string]any{
+					"nickname": "User",
+					"email":    "awesome_user@mail.com",
+					"address": map[string]any{
+						"city":   "Moscow",
+						"street": "Some Moscow street",
+						"house":  "007",
+					},
+				},
+			},
+			args:      args{path: ".city"},
+			wantValue: require.Empty,
+			wantError: func(tt require.TestingT, err error, _ ...any) {
+				require.EqualError(t, err, models.ErrIncorrectPath.Error())
+			},
+		},
+		{
+			name: "level not found",
+			fields: fields{
+				id: uuid.New(),
+				data: map[string]any{
+					"nickname": "User",
+					"email":    "awesome_user@mail.com",
+					"address": map[string]any{
+						"city":   "Moscow",
+						"street": "Some Moscow street",
+						"house":  "007",
+					},
+				},
+			},
+			args:      args{path: "age"},
+			wantValue: require.Empty,
+			wantError: func(tt require.TestingT, err error, _ ...any) {
+				require.EqualError(t, err, models.ErrLevelNotFound.Error())
+			},
+		},
+		{
+			name: "intermediate is not a map",
+			fields: fields{
+				id: uuid.New(),
+				data: map[string]any{
+					"nickname": "User",
+					"email":    "awesome_user@mail.com",
+					"address": map[string]any{
+						"city":   "Moscow",
+						"street": "Some Moscow street",
+						"house":  "007",
+					},
+				},
+			},
+			args:      args{path: "address.city.dummy"},
+			wantValue: require.Empty,
+			wantError: func(tt require.TestingT, err error, _ ...any) {
+				require.EqualError(t, err, models.ErrIntermediateNotMap.Error())
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := models.Document{
+				ID:   tc.fields.id,
+				Data: tc.fields.data,
+			}
+			val, err := d.Get(tc.args.path)
+
+			tc.wantValue(t, val)
+			tc.wantError(t, err)
+		})
+	}
+}
+
+func TestDocument_Set(t *testing.T) {
 	t.Parallel()
 
 	type fields struct {
@@ -16,67 +177,82 @@ func TestDocument_DeepCopy(t *testing.T) {
 		Data map[string]any
 	}
 
+	type args struct {
+		path  string
+		value any
+	}
+
 	tests := []struct {
-		name      string
-		fields    fields
-		wantValue func(t *testing.T, original, copied *models.Document)
+		name    string
+		fields  fields
+		args    args
+		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name: "simple data",
+			name: "successful set",
 			fields: fields{
 				ID: uuid.New(),
 				Data: map[string]any{
-					"name": "test",
-					"age":  25,
+					"nickname": "User",
+					"email":    "awesome_user@mail.com",
 				},
 			},
-			wantValue: func(t *testing.T, original, copied *models.Document) {
-				assert.Equal(t, original.ID, copied.ID)
-				assert.Equal(t, original.Data, copied.Data)
-
-				copied.Data["modified"] = true
-				assert.NotEqual(t, original.Data, copied.Data)
-
-				original.Data["nested"] = map[string]any{"key": "value"}
-				assert.NotContains(t, copied.Data, "nested")
+			args: args{
+				path:  "address.city",
+				value: "Moscow",
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "empty path",
+			fields: fields{
+				ID: uuid.New(),
+				Data: map[string]any{
+					"nickname": "User",
+					"email":    "awesome_user@mail.com",
+				},
+			},
+			args: args{
+				path:  "",
+				value: "",
+			},
+			wantErr: func(tt require.TestingT, err error, i ...any) {
+				require.EqualError(t, err, models.ErrIncorrectPath.Error())
 			},
 		},
 		{
-			name: "nested structures",
+			name: "first level is empty",
 			fields: fields{
 				ID: uuid.New(),
 				Data: map[string]any{
-					"slice": []any{1, "two", false},
-					"map": map[string]any{
-						"inner": map[string]any{
-							"value": 42,
-						},
-					},
+					"nickname": "User",
+					"email":    "awesome_user@mail.com",
 				},
 			},
-			wantValue: func(t *testing.T, original, copied *models.Document) {
-				origSlice := original.Data["slice"].([]any)
-				copiedSlice := copied.Data["slice"].([]any)
-				assert.Equal(t, origSlice, copiedSlice)
-
-				copied.Data["slice"].([]any)[0] = "modified"
-				assert.NotEqual(t, original.Data["slice"], copied.Data["slice"])
+			args: args{
+				path:  ".city",
+				value: "",
+			},
+			wantErr: func(tt require.TestingT, err error, i ...any) {
+				require.EqualError(t, err, models.ErrIncorrectPath.Error())
 			},
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, tc := range tests {
+		tc := tc
+
+		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			original := &models.Document{
-				ID:   tt.fields.ID,
-				Data: tt.fields.Data,
+			d := models.Document{
+				ID:   tc.fields.ID,
+				Data: tc.fields.Data,
 			}
+			err := d.Set(tc.args.path, tc.args.value)
 
-			copied := original.DeepCopy()
-
-			tt.wantValue(t, original, copied)
+			tc.wantErr(t, err)
 		})
 	}
+
 }
