@@ -10,16 +10,7 @@ endif
 
 all: generate
 
-generate: generate-common generate-worker
-
-generate-common:
-	@echo "Generating Go code for common package..."
-	mkdir -p $(PKG_DIR)/proto/common
-	protoc -I . proto/common/*.proto --go_out=$(PKG_DIR) --go_opt=paths=source_relative \
-		--go-grpc_out=$(PKG_DIR) --go-grpc_opt=paths=source_relative
-	@echo "Code generation for common package completed."
-
-generate-worker:
+generate:
 	@echo "Generating Go code for worker package..."
 	mkdir -p $(PKG_DIR)/proto/worker
 	protoc -I . proto/worker/*.proto --go_out=$(PKG_DIR) --go_opt=paths=source_relative \

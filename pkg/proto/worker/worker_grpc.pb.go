@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.30.1
-// source: proto/worker/storage.proto
+// source: proto/worker/worker.proto
 
 package worker
 
@@ -269,5 +269,5 @@ var Storage_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/worker/storage.proto",
+	Metadata: "proto/worker/worker.proto",
 }
