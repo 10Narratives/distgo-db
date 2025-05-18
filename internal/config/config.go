@@ -33,8 +33,8 @@ type LoggingConfig struct {
 }
 
 type GRPCConfig struct {
-	BindAddress string        `yaml:"bind_address" env-default:"0.0.0.0:50052"`
-	Timeout     time.Duration `yaml:"timeout" env-default:"5s"`
+	Port    int           `yaml:"port" env-default:"50052"`
+	Timeout time.Duration `yaml:"timeout" env-default:"5s"`
 }
 
 func mustConfigPath() string {

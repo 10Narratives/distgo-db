@@ -7,7 +7,7 @@ import "google/protobuf/struct.proto";
 
 option go_package = "github.com/10Narratives/distgo-db/pkg/proto/worker";
 
-service DatabaseService {
+service Storage {
     rpc CreateDocument(CreateDocumentRequest) returns (CreateDocumentResponse);
     rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse);
     rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse);

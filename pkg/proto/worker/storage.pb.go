@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v6.30.1
-// source: proto/worker/database.proto
+// source: proto/worker/storage.proto
 
 package worker
 
@@ -33,7 +33,7 @@ type CreateDocumentRequest struct {
 
 func (x *CreateDocumentRequest) Reset() {
 	*x = CreateDocumentRequest{}
-	mi := &file_proto_worker_database_proto_msgTypes[0]
+	mi := &file_proto_worker_storage_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +45,7 @@ func (x *CreateDocumentRequest) String() string {
 func (*CreateDocumentRequest) ProtoMessage() {}
 
 func (x *CreateDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_worker_database_proto_msgTypes[0]
+	mi := &file_proto_worker_storage_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +58,7 @@ func (x *CreateDocumentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateDocumentRequest.ProtoReflect.Descriptor instead.
 func (*CreateDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_proto_worker_database_proto_rawDescGZIP(), []int{0}
+	return file_proto_worker_storage_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *CreateDocumentRequest) GetCollection() string {
@@ -85,7 +85,7 @@ type CreateDocumentResponse struct {
 
 func (x *CreateDocumentResponse) Reset() {
 	*x = CreateDocumentResponse{}
-	mi := &file_proto_worker_database_proto_msgTypes[1]
+	mi := &file_proto_worker_storage_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -97,7 +97,7 @@ func (x *CreateDocumentResponse) String() string {
 func (*CreateDocumentResponse) ProtoMessage() {}
 
 func (x *CreateDocumentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_worker_database_proto_msgTypes[1]
+	mi := &file_proto_worker_storage_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -110,7 +110,7 @@ func (x *CreateDocumentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateDocumentResponse.ProtoReflect.Descriptor instead.
 func (*CreateDocumentResponse) Descriptor() ([]byte, []int) {
-	return file_proto_worker_database_proto_rawDescGZIP(), []int{1}
+	return file_proto_worker_storage_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *CreateDocumentResponse) GetCreatedDocument() *common.Document {
@@ -138,7 +138,7 @@ type GetDocumentRequest struct {
 
 func (x *GetDocumentRequest) Reset() {
 	*x = GetDocumentRequest{}
-	mi := &file_proto_worker_database_proto_msgTypes[2]
+	mi := &file_proto_worker_storage_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -150,7 +150,7 @@ func (x *GetDocumentRequest) String() string {
 func (*GetDocumentRequest) ProtoMessage() {}
 
 func (x *GetDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_worker_database_proto_msgTypes[2]
+	mi := &file_proto_worker_storage_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -163,7 +163,7 @@ func (x *GetDocumentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDocumentRequest.ProtoReflect.Descriptor instead.
 func (*GetDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_proto_worker_database_proto_rawDescGZIP(), []int{2}
+	return file_proto_worker_storage_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetDocumentRequest) GetCollection() string {
@@ -197,7 +197,7 @@ type GetDocumentResponse struct {
 
 func (x *GetDocumentResponse) Reset() {
 	*x = GetDocumentResponse{}
-	mi := &file_proto_worker_database_proto_msgTypes[3]
+	mi := &file_proto_worker_storage_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -209,7 +209,7 @@ func (x *GetDocumentResponse) String() string {
 func (*GetDocumentResponse) ProtoMessage() {}
 
 func (x *GetDocumentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_worker_database_proto_msgTypes[3]
+	mi := &file_proto_worker_storage_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -222,7 +222,7 @@ func (x *GetDocumentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDocumentResponse.ProtoReflect.Descriptor instead.
 func (*GetDocumentResponse) Descriptor() ([]byte, []int) {
-	return file_proto_worker_database_proto_rawDescGZIP(), []int{3}
+	return file_proto_worker_storage_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetDocumentResponse) GetDocument() *common.Document {
@@ -248,7 +248,7 @@ type ListDocumentsRequest struct {
 
 func (x *ListDocumentsRequest) Reset() {
 	*x = ListDocumentsRequest{}
-	mi := &file_proto_worker_database_proto_msgTypes[4]
+	mi := &file_proto_worker_storage_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -260,7 +260,7 @@ func (x *ListDocumentsRequest) String() string {
 func (*ListDocumentsRequest) ProtoMessage() {}
 
 func (x *ListDocumentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_worker_database_proto_msgTypes[4]
+	mi := &file_proto_worker_storage_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -273,7 +273,7 @@ func (x *ListDocumentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDocumentsRequest.ProtoReflect.Descriptor instead.
 func (*ListDocumentsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_worker_database_proto_rawDescGZIP(), []int{4}
+	return file_proto_worker_storage_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ListDocumentsRequest) GetCollection() string {
@@ -293,7 +293,7 @@ type ListDocumentsResponse struct {
 
 func (x *ListDocumentsResponse) Reset() {
 	*x = ListDocumentsResponse{}
-	mi := &file_proto_worker_database_proto_msgTypes[5]
+	mi := &file_proto_worker_storage_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -305,7 +305,7 @@ func (x *ListDocumentsResponse) String() string {
 func (*ListDocumentsResponse) ProtoMessage() {}
 
 func (x *ListDocumentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_worker_database_proto_msgTypes[5]
+	mi := &file_proto_worker_storage_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -318,7 +318,7 @@ func (x *ListDocumentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDocumentsResponse.ProtoReflect.Descriptor instead.
 func (*ListDocumentsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_worker_database_proto_rawDescGZIP(), []int{5}
+	return file_proto_worker_storage_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListDocumentsResponse) GetDocuments() []*common.Document {
@@ -348,7 +348,7 @@ type UpdateDocumentRequest struct {
 
 func (x *UpdateDocumentRequest) Reset() {
 	*x = UpdateDocumentRequest{}
-	mi := &file_proto_worker_database_proto_msgTypes[6]
+	mi := &file_proto_worker_storage_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -360,7 +360,7 @@ func (x *UpdateDocumentRequest) String() string {
 func (*UpdateDocumentRequest) ProtoMessage() {}
 
 func (x *UpdateDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_worker_database_proto_msgTypes[6]
+	mi := &file_proto_worker_storage_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -373,7 +373,7 @@ func (x *UpdateDocumentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDocumentRequest.ProtoReflect.Descriptor instead.
 func (*UpdateDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_proto_worker_database_proto_rawDescGZIP(), []int{6}
+	return file_proto_worker_storage_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *UpdateDocumentRequest) GetCollection() string {
@@ -421,7 +421,7 @@ type UpdateDocumentResponse struct {
 
 func (x *UpdateDocumentResponse) Reset() {
 	*x = UpdateDocumentResponse{}
-	mi := &file_proto_worker_database_proto_msgTypes[7]
+	mi := &file_proto_worker_storage_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -433,7 +433,7 @@ func (x *UpdateDocumentResponse) String() string {
 func (*UpdateDocumentResponse) ProtoMessage() {}
 
 func (x *UpdateDocumentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_worker_database_proto_msgTypes[7]
+	mi := &file_proto_worker_storage_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -446,7 +446,7 @@ func (x *UpdateDocumentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDocumentResponse.ProtoReflect.Descriptor instead.
 func (*UpdateDocumentResponse) Descriptor() ([]byte, []int) {
-	return file_proto_worker_database_proto_rawDescGZIP(), []int{7}
+	return file_proto_worker_storage_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UpdateDocumentResponse) GetUpdatedDocument() *common.Document {
@@ -474,7 +474,7 @@ type DeleteDocumentRequest struct {
 
 func (x *DeleteDocumentRequest) Reset() {
 	*x = DeleteDocumentRequest{}
-	mi := &file_proto_worker_database_proto_msgTypes[8]
+	mi := &file_proto_worker_storage_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -486,7 +486,7 @@ func (x *DeleteDocumentRequest) String() string {
 func (*DeleteDocumentRequest) ProtoMessage() {}
 
 func (x *DeleteDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_worker_database_proto_msgTypes[8]
+	mi := &file_proto_worker_storage_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -499,7 +499,7 @@ func (x *DeleteDocumentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteDocumentRequest.ProtoReflect.Descriptor instead.
 func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_proto_worker_database_proto_rawDescGZIP(), []int{8}
+	return file_proto_worker_storage_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteDocumentRequest) GetCollection() string {
@@ -532,7 +532,7 @@ type DeleteDocumentResponse struct {
 
 func (x *DeleteDocumentResponse) Reset() {
 	*x = DeleteDocumentResponse{}
-	mi := &file_proto_worker_database_proto_msgTypes[9]
+	mi := &file_proto_worker_storage_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -544,7 +544,7 @@ func (x *DeleteDocumentResponse) String() string {
 func (*DeleteDocumentResponse) ProtoMessage() {}
 
 func (x *DeleteDocumentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_worker_database_proto_msgTypes[9]
+	mi := &file_proto_worker_storage_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -557,7 +557,7 @@ func (x *DeleteDocumentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteDocumentResponse.ProtoReflect.Descriptor instead.
 func (*DeleteDocumentResponse) Descriptor() ([]byte, []int) {
-	return file_proto_worker_database_proto_rawDescGZIP(), []int{9}
+	return file_proto_worker_storage_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DeleteDocumentResponse) GetStatus() *common.Status {
@@ -567,11 +567,11 @@ func (x *DeleteDocumentResponse) GetStatus() *common.Status {
 	return nil
 }
 
-var File_proto_worker_database_proto protoreflect.FileDescriptor
+var File_proto_worker_storage_proto protoreflect.FileDescriptor
 
-const file_proto_worker_database_proto_rawDesc = "" +
+const file_proto_worker_storage_proto_rawDesc = "" +
 	"\n" +
-	"\x1bproto/worker/database.proto\x12\x06worker\x1a\x19proto/common/common.proto\x1a\x1cgoogle/protobuf/struct.proto\"l\n" +
+	"\x1aproto/worker/storage.proto\x12\x06worker\x1a\x19proto/common/common.proto\x1a\x1cgoogle/protobuf/struct.proto\"l\n" +
 	"\x15CreateDocumentRequest\x12\x1e\n" +
 	"\n" +
 	"collection\x18\x01 \x01(\tR\n" +
@@ -621,8 +621,8 @@ const file_proto_worker_database_proto_rawDesc = "" +
 	"ifRevision\x88\x01\x01B\x0e\n" +
 	"\f_if_revision\"@\n" +
 	"\x16DeleteDocumentResponse\x12&\n" +
-	"\x06status\x18\x01 \x01(\v2\x0e.common.StatusR\x06status2\x9a\x03\n" +
-	"\x0fDatabaseService\x12O\n" +
+	"\x06status\x18\x01 \x01(\v2\x0e.common.StatusR\x06status2\x92\x03\n" +
+	"\aStorage\x12O\n" +
 	"\x0eCreateDocument\x12\x1d.worker.CreateDocumentRequest\x1a\x1e.worker.CreateDocumentResponse\x12F\n" +
 	"\vGetDocument\x12\x1a.worker.GetDocumentRequest\x1a\x1b.worker.GetDocumentResponse\x12L\n" +
 	"\rListDocuments\x12\x1c.worker.ListDocumentsRequest\x1a\x1d.worker.ListDocumentsResponse\x12O\n" +
@@ -630,19 +630,19 @@ const file_proto_worker_database_proto_rawDesc = "" +
 	"\x0eDeleteDocument\x12\x1d.worker.DeleteDocumentRequest\x1a\x1e.worker.DeleteDocumentResponseB4Z2github.com/10Narratives/distgo-db/pkg/proto/workerb\x06proto3"
 
 var (
-	file_proto_worker_database_proto_rawDescOnce sync.Once
-	file_proto_worker_database_proto_rawDescData []byte
+	file_proto_worker_storage_proto_rawDescOnce sync.Once
+	file_proto_worker_storage_proto_rawDescData []byte
 )
 
-func file_proto_worker_database_proto_rawDescGZIP() []byte {
-	file_proto_worker_database_proto_rawDescOnce.Do(func() {
-		file_proto_worker_database_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_worker_database_proto_rawDesc), len(file_proto_worker_database_proto_rawDesc)))
+func file_proto_worker_storage_proto_rawDescGZIP() []byte {
+	file_proto_worker_storage_proto_rawDescOnce.Do(func() {
+		file_proto_worker_storage_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_worker_storage_proto_rawDesc), len(file_proto_worker_storage_proto_rawDesc)))
 	})
-	return file_proto_worker_database_proto_rawDescData
+	return file_proto_worker_storage_proto_rawDescData
 }
 
-var file_proto_worker_database_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
-var file_proto_worker_database_proto_goTypes = []any{
+var file_proto_worker_storage_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_proto_worker_storage_proto_goTypes = []any{
 	(*CreateDocumentRequest)(nil),  // 0: worker.CreateDocumentRequest
 	(*CreateDocumentResponse)(nil), // 1: worker.CreateDocumentResponse
 	(*GetDocumentRequest)(nil),     // 2: worker.GetDocumentRequest
@@ -657,7 +657,7 @@ var file_proto_worker_database_proto_goTypes = []any{
 	(*common.Document)(nil),        // 11: common.Document
 	(*common.Status)(nil),          // 12: common.Status
 }
-var file_proto_worker_database_proto_depIdxs = []int32{
+var file_proto_worker_storage_proto_depIdxs = []int32{
 	10, // 0: worker.CreateDocumentRequest.document:type_name -> google.protobuf.Struct
 	11, // 1: worker.CreateDocumentResponse.created_document:type_name -> common.Document
 	12, // 2: worker.CreateDocumentResponse.status:type_name -> common.Status
@@ -669,16 +669,16 @@ var file_proto_worker_database_proto_depIdxs = []int32{
 	11, // 8: worker.UpdateDocumentResponse.updated_document:type_name -> common.Document
 	12, // 9: worker.UpdateDocumentResponse.status:type_name -> common.Status
 	12, // 10: worker.DeleteDocumentResponse.status:type_name -> common.Status
-	0,  // 11: worker.DatabaseService.CreateDocument:input_type -> worker.CreateDocumentRequest
-	2,  // 12: worker.DatabaseService.GetDocument:input_type -> worker.GetDocumentRequest
-	4,  // 13: worker.DatabaseService.ListDocuments:input_type -> worker.ListDocumentsRequest
-	6,  // 14: worker.DatabaseService.UpdateDocument:input_type -> worker.UpdateDocumentRequest
-	8,  // 15: worker.DatabaseService.DeleteDocument:input_type -> worker.DeleteDocumentRequest
-	1,  // 16: worker.DatabaseService.CreateDocument:output_type -> worker.CreateDocumentResponse
-	3,  // 17: worker.DatabaseService.GetDocument:output_type -> worker.GetDocumentResponse
-	5,  // 18: worker.DatabaseService.ListDocuments:output_type -> worker.ListDocumentsResponse
-	7,  // 19: worker.DatabaseService.UpdateDocument:output_type -> worker.UpdateDocumentResponse
-	9,  // 20: worker.DatabaseService.DeleteDocument:output_type -> worker.DeleteDocumentResponse
+	0,  // 11: worker.Storage.CreateDocument:input_type -> worker.CreateDocumentRequest
+	2,  // 12: worker.Storage.GetDocument:input_type -> worker.GetDocumentRequest
+	4,  // 13: worker.Storage.ListDocuments:input_type -> worker.ListDocumentsRequest
+	6,  // 14: worker.Storage.UpdateDocument:input_type -> worker.UpdateDocumentRequest
+	8,  // 15: worker.Storage.DeleteDocument:input_type -> worker.DeleteDocumentRequest
+	1,  // 16: worker.Storage.CreateDocument:output_type -> worker.CreateDocumentResponse
+	3,  // 17: worker.Storage.GetDocument:output_type -> worker.GetDocumentResponse
+	5,  // 18: worker.Storage.ListDocuments:output_type -> worker.ListDocumentsResponse
+	7,  // 19: worker.Storage.UpdateDocument:output_type -> worker.UpdateDocumentResponse
+	9,  // 20: worker.Storage.DeleteDocument:output_type -> worker.DeleteDocumentResponse
 	16, // [16:21] is the sub-list for method output_type
 	11, // [11:16] is the sub-list for method input_type
 	11, // [11:11] is the sub-list for extension type_name
@@ -686,28 +686,28 @@ var file_proto_worker_database_proto_depIdxs = []int32{
 	0,  // [0:11] is the sub-list for field type_name
 }
 
-func init() { file_proto_worker_database_proto_init() }
-func file_proto_worker_database_proto_init() {
-	if File_proto_worker_database_proto != nil {
+func init() { file_proto_worker_storage_proto_init() }
+func file_proto_worker_storage_proto_init() {
+	if File_proto_worker_storage_proto != nil {
 		return
 	}
-	file_proto_worker_database_proto_msgTypes[6].OneofWrappers = []any{}
-	file_proto_worker_database_proto_msgTypes[8].OneofWrappers = []any{}
+	file_proto_worker_storage_proto_msgTypes[6].OneofWrappers = []any{}
+	file_proto_worker_storage_proto_msgTypes[8].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_worker_database_proto_rawDesc), len(file_proto_worker_database_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_worker_storage_proto_rawDesc), len(file_proto_worker_storage_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_worker_database_proto_goTypes,
-		DependencyIndexes: file_proto_worker_database_proto_depIdxs,
-		MessageInfos:      file_proto_worker_database_proto_msgTypes,
+		GoTypes:           file_proto_worker_storage_proto_goTypes,
+		DependencyIndexes: file_proto_worker_storage_proto_depIdxs,
+		MessageInfos:      file_proto_worker_storage_proto_msgTypes,
 	}.Build()
-	File_proto_worker_database_proto = out.File
-	file_proto_worker_database_proto_goTypes = nil
-	file_proto_worker_database_proto_depIdxs = nil
+	File_proto_worker_storage_proto = out.File
+	file_proto_worker_storage_proto_goTypes = nil
+	file_proto_worker_storage_proto_depIdxs = nil
 }
