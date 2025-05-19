@@ -1,6 +1,4 @@
-// Package slogpretty provides a custom slog.Handler that formats log records
-// with colorized levels, indented JSON fields, and timestamp prefixes for
-// human-readable output.
+// Package slogpretty provides a human-readable, colorized log formatter for the slog package.
 package slogpretty
 
 import (
@@ -9,18 +7,17 @@ import (
 	"io"
 	stdLog "log"
 	"log/slog"
+	"os"
 
 	"github.com/fatih/color"
 )
 
-// PrettyHandlerOptions configures the behavior of the PrettyHandler.
-// It embeds slog.HandlerOptions to inherit standard handler configurations.
+// PrettyHandlerOptions contains configuration options for the pretty printer
 type PrettyHandlerOptions struct {
 	SlogOpts *slog.HandlerOptions
 }
 
-// PrettyHandler is a slog.Handler implementation that outputs logs in a
-// human-friendly format with ANSI color codes and indented JSON fields.
+// PrettyHandler implements a human-readable slog.Handler with colorized output
 type PrettyHandler struct {
 	opts PrettyHandlerOptions
 	slog.Handler
@@ -28,9 +25,15 @@ type PrettyHandler struct {
 	attrs []slog.Attr
 }
 
-// NewPrettyHandler creates a new PrettyHandler that writes to the given output.
-// It combines colorized level prefixes, timestamp, message, and indented JSON
-// attributes for improved readability.
+// NewPrettyHandler creates a new PrettyHandler instance
+// Parameters:
+//   - out: io.Writer to send formatted log output to (typically os.Stdout)
+//
+// Returns a handler that:
+//   - Colorizes log levels
+//   - Formats timestamps as [HH:MM:SS.MSS]
+//   - Pretty-prints attributes as indented JSON
+//   - Maintains attribute context with WithAttrs
 func (opts PrettyHandlerOptions) NewPrettyHandler(
 	out io.Writer,
 ) *PrettyHandler {
@@ -42,8 +45,8 @@ func (opts PrettyHandlerOptions) NewPrettyHandler(
 	return h
 }
 
-// Handle processes a log record by formatting it with colorized level, timestamp,
-// message, and pretty-printed JSON attributes. Implements slog.Handler.
+// Handle formats and writes a log record
+// Format: [TIME] LEVEL: MESSAGE {ATTRS}
 func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	level := r.Level.String() + ":"
 
@@ -93,8 +96,7 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	return nil
 }
 
-// WithAttrs returns a new PrettyHandler with additional attributes prepended
-// to future log records. Implements slog.Handler.
+// WithAttrs adds contextual attributes to the handler
 func (h *PrettyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return &PrettyHandler{
 		Handler: h.Handler,
@@ -103,11 +105,38 @@ func (h *PrettyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	}
 }
 
-// WithGroup returns a new PrettyHandler that starts a group for subsequent
-// attributes. Implements slog.Handler.
+// WithGroup starts a new attribute group
 func (h *PrettyHandler) WithGroup(name string) slog.Handler {
 	return &PrettyHandler{
 		Handler: h.Handler.WithGroup(name),
 		l:       h.l,
 	}
+}
+
+// NewPrettyLogger creates a configured slog.Logger
+// Parameters:
+//   - opts: Configuration options (use nil for defaults)
+//   - out: Optional output destination (defaults to os.Stdout)
+//
+// Returns a logger that:
+//   - Uses colorized output for levels
+//   - Shows millisecond timestamps
+//   - Pretty-prints attributes
+//   - Filters logs by level (default: Info)
+func NewPrettyLogger(opts *PrettyHandlerOptions, out ...io.Writer) *slog.Logger {
+	output := io.Writer(os.Stdout)
+	if len(out) > 0 {
+		output = out[0]
+	}
+
+	if opts == nil {
+		opts = &PrettyHandlerOptions{
+			SlogOpts: &slog.HandlerOptions{
+				Level: slog.LevelInfo,
+			},
+		}
+	}
+
+	handler := opts.NewPrettyHandler(output)
+	return slog.New(handler)
 }

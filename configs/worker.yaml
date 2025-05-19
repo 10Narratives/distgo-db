@@ -1,0 +1,12 @@
+logging:
+  level: "info"
+  format: "pretty"
+  output: "stdout"
+  file_path: "./logs/workers/worker.log"
+  max_size: 10
+  max_age: 4
+  compress: true
+
+grpc:
+  port: 50000
+  timeout: 5s
