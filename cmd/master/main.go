@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 
-	workercfg "github.com/10Narratives/distgo-db/internal/config/worker"
+	mastercfg "github.com/10Narratives/distgo-db/internal/config/master"
 	"github.com/10Narratives/distgo-db/internal/lib/logger/sl"
 )
 
 func main() {
-	cfg := workercfg.MustLoad()
+	cfg := mastercfg.MustLoad()
 	fmt.Println(cfg)
 
 	log := sl.MustLogger(
@@ -18,7 +18,7 @@ func main() {
 		sl.WithFileOptions(cfg.Logging.FilePath, cfg.Logging.MaxSize, cfg.Logging.MaxAge, cfg.Logging.Compress),
 	)
 
-	log.Info("Worker Node is online")
+	log.Info("Master Node is online")
 
-	log.Info("Worker Node stopped")
+	log.Info("Master Node stopped")
 }
