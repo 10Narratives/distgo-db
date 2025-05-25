@@ -1,34 +1,53 @@
-PROTO_DIR := proto
-PKG_DIR := pkg
-GO_MOD_NAME := github.com/10Narratives/distgo-db
+PROTOC = protoc
+PROTO_DIR = proto
+GO_MODULE_PATH = github.com/10Narratives/distgo-db/proto
+OUTPUT_DIR = pkg/proto
+GOOGLEAPIS_DIR = vendor/googleapis
+PGV_DIR = vendor/protoc-gen-validate
 
-PROTO_INCLUDE := $(shell go list -m -f '{{ .Dir }}' google.golang.org/protobuf)/types/known
+PROTOC_GEN_GO := $(shell which protoc-gen-go)
+PROTOC_GEN_GO_GRPC := $(shell which protoc-gen-go-grpc)
+PROTOC_GEN_VALIDATE := $(shell which protoc-gen-validate)
 
-ifeq ($(wildcard $(PROTO_INCLUDE)),)
-$(error "Path to Google Protobuf types not found. Please ensure google.golang.org/protobuf is installed.")
-endif
+PROTO_FILES = $(wildcard $(PROTO_DIR)/distgodb/worker/document/v1/*.proto)
 
-all: generate
+all: setup generate
 
-generate:
-	@echo "Generating Go code for worker package..."
-	mkdir -p $(PKG_DIR)/proto/worker
-	protoc -I . proto/worker/*.proto --go_out=$(PKG_DIR) --go_opt=paths=source_relative \
-		--go-grpc_out=$(PKG_DIR) --go-grpc_opt=paths=source_relative
-	@echo "Code generation for worker package completed."
+setup: install clone-repos
+	@echo "Setup completed."
+
+install:
+	@echo "Installing required tools..."
+	@GOBIN=$(PWD)/bin go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	@GOBIN=$(PWD)/bin go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	@GOBIN=$(PWD)/bin go install github.com/envoyproxy/protoc-gen-validate@latest
+	@echo "Tools installed successfully."
+
+clone-repos:
+	@echo "Cloning required repositories..."
+	@git clone https://github.com/googleapis/googleapis.git  $(GOOGLEAPIS_DIR) || true
+	@git clone https://github.com/envoyproxy/protoc-gen-validate.git  $(PGV_DIR) || true
+	@echo "Repositories cloned successfully."
+
+generate: $(PROTO_FILES)
+	@echo "Generating Go code from .proto files..."
+	@mkdir -p $(OUTPUT_DIR)/distgodb/worker/document/v1
+	$(PROTOC) \
+	    --proto_path=$(PROTO_DIR) \
+	    --proto_path=$(GOOGLEAPIS_DIR) \
+	    --proto_path=$(PGV_DIR) \
+	    --go_out=paths=source_relative:$(OUTPUT_DIR) \
+	    --go-grpc_out=paths=source_relative:$(OUTPUT_DIR) \
+	    --validate_out=lang=go,paths=source_relative:$(OUTPUT_DIR) \
+	    $(PROTO_FILES)
+	@echo "Code generation completed."
 
 clean:
 	@echo "Cleaning generated files..."
-	rm -rf $(PKG_DIR)/proto
+	rm -rf $(OUTPUT_DIR)
+	rm -rf $(GOOGLEAPIS_DIR)
+	rm -rf $(PGV_DIR)
+	rm -rf bin/
 	@echo "Cleanup completed."
 
-help:
-	@echo "Available targets:"
-	@echo "  all                     - Generate Go code for all packages (default target)."
-	@echo "  generate                - Generate Go code for all packages."
-	@echo "  generate-common         - Generate Go code for common package."
-	@echo "  generate-worker         - Generate Go code for worker package."
-	@echo "  clean                   - Remove generated files and directories."
-	@echo "  help                    - Show this help message."
-
-.PHONY: all generate generate-common generate-worker clean help
+.PHONY: all setup install clone-repos generate clean
