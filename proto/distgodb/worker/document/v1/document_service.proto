@@ -82,7 +82,6 @@ message GetDocumentResponse {
 // CreateDocumentRequest: Request to create a new document.
 message CreateDocumentRequest {
     string collection = 1 [(validate.rules).string.min_len = 1];
-    string document_id = 2 [(validate.rules).string.uuid = true];
     google.protobuf.Struct data = 3 [(validate.rules).message.required = true];
 }
 

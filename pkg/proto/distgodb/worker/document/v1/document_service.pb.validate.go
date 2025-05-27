@@ -848,18 +848,6 @@ func (m *CreateDocumentRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if err := m._validateUuid(m.GetDocumentId()); err != nil {
-		err = CreateDocumentRequestValidationError{
-			field:  "DocumentId",
-			reason: "value must be a valid UUID",
-			cause:  err,
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
 	if m.GetData() == nil {
 		err := CreateDocumentRequestValidationError{
 			field:  "Data",
@@ -902,14 +890,6 @@ func (m *CreateDocumentRequest) validate(all bool) error {
 
 	if len(errors) > 0 {
 		return CreateDocumentRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *CreateDocumentRequest) _validateUuid(uuid string) error {
-	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
 	}
 
 	return nil

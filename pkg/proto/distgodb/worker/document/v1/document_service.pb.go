@@ -327,7 +327,6 @@ func (*GetDocumentResponse_Error) isGetDocumentResponse_Result() {}
 type CreateDocumentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Collection    string                 `protobuf:"bytes,1,opt,name=collection,proto3" json:"collection,omitempty"`
-	DocumentId    string                 `protobuf:"bytes,2,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
 	Data          *structpb.Struct       `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -366,13 +365,6 @@ func (*CreateDocumentRequest) Descriptor() ([]byte, []int) {
 func (x *CreateDocumentRequest) GetCollection() string {
 	if x != nil {
 		return x.Collection
-	}
-	return ""
-}
-
-func (x *CreateDocumentRequest) GetDocumentId() string {
-	if x != nil {
-		return x.DocumentId
 	}
 	return ""
 }
@@ -731,13 +723,11 @@ const file_distgodb_worker_document_v1_document_service_proto_rawDesc = "" +
 	"\x13GetDocumentResponse\x12C\n" +
 	"\bdocument\x18\x01 \x01(\v2%.distgodb.worker.document.v1.DocumentH\x00R\bdocument\x12*\n" +
 	"\x05error\x18\x02 \x01(\v2\x12.google.rpc.StatusH\x00R\x05errorB\b\n" +
-	"\x06result\"\xa2\x01\n" +
+	"\x06result\"w\n" +
 	"\x15CreateDocumentRequest\x12'\n" +
 	"\n" +
 	"collection\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\n" +
-	"collection\x12)\n" +
-	"\vdocument_id\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\n" +
-	"documentId\x125\n" +
+	"collection\x125\n" +
 	"\x04data\x18\x03 \x01(\v2\x17.google.protobuf.StructB\b\xfaB\x05\x8a\x01\x02\x10\x01R\x04data\"[\n" +
 	"\x16CreateDocumentResponse\x12A\n" +
 	"\bdocument\x18\x01 \x01(\v2%.distgodb.worker.document.v1.DocumentR\bdocument\"\xa6\x01\n" +
