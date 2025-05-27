@@ -3,16 +3,14 @@ package workerapp
 import (
 	"log/slog"
 
-	"github.com/10Narratives/distgo-db/internal/config"
+	workercfg "github.com/10Narratives/distgo-db/internal/config/worker"
 )
 
 type App struct {
-	GRPCSrv *WorkerGRPCApp
+	GRPCServer *GRPCApp
 }
 
-func New(log *slog.Logger, cfg *config.WorkerConfig) *App {
-
+func New(log *slog.Logger, cfg *workercfg.Config) *App {
 	grpcApp := NewGRPCApp(log, nil, cfg.GRPC.Port)
-
-	return &App{GRPCSrv: grpcApp}
+	return &App{GRPCServer: grpcApp}
 }

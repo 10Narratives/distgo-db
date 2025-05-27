@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net"
 
-	storagegrpc "github.com/10Narratives/distgo-db/internal/grpc/storage"
+	documentgrpc "github.com/10Narratives/distgo-db/internal/grpc/document"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
@@ -14,13 +14,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type WorkerGRPCApp struct {
+type GRPCApp struct {
 	log        *slog.Logger
 	gRPCServer *grpc.Server
 	port       int
 }
 
-func NewGRPCApp(log *slog.Logger, storeService storagegrpc.Storage, port int) *WorkerGRPCApp {
+func NewGRPCApp(log *slog.Logger, documentSrv documentgrpc.DocumentService, port int) *GRPCApp {
 	loggingOpts := []logging.Option{
 		logging.WithLogOnEvents(
 			logging.PayloadReceived, logging.PayloadSent,
@@ -39,9 +39,9 @@ func NewGRPCApp(log *slog.Logger, storeService storagegrpc.Storage, port int) *W
 		logging.UnaryServerInterceptor(InterceptorLogger(log), loggingOpts...),
 	))
 
-	storagegrpc.Register(gRPCServer, storeService)
+	documentgrpc.Register(gRPCServer, documentSrv)
 
-	return &WorkerGRPCApp{
+	return &GRPCApp{
 		log:        log,
 		gRPCServer: gRPCServer,
 		port:       port,
@@ -54,31 +54,31 @@ func InterceptorLogger(l *slog.Logger) logging.Logger {
 	})
 }
 
-func (a *WorkerGRPCApp) MustRun() {
-	if err := a.Run(); err != nil {
+func (g *GRPCApp) MustRun() {
+	if err := g.Run(); err != nil {
 		panic(err)
 	}
 }
 
-func (a *WorkerGRPCApp) Run() error {
-	const op = "grpcapp.Run"
+func (g *GRPCApp) Run() error {
+	const op = "worker.grpcapp.Run"
 
-	l, err := net.Listen("tcp", fmt.Sprintf(":%d", a.port))
+	l, err := net.Listen("tcp", fmt.Sprintf(":%d", g.port))
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	a.log.Info("grpc server started", slog.String("addr", l.Addr().String()))
+	g.log.Info("grpc server started", slog.String("addr", l.Addr().String()))
 
-	if err := a.gRPCServer.Serve(l); err != nil {
+	if err := g.gRPCServer.Serve(l); err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	return nil
 }
 
-func (a *WorkerGRPCApp) Stop() {
-	const op = "grpcapp.Stop"
+func (a *GRPCApp) Stop() {
+	const op = "worker.grpcapp.Stop"
 
 	a.log.With(slog.String("op", op)).
 		Info("stopping gRPC server", slog.Int("port", a.port))

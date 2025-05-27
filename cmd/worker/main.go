@@ -1,17 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
 	workerapp "github.com/10Narratives/distgo-db/internal/app/worker"
-	"github.com/10Narratives/distgo-db/internal/config"
+	workercfg "github.com/10Narratives/distgo-db/internal/config/worker"
 	"github.com/10Narratives/distgo-db/internal/lib/logger/sl"
 )
 
 func main() {
-	cfg := config.MustLoadWorker()
+	cfg := workercfg.MustLoad()
+	fmt.Println(cfg)
 
 	log := sl.MustLogger(
 		sl.WithLevel(cfg.Logging.Level),
@@ -20,20 +22,19 @@ func main() {
 		sl.WithFileOptions(cfg.Logging.FilePath, cfg.Logging.MaxSize, cfg.Logging.MaxAge, cfg.Logging.Compress),
 	)
 
-	log.Info("Worker node started")
+	log.Info("Worker Node is online")
 
 	application := workerapp.New(log, cfg)
 
 	go func() {
-		application.GRPCSrv.MustRun()
+		application.GRPCServer.MustRun()
 	}()
 
-	stop := make(chan os.Signal, 1)
+	stop := make(chan os.Signal, 2)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
 	<-stop
 
-	application.GRPCSrv.Stop()
-
-	log.Info("Worker node stopped")
+	application.GRPCServer.Stop()
+	log.Info("Worker Node stopped")
 }

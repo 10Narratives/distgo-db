@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+// Package declaration
+package distgodb.worker.document.v1;
+
+// Go package option
+option go_package = "github.com/10Narratives/distgo-db/proto/distgodb/worker/document/v1;documentv1";
+
+// Imports
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "google/rpc/status.proto";
+import "validate/validate.proto";
+
+service DocumentService {
+  rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse) {
+    option (google.api.http) = {
+      get: "/v1/{collection}/documents"
+    };
+  }
+
+  rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse) {
+    option (google.api.http) = {
+      get: "/v1/{collection}/documents/{document_id}"
+    };
+  }
+
+  rpc CreateDocument(CreateDocumentRequest) returns (CreateDocumentResponse) {
+    option (google.api.http) = {
+      post: "/v1/{collection}/documents"
+      body: "data"
+    };
+  }
+
+  rpc UpdateDocument(UpdateDocumentRequest) returns (UpdateDocumentResponse) {
+    option (google.api.http) = {
+      patch: "/v1/{collection}/documents/{document_id}"
+      body: "update"
+    };
+  }
+
+  rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {
+    option (google.api.http) = {
+      delete: "/v1/{collection}/documents/{document_id}"
+    };
+  }
+}
+
+// Document Entity
+message Document {
+    string id = 1 [(validate.rules).string.uuid = true]; // Validate UUID format
+    google.protobuf.Struct data = 2;
+    google.protobuf.Timestamp created_at = 3;
+    google.protobuf.Timestamp updated_at = 4;
+}
+
+// ListDocumentsRequest: Request to list documents in a collection.
+message ListDocumentsRequest {
+    string collection = 1 [(validate.rules).string.min_len = 1]; // Ensure collection name is not empty
+}
+
+// ListDocumentsResponse: Response containing a list of documents.
+message ListDocumentsResponse {
+    repeated Document documents = 1;
+}
+
+// GetDocumentRequest: Request to retrieve a specific document.
+message GetDocumentRequest {
+    string collection = 1 [(validate.rules).string.min_len = 1]; // Ensure collection name is not empty
+    string document_id = 2 [(validate.rules).string.uuid = true]; // Validate UUID format
+}
+
+// GetDocumentResponse: Response containing the requested document.
+message GetDocumentResponse {
+    oneof result {
+        Document document = 1;
+        google.rpc.Status error = 2;
+    }
+}
+
+// CreateDocumentRequest: Request to create a new document.
+message CreateDocumentRequest {
+    string collection = 1 [(validate.rules).string.min_len = 1];
+    google.protobuf.Struct data = 3 [(validate.rules).message.required = true];
+}
+
+message CreateDocumentResponse {
+    Document document = 1;
+}
+
+message UpdateDocumentRequest {
+    string collection = 1 [(validate.rules).string.min_len = 1];
+    string document_id = 2 [(validate.rules).string.uuid = true]; // Validate UUID format
+    google.protobuf.Struct update = 3 [(validate.rules).message.required = true]; // Ensure update is provided
+}
+
+message UpdateDocumentResponse {
+    oneof result {
+        Document document = 1;
+        google.rpc.Status error = 2;
+    }
+}
+
+message DeleteDocumentRequest {
+    string collection = 1 [(validate.rules).string.min_len = 1]; // Ensure collection name is not empty
+    string document_id = 2 [(validate.rules).string.uuid = true]; // Validate UUID format
+}
+
+message DeleteDocumentResponse {
+    oneof result {
+        bool success = 1;
+        google.rpc.Status error = 2;
+    }
+}
