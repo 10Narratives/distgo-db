@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	workercfg "github.com/10Narratives/distgo-db/internal/config/worker"
+	databasesrv "github.com/10Narratives/distgo-db/internal/services/worker/database"
 )
 
 type App struct {
@@ -11,6 +12,9 @@ type App struct {
 }
 
 func New(log *slog.Logger, cfg *workercfg.Config) *App {
-	grpcApp := NewGRPCApp(log, nil, cfg.GRPC.Port)
+
+	databaseSrv := databasesrv.New(log)
+
+	grpcApp := NewGRPCApp(log, databaseSrv, cfg.GRPC.Port)
 	return &App{GRPCServer: grpcApp}
 }

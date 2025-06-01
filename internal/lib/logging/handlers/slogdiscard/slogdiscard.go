@@ -1,5 +1,3 @@
-// Package slogdiscard provides a no-op implementation of slog.Handler.
-// It's useful for disabling logging in tests or specific environments.
 package slogdiscard
 
 import (

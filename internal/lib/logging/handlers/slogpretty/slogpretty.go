@@ -1,4 +1,3 @@
-// Package slogpretty provides a human-readable, colorized log formatter for the slog package.
 package slogpretty
 
 import (
@@ -12,12 +11,10 @@ import (
 	"github.com/fatih/color"
 )
 
-// PrettyHandlerOptions contains configuration options for the pretty printer
 type PrettyHandlerOptions struct {
 	SlogOpts *slog.HandlerOptions
 }
 
-// PrettyHandler implements a human-readable slog.Handler with colorized output
 type PrettyHandler struct {
 	opts PrettyHandlerOptions
 	slog.Handler
@@ -25,15 +22,6 @@ type PrettyHandler struct {
 	attrs []slog.Attr
 }
 
-// NewPrettyHandler creates a new PrettyHandler instance
-// Parameters:
-//   - out: io.Writer to send formatted log output to (typically os.Stdout)
-//
-// Returns a handler that:
-//   - Colorizes log levels
-//   - Formats timestamps as [HH:MM:SS.MSS]
-//   - Pretty-prints attributes as indented JSON
-//   - Maintains attribute context with WithAttrs
 func (opts PrettyHandlerOptions) NewPrettyHandler(
 	out io.Writer,
 ) *PrettyHandler {
@@ -45,8 +33,6 @@ func (opts PrettyHandlerOptions) NewPrettyHandler(
 	return h
 }
 
-// Handle formats and writes a log record
-// Format: [TIME] LEVEL: MESSAGE {ATTRS}
 func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	level := r.Level.String() + ":"
 
@@ -96,7 +82,6 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	return nil
 }
 
-// WithAttrs adds contextual attributes to the handler
 func (h *PrettyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return &PrettyHandler{
 		Handler: h.Handler,
@@ -105,7 +90,6 @@ func (h *PrettyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	}
 }
 
-// WithGroup starts a new attribute group
 func (h *PrettyHandler) WithGroup(name string) slog.Handler {
 	return &PrettyHandler{
 		Handler: h.Handler.WithGroup(name),
@@ -113,16 +97,6 @@ func (h *PrettyHandler) WithGroup(name string) slog.Handler {
 	}
 }
 
-// NewPrettyLogger creates a configured slog.Logger
-// Parameters:
-//   - opts: Configuration options (use nil for defaults)
-//   - out: Optional output destination (defaults to os.Stdout)
-//
-// Returns a logger that:
-//   - Uses colorized output for levels
-//   - Shows millisecond timestamps
-//   - Pretty-prints attributes
-//   - Filters logs by level (default: Info)
 func NewPrettyLogger(opts *PrettyHandlerOptions, out ...io.Writer) *slog.Logger {
 	output := io.Writer(os.Stdout)
 	if len(out) > 0 {

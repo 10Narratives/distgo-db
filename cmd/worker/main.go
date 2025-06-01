@@ -8,7 +8,7 @@ import (
 
 	workerapp "github.com/10Narratives/distgo-db/internal/app/worker"
 	workercfg "github.com/10Narratives/distgo-db/internal/config/worker"
-	"github.com/10Narratives/distgo-db/internal/lib/logger/sl"
+	"github.com/10Narratives/distgo-db/internal/lib/logging/sl"
 )
 
 func main() {
@@ -19,10 +19,8 @@ func main() {
 		sl.WithLevel(cfg.Logging.Level),
 		sl.WithFormat(cfg.Logging.Format),
 		sl.WithOutput(cfg.Logging.Output),
-		sl.WithFileOptions(cfg.Logging.FilePath, cfg.Logging.MaxSize, cfg.Logging.MaxAge, cfg.Logging.Compress),
 	)
-
-	log.Info("Worker Node is online")
+	log.Info("Worker " + cfg.Name + " is online")
 
 	application := workerapp.New(log, cfg)
 
@@ -36,5 +34,5 @@ func main() {
 	<-stop
 
 	application.GRPCServer.Stop()
-	log.Info("Worker Node stopped")
+	log.Info("Worker " + cfg.Name + " is stopped")
 }

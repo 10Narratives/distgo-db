@@ -10,6 +10,7 @@ import (
 )
 
 type Config struct {
+	Name    string               `yaml:"name" env-required:"true"`
 	GRPC    config.GRPCConfig    `yaml:"grpc"`
 	Logging config.LoggingConfig `yaml:"logging"`
 }
@@ -21,7 +22,7 @@ func MustLoad() *Config {
 	flag.Parse()
 
 	if path == "" {
-		panic("cannot run node: path to configuration is missing")
+		panic("cannot load config: path to file is missing")
 	}
 
 	return MustLoadFromFile(path)
