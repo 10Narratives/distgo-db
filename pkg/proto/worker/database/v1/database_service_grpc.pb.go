@@ -20,17 +20,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DocumentService_ListDocuments_FullMethodName  = "/worker.database.v1.DocumentService/ListDocuments"
-	DocumentService_GetDocument_FullMethodName    = "/worker.database.v1.DocumentService/GetDocument"
-	DocumentService_CreateDocument_FullMethodName = "/worker.database.v1.DocumentService/CreateDocument"
-	DocumentService_UpdateDocument_FullMethodName = "/worker.database.v1.DocumentService/UpdateDocument"
-	DocumentService_DeleteDocument_FullMethodName = "/worker.database.v1.DocumentService/DeleteDocument"
+	DatabaseService_ListDocuments_FullMethodName  = "/worker.database.v1.DatabaseService/ListDocuments"
+	DatabaseService_GetDocument_FullMethodName    = "/worker.database.v1.DatabaseService/GetDocument"
+	DatabaseService_CreateDocument_FullMethodName = "/worker.database.v1.DatabaseService/CreateDocument"
+	DatabaseService_UpdateDocument_FullMethodName = "/worker.database.v1.DatabaseService/UpdateDocument"
+	DatabaseService_DeleteDocument_FullMethodName = "/worker.database.v1.DatabaseService/DeleteDocument"
 )
 
-// DocumentServiceClient is the client API for DocumentService service.
+// DatabaseServiceClient is the client API for DatabaseService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type DocumentServiceClient interface {
+type DatabaseServiceClient interface {
 	ListDocuments(ctx context.Context, in *ListDocumentsRequest, opts ...grpc.CallOption) (*ListDocumentsResponse, error)
 	GetDocument(ctx context.Context, in *GetDocumentRequest, opts ...grpc.CallOption) (*Document, error)
 	CreateDocument(ctx context.Context, in *CreateDocumentRequest, opts ...grpc.CallOption) (*Document, error)
@@ -38,68 +38,68 @@ type DocumentServiceClient interface {
 	DeleteDocument(ctx context.Context, in *DeleteDocumentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
-type documentServiceClient struct {
+type databaseServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewDocumentServiceClient(cc grpc.ClientConnInterface) DocumentServiceClient {
-	return &documentServiceClient{cc}
+func NewDatabaseServiceClient(cc grpc.ClientConnInterface) DatabaseServiceClient {
+	return &databaseServiceClient{cc}
 }
 
-func (c *documentServiceClient) ListDocuments(ctx context.Context, in *ListDocumentsRequest, opts ...grpc.CallOption) (*ListDocumentsResponse, error) {
+func (c *databaseServiceClient) ListDocuments(ctx context.Context, in *ListDocumentsRequest, opts ...grpc.CallOption) (*ListDocumentsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListDocumentsResponse)
-	err := c.cc.Invoke(ctx, DocumentService_ListDocuments_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, DatabaseService_ListDocuments_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *documentServiceClient) GetDocument(ctx context.Context, in *GetDocumentRequest, opts ...grpc.CallOption) (*Document, error) {
+func (c *databaseServiceClient) GetDocument(ctx context.Context, in *GetDocumentRequest, opts ...grpc.CallOption) (*Document, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Document)
-	err := c.cc.Invoke(ctx, DocumentService_GetDocument_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, DatabaseService_GetDocument_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *documentServiceClient) CreateDocument(ctx context.Context, in *CreateDocumentRequest, opts ...grpc.CallOption) (*Document, error) {
+func (c *databaseServiceClient) CreateDocument(ctx context.Context, in *CreateDocumentRequest, opts ...grpc.CallOption) (*Document, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Document)
-	err := c.cc.Invoke(ctx, DocumentService_CreateDocument_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, DatabaseService_CreateDocument_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *documentServiceClient) UpdateDocument(ctx context.Context, in *UpdateDocumentRequest, opts ...grpc.CallOption) (*Document, error) {
+func (c *databaseServiceClient) UpdateDocument(ctx context.Context, in *UpdateDocumentRequest, opts ...grpc.CallOption) (*Document, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Document)
-	err := c.cc.Invoke(ctx, DocumentService_UpdateDocument_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, DatabaseService_UpdateDocument_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *documentServiceClient) DeleteDocument(ctx context.Context, in *DeleteDocumentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *databaseServiceClient) DeleteDocument(ctx context.Context, in *DeleteDocumentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, DocumentService_DeleteDocument_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, DatabaseService_DeleteDocument_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// DocumentServiceServer is the server API for DocumentService service.
-// All implementations should embed UnimplementedDocumentServiceServer
+// DatabaseServiceServer is the server API for DatabaseService service.
+// All implementations should embed UnimplementedDatabaseServiceServer
 // for forward compatibility.
-type DocumentServiceServer interface {
+type DatabaseServiceServer interface {
 	ListDocuments(context.Context, *ListDocumentsRequest) (*ListDocumentsResponse, error)
 	GetDocument(context.Context, *GetDocumentRequest) (*Document, error)
 	CreateDocument(context.Context, *CreateDocumentRequest) (*Document, error)
@@ -107,164 +107,164 @@ type DocumentServiceServer interface {
 	DeleteDocument(context.Context, *DeleteDocumentRequest) (*emptypb.Empty, error)
 }
 
-// UnimplementedDocumentServiceServer should be embedded to have
+// UnimplementedDatabaseServiceServer should be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedDocumentServiceServer struct{}
+type UnimplementedDatabaseServiceServer struct{}
 
-func (UnimplementedDocumentServiceServer) ListDocuments(context.Context, *ListDocumentsRequest) (*ListDocumentsResponse, error) {
+func (UnimplementedDatabaseServiceServer) ListDocuments(context.Context, *ListDocumentsRequest) (*ListDocumentsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDocuments not implemented")
 }
-func (UnimplementedDocumentServiceServer) GetDocument(context.Context, *GetDocumentRequest) (*Document, error) {
+func (UnimplementedDatabaseServiceServer) GetDocument(context.Context, *GetDocumentRequest) (*Document, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDocument not implemented")
 }
-func (UnimplementedDocumentServiceServer) CreateDocument(context.Context, *CreateDocumentRequest) (*Document, error) {
+func (UnimplementedDatabaseServiceServer) CreateDocument(context.Context, *CreateDocumentRequest) (*Document, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDocument not implemented")
 }
-func (UnimplementedDocumentServiceServer) UpdateDocument(context.Context, *UpdateDocumentRequest) (*Document, error) {
+func (UnimplementedDatabaseServiceServer) UpdateDocument(context.Context, *UpdateDocumentRequest) (*Document, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateDocument not implemented")
 }
-func (UnimplementedDocumentServiceServer) DeleteDocument(context.Context, *DeleteDocumentRequest) (*emptypb.Empty, error) {
+func (UnimplementedDatabaseServiceServer) DeleteDocument(context.Context, *DeleteDocumentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteDocument not implemented")
 }
-func (UnimplementedDocumentServiceServer) testEmbeddedByValue() {}
+func (UnimplementedDatabaseServiceServer) testEmbeddedByValue() {}
 
-// UnsafeDocumentServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to DocumentServiceServer will
+// UnsafeDatabaseServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to DatabaseServiceServer will
 // result in compilation errors.
-type UnsafeDocumentServiceServer interface {
-	mustEmbedUnimplementedDocumentServiceServer()
+type UnsafeDatabaseServiceServer interface {
+	mustEmbedUnimplementedDatabaseServiceServer()
 }
 
-func RegisterDocumentServiceServer(s grpc.ServiceRegistrar, srv DocumentServiceServer) {
-	// If the following call pancis, it indicates UnimplementedDocumentServiceServer was
+func RegisterDatabaseServiceServer(s grpc.ServiceRegistrar, srv DatabaseServiceServer) {
+	// If the following call pancis, it indicates UnimplementedDatabaseServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&DocumentService_ServiceDesc, srv)
+	s.RegisterService(&DatabaseService_ServiceDesc, srv)
 }
 
-func _DocumentService_ListDocuments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DatabaseService_ListDocuments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListDocumentsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DocumentServiceServer).ListDocuments(ctx, in)
+		return srv.(DatabaseServiceServer).ListDocuments(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DocumentService_ListDocuments_FullMethodName,
+		FullMethod: DatabaseService_ListDocuments_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DocumentServiceServer).ListDocuments(ctx, req.(*ListDocumentsRequest))
+		return srv.(DatabaseServiceServer).ListDocuments(ctx, req.(*ListDocumentsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DocumentService_GetDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DatabaseService_GetDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetDocumentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DocumentServiceServer).GetDocument(ctx, in)
+		return srv.(DatabaseServiceServer).GetDocument(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DocumentService_GetDocument_FullMethodName,
+		FullMethod: DatabaseService_GetDocument_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DocumentServiceServer).GetDocument(ctx, req.(*GetDocumentRequest))
+		return srv.(DatabaseServiceServer).GetDocument(ctx, req.(*GetDocumentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DocumentService_CreateDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DatabaseService_CreateDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateDocumentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DocumentServiceServer).CreateDocument(ctx, in)
+		return srv.(DatabaseServiceServer).CreateDocument(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DocumentService_CreateDocument_FullMethodName,
+		FullMethod: DatabaseService_CreateDocument_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DocumentServiceServer).CreateDocument(ctx, req.(*CreateDocumentRequest))
+		return srv.(DatabaseServiceServer).CreateDocument(ctx, req.(*CreateDocumentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DocumentService_UpdateDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DatabaseService_UpdateDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateDocumentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DocumentServiceServer).UpdateDocument(ctx, in)
+		return srv.(DatabaseServiceServer).UpdateDocument(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DocumentService_UpdateDocument_FullMethodName,
+		FullMethod: DatabaseService_UpdateDocument_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DocumentServiceServer).UpdateDocument(ctx, req.(*UpdateDocumentRequest))
+		return srv.(DatabaseServiceServer).UpdateDocument(ctx, req.(*UpdateDocumentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DocumentService_DeleteDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DatabaseService_DeleteDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteDocumentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DocumentServiceServer).DeleteDocument(ctx, in)
+		return srv.(DatabaseServiceServer).DeleteDocument(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DocumentService_DeleteDocument_FullMethodName,
+		FullMethod: DatabaseService_DeleteDocument_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DocumentServiceServer).DeleteDocument(ctx, req.(*DeleteDocumentRequest))
+		return srv.(DatabaseServiceServer).DeleteDocument(ctx, req.(*DeleteDocumentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// DocumentService_ServiceDesc is the grpc.ServiceDesc for DocumentService service.
+// DatabaseService_ServiceDesc is the grpc.ServiceDesc for DatabaseService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var DocumentService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "worker.database.v1.DocumentService",
-	HandlerType: (*DocumentServiceServer)(nil),
+var DatabaseService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "worker.database.v1.DatabaseService",
+	HandlerType: (*DatabaseServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "ListDocuments",
-			Handler:    _DocumentService_ListDocuments_Handler,
+			Handler:    _DatabaseService_ListDocuments_Handler,
 		},
 		{
 			MethodName: "GetDocument",
-			Handler:    _DocumentService_GetDocument_Handler,
+			Handler:    _DatabaseService_GetDocument_Handler,
 		},
 		{
 			MethodName: "CreateDocument",
-			Handler:    _DocumentService_CreateDocument_Handler,
+			Handler:    _DatabaseService_CreateDocument_Handler,
 		},
 		{
 			MethodName: "UpdateDocument",
-			Handler:    _DocumentService_UpdateDocument_Handler,
+			Handler:    _DatabaseService_UpdateDocument_Handler,
 		},
 		{
 			MethodName: "DeleteDocument",
-			Handler:    _DocumentService_DeleteDocument_Handler,
+			Handler:    _DatabaseService_DeleteDocument_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

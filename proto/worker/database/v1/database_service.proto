@@ -9,7 +9,7 @@ import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/field_mask.proto";
 
-service DocumentService {
+service DatabaseService {
   rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse);
   rpc GetDocument(GetDocumentRequest) returns (Document);
   rpc CreateDocument(CreateDocumentRequest) returns (Document);

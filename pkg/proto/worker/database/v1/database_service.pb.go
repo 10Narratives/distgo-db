@@ -439,7 +439,7 @@ const file_worker_database_v1_database_service_proto_rawDesc = "" +
 	"collection\x12\x1f\n" +
 	"\vdocument_id\x18\x02 \x01(\tR\n" +
 	"documentId2\xd7\x03\n" +
-	"\x0fDocumentService\x12d\n" +
+	"\x0fDatabaseService\x12d\n" +
 	"\rListDocuments\x12(.worker.database.v1.ListDocumentsRequest\x1a).worker.database.v1.ListDocumentsResponse\x12S\n" +
 	"\vGetDocument\x12&.worker.database.v1.GetDocumentRequest\x1a\x1c.worker.database.v1.Document\x12Y\n" +
 	"\x0eCreateDocument\x12).worker.database.v1.CreateDocumentRequest\x1a\x1c.worker.database.v1.Document\x12Y\n" +
@@ -479,16 +479,16 @@ var file_worker_database_v1_database_service_proto_depIdxs = []int32{
 	0,  // 3: worker.database.v1.ListDocumentsResponse.documents:type_name -> worker.database.v1.Document
 	7,  // 4: worker.database.v1.CreateDocumentRequest.content:type_name -> google.protobuf.Struct
 	9,  // 5: worker.database.v1.UpdateDocumentRequest.update:type_name -> google.protobuf.FieldMask
-	1,  // 6: worker.database.v1.DocumentService.ListDocuments:input_type -> worker.database.v1.ListDocumentsRequest
-	3,  // 7: worker.database.v1.DocumentService.GetDocument:input_type -> worker.database.v1.GetDocumentRequest
-	4,  // 8: worker.database.v1.DocumentService.CreateDocument:input_type -> worker.database.v1.CreateDocumentRequest
-	5,  // 9: worker.database.v1.DocumentService.UpdateDocument:input_type -> worker.database.v1.UpdateDocumentRequest
-	6,  // 10: worker.database.v1.DocumentService.DeleteDocument:input_type -> worker.database.v1.DeleteDocumentRequest
-	2,  // 11: worker.database.v1.DocumentService.ListDocuments:output_type -> worker.database.v1.ListDocumentsResponse
-	0,  // 12: worker.database.v1.DocumentService.GetDocument:output_type -> worker.database.v1.Document
-	0,  // 13: worker.database.v1.DocumentService.CreateDocument:output_type -> worker.database.v1.Document
-	0,  // 14: worker.database.v1.DocumentService.UpdateDocument:output_type -> worker.database.v1.Document
-	10, // 15: worker.database.v1.DocumentService.DeleteDocument:output_type -> google.protobuf.Empty
+	1,  // 6: worker.database.v1.DatabaseService.ListDocuments:input_type -> worker.database.v1.ListDocumentsRequest
+	3,  // 7: worker.database.v1.DatabaseService.GetDocument:input_type -> worker.database.v1.GetDocumentRequest
+	4,  // 8: worker.database.v1.DatabaseService.CreateDocument:input_type -> worker.database.v1.CreateDocumentRequest
+	5,  // 9: worker.database.v1.DatabaseService.UpdateDocument:input_type -> worker.database.v1.UpdateDocumentRequest
+	6,  // 10: worker.database.v1.DatabaseService.DeleteDocument:input_type -> worker.database.v1.DeleteDocumentRequest
+	2,  // 11: worker.database.v1.DatabaseService.ListDocuments:output_type -> worker.database.v1.ListDocumentsResponse
+	0,  // 12: worker.database.v1.DatabaseService.GetDocument:output_type -> worker.database.v1.Document
+	0,  // 13: worker.database.v1.DatabaseService.CreateDocument:output_type -> worker.database.v1.Document
+	0,  // 14: worker.database.v1.DatabaseService.UpdateDocument:output_type -> worker.database.v1.Document
+	10, // 15: worker.database.v1.DatabaseService.DeleteDocument:output_type -> google.protobuf.Empty
 	11, // [11:16] is the sub-list for method output_type
 	6,  // [6:11] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name

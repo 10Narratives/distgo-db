@@ -1,9 +1,13 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Document struct {
-	ID        string
+	ID        uuid.UUID
 	Content   map[string]any
 	CreatedAt time.Time
 	UpdatedAt time.Time
