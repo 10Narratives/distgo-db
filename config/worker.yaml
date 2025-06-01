@@ -1,0 +1,7 @@
+name: worker#1
+grpc:
+  port: 55055
+  timeout: 4s
+logging:
+  level: info
+  format: json
