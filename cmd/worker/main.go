@@ -18,6 +18,17 @@ func main() {
 	)
 	log.Info("Worker " + cfg.Name + " is online")
 
-	// TODO: initialize gRPC application
-	// TODO: initialize application
+	// application := workerapp.New(log, cfg)
+
+	// go func() {
+	// 	application.GRPCServer.MustRun()
+	// }()
+
+	// stop := make(chan os.Signal, 2)
+	// signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	// <-stop
+
+	// application.GRPCServer.Stop()
+	// log.Info("Worker Node stopped")
 }
