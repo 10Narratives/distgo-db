@@ -1,8 +1,12 @@
 package main
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
 
-	// workerapp "github.com/10Narratives/distgo-db/internal/app/worker"
+	workerapp "github.com/10Narratives/distgo-db/internal/app/worker"
+
 	workercfg "github.com/10Narratives/distgo-db/internal/config/worker"
 	"github.com/10Narratives/distgo-db/internal/lib/logging/sl"
 )
@@ -17,17 +21,17 @@ func main() {
 	)
 	log.Info("Worker " + cfg.Name + " is online")
 
-	// application := workerapp.New(log, cfg)
+	application := workerapp.New(log, cfg)
 
-	// go func() {
-	// 	application.GRPCServer.MustRun()
-	// }()
+	go func() {
+		application.GRPCServer.MustRun()
+	}()
 
-	// stop := make(chan os.Signal, 2)
-	// signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+	stop := make(chan os.Signal, 2)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
-	// <-stop
+	<-stop
 
-	// application.GRPCServer.Stop()
+	application.GRPCServer.Stop()
 	log.Info("Worker " + cfg.Name + " is stopped")
 }
