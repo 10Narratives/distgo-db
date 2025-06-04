@@ -10,7 +10,7 @@ import (
 )
 
 type DocumentStorage interface {
-	List(ctx context.Context, collection string) ([]databasemodels.Document, error)
+	List(ctx context.Context, collection string) []databasemodels.Document
 	Get(ctx context.Context, collection string, documentID uuid.UUID) (databasemodels.Document, error)
 	Set(ctx context.Context, collection string, documentID uuid.UUID, content map[string]any)
 	Delete(ctx context.Context, collection string, documentID uuid.UUID) error
@@ -45,7 +45,7 @@ func (s Service) Document(ctx context.Context, collection string, documentID str
 	return s.storage.Get(ctx, collection, uuid.MustParse(documentID))
 }
 
-func (s Service) Documents(ctx context.Context, collection string) ([]databasemodels.Document, error) {
+func (s Service) Documents(ctx context.Context, collection string) []databasemodels.Document {
 	return s.storage.List(ctx, collection)
 }
 

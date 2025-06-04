@@ -87,14 +87,14 @@ func (s *Storage) Has(ctx context.Context, collection string, documentID uuid.UU
 	return ok
 }
 
-func (s *Storage) List(ctx context.Context, collection string) ([]databasemodels.Document, error) {
+func (s *Storage) List(ctx context.Context, collection string) []databasemodels.Document {
 	c, ok := s.collections[collection]
 	if !ok {
-		return []databasemodels.Document{}, ErrCollectionNotFound
+		return []databasemodels.Document{}
 	}
 	documents := []databasemodels.Document{}
 	for _, doc := range c {
 		documents = append(documents, doc)
 	}
-	return documents, nil
+	return documents
 }

@@ -15,7 +15,7 @@ import (
 
 type DatabaseService interface {
 	CreateDocument(ctx context.Context, collection string, content map[string]any) (databasemodels.Document, error)
-	Documents(ctx context.Context, collection string) ([]databasemodels.Document, error)
+	Documents(ctx context.Context, collection string) []databasemodels.Document
 	Document(ctx context.Context, collection, documentID string) (databasemodels.Document, error)
 	UpdateDocument(ctx context.Context, collection, documentID string) (databasemodels.Document, error)
 	DeleteDocument(ctx context.Context, collection, documentID string) error
@@ -74,12 +74,9 @@ func (s serverAPI) ListDocuments(ctx context.Context, req *dbv1.ListDocumentsReq
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	docs, err := s.dbSrv.Documents(ctx, req.GetCollection())
-	if err != nil {
-		return nil, status.Error(codes.Internal, "cannot list documents")
-	}
+	docs := s.dbSrv.Documents(ctx, req.GetCollection())
 
-	res := make([]*dbv1.Document, len(docs))
+	res := make([]*dbv1.Document, 0)
 	for _, doc := range docs {
 		res = append(res, convertDocument(doc))
 	}
