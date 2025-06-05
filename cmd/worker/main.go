@@ -1,37 +1,37 @@
 package main
 
-import (
-	"os"
-	"os/signal"
-	"syscall"
+// import (
+// 	"os"
+// 	"os/signal"
+// 	"syscall"
 
-	workerapp "github.com/10Narratives/distgo-db/internal/app/worker"
+// 	workerapp "github.com/10Narratives/distgo-db/internal/app/worker"
 
-	workercfg "github.com/10Narratives/distgo-db/internal/config/worker"
-	"github.com/10Narratives/distgo-db/internal/lib/logging/sl"
-)
+// 	workercfg "github.com/10Narratives/distgo-db/internal/config/worker"
+// 	"github.com/10Narratives/distgo-db/internal/lib/logging/sl"
+// )
 
-func main() {
-	cfg := workercfg.MustLoad()
+// func main() {
+// 	cfg := workercfg.MustLoad()
 
-	log := sl.MustLogger(
-		sl.WithLevel(cfg.Logging.Level),
-		sl.WithFormat(cfg.Logging.Format),
-		sl.WithOutput(cfg.Logging.Output),
-	)
-	log.Info("Worker " + cfg.Name + " is online")
+// 	log := sl.MustLogger(
+// 		sl.WithLevel(cfg.Logging.Level),
+// 		sl.WithFormat(cfg.Logging.Format),
+// 		sl.WithOutput(cfg.Logging.Output),
+// 	)
+// 	log.Info("Worker " + cfg.Name + " is online")
 
-	application := workerapp.New(log, cfg)
+// 	application := workerapp.New(log, cfg)
 
-	go func() {
-		application.GRPCServer.MustRun()
-	}()
+// 	go func() {
+// 		application.GRPCServer.MustRun()
+// 	}()
 
-	stop := make(chan os.Signal, 2)
-	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+// 	stop := make(chan os.Signal, 2)
+// 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
-	<-stop
+// 	<-stop
 
-	application.GRPCServer.Stop()
-	log.Info("Worker " + cfg.Name + " is stopped")
-}
+// 	application.GRPCServer.Stop()
+// 	log.Info("Worker " + cfg.Name + " is stopped")
+// }

@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+package master.cluster.v1;
+
+option go_package = "github.com/10Narratives/distgo-db/pkg/proto/master/cluster/v1;clusterv1";
