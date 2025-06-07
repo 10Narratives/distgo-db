@@ -313,7 +313,8 @@ func (x *UpdateDocumentRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 
 type DeleteDocumentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Collection    string                 `protobuf:"bytes,1,opt,name=collection,proto3" json:"collection,omitempty"`
+	DocumentId    string                 `protobuf:"bytes,2,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -348,9 +349,16 @@ func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) {
 	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *DeleteDocumentRequest) GetName() string {
+func (x *DeleteDocumentRequest) GetCollection() string {
 	if x != nil {
-		return x.Name
+		return x.Collection
+	}
+	return ""
+}
+
+func (x *DeleteDocumentRequest) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
 	}
 	return ""
 }
@@ -439,10 +447,13 @@ const file_worker_database_v1_document_service_proto_rawDesc = "" +
 	"\x15UpdateDocumentRequest\x12E\n" +
 	"\bdocument\x18\x01 \x01(\v2\x1c.worker.database.v1.DocumentB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\bdocument\x12@\n" +
 	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskB\x03\xe0A\x01R\n" +
-	"updateMask\"W\n" +
-	"\x15DeleteDocumentRequest\x12>\n" +
-	"\x04name\x18\x01 \x01(\tB*\xe0A\x02\xfaA\x1d\n" +
-	"\x1bworker.database.v1/Document\xfaB\x04r\x02\x10\x01R\x04name\"{\n" +
+	"updateMask\"\x89\x01\n" +
+	"\x15DeleteDocumentRequest\x12B\n" +
+	"\n" +
+	"collection\x18\x01 \x01(\tB\"\xe0A\x02\xfaB\x1cr\x1a2\x18projects/.*/databases/.*R\n" +
+	"collection\x12,\n" +
+	"\vdocument_id\x18\x02 \x01(\tB\v\xe0A\x02\xfaB\x05r\x03\xb0\x01\x01R\n" +
+	"documentId\"{\n" +
 	"\x15ListDocumentsResponse\x12:\n" +
 	"\tdocuments\x18\x01 \x03(\v2\x1c.worker.database.v1.DocumentR\tdocuments\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken2\xaa\x06\n" +

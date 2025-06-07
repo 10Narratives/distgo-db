@@ -866,10 +866,22 @@ func (m *DeleteDocumentRequest) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetName()) < 1 {
+	if !_DeleteDocumentRequest_Collection_Pattern.MatchString(m.GetCollection()) {
 		err := DeleteDocumentRequestValidationError{
-			field:  "Name",
-			reason: "value length must be at least 1 runes",
+			field:  "Collection",
+			reason: "value does not match regex pattern \"projects/.*/databases/.*\"",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if err := m._validateUuid(m.GetDocumentId()); err != nil {
+		err = DeleteDocumentRequestValidationError{
+			field:  "DocumentId",
+			reason: "value must be a valid UUID",
+			cause:  err,
 		}
 		if !all {
 			return err
@@ -879,6 +891,14 @@ func (m *DeleteDocumentRequest) validate(all bool) error {
 
 	if len(errors) > 0 {
 		return DeleteDocumentRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+func (m *DeleteDocumentRequest) _validateUuid(uuid string) error {
+	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
 	}
 
 	return nil
@@ -956,6 +976,8 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteDocumentRequestValidationError{}
+
+var _DeleteDocumentRequest_Collection_Pattern = regexp.MustCompile("projects/.*/databases/.*")
 
 // Validate checks the field values on ListDocumentsResponse with the rules
 // defined in the proto definition for this message. If any rules are

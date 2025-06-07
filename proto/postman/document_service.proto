@@ -40,7 +40,8 @@ message UpdateDocumentRequest {
 }
 
 message DeleteDocumentRequest {
-  string name = 1;
+  string collection = 1;
+  string document_id = 2;
 }
 
 message ListDocumentsResponse {

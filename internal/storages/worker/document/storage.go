@@ -79,3 +79,22 @@ func (s Storage) List(ctx context.Context, collection string) ([]documentmodels.
 
 	return listed, nil
 }
+
+func (s Storage) Delete(ctx context.Context, collection string, documentID uuid.UUID) error {
+	c, exists := s.data[collection]
+	if !exists {
+		return ErrCollectionNotFound
+	}
+
+	_, exists = c[documentID]
+	if !exists {
+		return ErrDocumentNotFound
+	}
+
+	delete(s.data[collection], documentID)
+	if len(s.data[collection]) == 0 {
+		delete(s.data, collection)
+	}
+
+	return nil
+}

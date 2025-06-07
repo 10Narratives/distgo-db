@@ -138,6 +138,8 @@ func TestServerAPI_CreateDocument(t *testing.T) {
 			doc, err := serverAPI.CreateDocument(tt.args.ctx, tt.args.req)
 			tt.wantVal(t, doc)
 			tt.wantErr(t, err)
+
+			mock.AssertExpectations(t)
 		})
 	}
 }
@@ -289,6 +291,8 @@ func TestServerAPI_GetDocument(t *testing.T) {
 			doc, err := serverAPI.GetDocument(tt.args.ctx, tt.args.req)
 			tt.wantVal(t, doc)
 			tt.wantErr(t, err)
+
+			mock.AssertExpectations(t)
 		})
 	}
 }
@@ -411,6 +415,134 @@ func TestServerAPI_ListDocuments(t *testing.T) {
 
 			tt.wantVal(t, resp)
 			tt.wantErr(t, err)
+
+			mock.AssertExpectations(t)
+		})
+	}
+}
+
+func TestServerAPI_DeleteDocument(t *testing.T) {
+	t.Parallel()
+
+	var (
+		collection string    = "projects/my-project/databases/main-db"
+		documentID uuid.UUID = uuid.New()
+	)
+
+	type fields struct {
+		mockSetup func(m *mocks.DocumentService)
+	}
+	type args struct {
+		ctx context.Context
+		req *dbv1.DeleteDocumentRequest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantVal require.ValueAssertionFunc
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "successful deletion",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentService) {
+					m.On("Delete", mock.Anything, collection, documentID.String()).Return(nil)
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.DeleteDocumentRequest{
+					Collection: collection,
+					DocumentId: documentID.String(),
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: require.NoError,
+		},
+		{
+			name: "validation error invalid collection name",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentService) {
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.DeleteDocumentRequest{
+					Collection: "collection",
+					DocumentId: documentID.String(),
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: require.Error,
+		},
+		{
+			name: "validation error invalid document id",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentService) {
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.DeleteDocumentRequest{
+					Collection: collection,
+					DocumentId: "documentID.String()",
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: require.Error,
+		},
+		{
+			name: "internal error collection not found",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentService) {
+					m.On("Delete", mock.Anything, collection, documentID.String()).Return(documentstore.ErrCollectionNotFound)
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.DeleteDocumentRequest{
+					Collection: collection,
+					DocumentId: documentID.String(),
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: require.Error,
+		},
+		{
+			name: "internal error document not found",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentService) {
+					m.On("Delete", mock.Anything, collection, documentID.String()).Return(documentstore.ErrDocumentNotFound)
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.DeleteDocumentRequest{
+					Collection: collection,
+					DocumentId: documentID.String(),
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: require.Error,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			mock := mocks.NewDocumentService(t)
+			tt.fields.mockSetup(mock)
+
+			serverAPI := documentgrpc.New(mock)
+
+			resp, err := serverAPI.DeleteDocument(tt.args.ctx, tt.args.req)
+			tt.wantVal(t, resp)
+			tt.wantErr(t, err)
+
+			mock.AssertExpectations(t)
 		})
 	}
 }

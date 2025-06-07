@@ -17,6 +17,24 @@ type DocumentStorage struct {
 	mock.Mock
 }
 
+// Delete provides a mock function with given fields: ctx, collection, documentID
+func (_m *DocumentStorage) Delete(ctx context.Context, collection string, documentID uuid.UUID) error {
+	ret := _m.Called(ctx, collection, documentID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Delete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, uuid.UUID) error); ok {
+		r0 = rf(ctx, collection, documentID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Get provides a mock function with given fields: ctx, collection, documentID
 func (_m *DocumentStorage) Get(ctx context.Context, collection string, documentID uuid.UUID) (documentmodels.Document, error) {
 	ret := _m.Called(ctx, collection, documentID)

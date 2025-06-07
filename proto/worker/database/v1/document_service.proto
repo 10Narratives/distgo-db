@@ -77,12 +77,13 @@ message UpdateDocumentRequest {
 }
 
 message DeleteDocumentRequest {
-  string name = 1 [
+  string collection = 1 [
     (google.api.field_behavior) = REQUIRED,
-    (google.api.resource_reference) = {
-      type: "worker.database.v1/Document"
-    },
-    (validate.rules).string.min_len = 1
+    (validate.rules).string.pattern = "projects/.*/databases/.*"
+  ];
+  string document_id = 2 [
+    (google.api.field_behavior) = REQUIRED,
+    (validate.rules).string.uuid = true
   ];
 }
 

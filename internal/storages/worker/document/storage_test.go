@@ -334,3 +334,113 @@ func TestStorage_List(t *testing.T) {
 		})
 	}
 }
+
+func TestStorage_Delete(t *testing.T) {
+	t.Parallel()
+
+	var (
+		collection string         = "users"
+		documentID uuid.UUID      = uuid.New()
+		content    map[string]any = map[string]any{
+			"fullname": "User Fullname",
+			"email":    "email@gmail.com",
+		}
+		createdAt time.Time = time.Now()
+		updatedAt time.Time = time.Now()
+	)
+
+	type fields struct {
+		data map[string]documentstore.Collection
+	}
+	type args struct {
+		ctx        context.Context
+		collection string
+		documentID uuid.UUID
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "successful deletion",
+			fields: fields{
+				data: map[string]documentstore.Collection{
+					collection: documentstore.Collection{
+						documentID: documentmodels.Document{
+							ID:        documentID,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
+						},
+					},
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: documentID,
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "collection not found",
+			fields: fields{
+				data: map[string]documentstore.Collection{
+					collection: documentstore.Collection{
+						documentID: documentmodels.Document{
+							ID:        documentID,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
+						},
+					},
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: "collection",
+				documentID: documentID,
+			},
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				assert.EqualError(t, err, documentstore.ErrCollectionNotFound.Error())
+			},
+		},
+		{
+			name: "document not found",
+			fields: fields{
+				data: map[string]documentstore.Collection{
+					collection: documentstore.Collection{
+						documentID: documentmodels.Document{
+							ID:        documentID,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
+						},
+					},
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: uuid.MustParse("c2cecd16-ed51-421e-8a4c-ccfbc4e80000"),
+			},
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				assert.EqualError(t, err, documentstore.ErrDocumentNotFound.Error())
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			storage := documentstore.NewOf(tt.fields.data)
+			err := storage.Delete(tt.args.ctx, tt.args.collection, tt.args.documentID)
+
+			tt.wantErr(t, err)
+		})
+	}
+}

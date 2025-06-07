@@ -13,6 +13,7 @@ type DocumentStorage interface {
 	Get(ctx context.Context, collection string, documentID uuid.UUID) (documentmodels.Document, error)
 	Set(ctx context.Context, collection string, documentID uuid.UUID, content map[string]any)
 	List(ctx context.Context, collection string) ([]documentmodels.Document, error)
+	Delete(ctx context.Context, collection string, documentID uuid.UUID) error
 }
 
 type Service struct {
@@ -38,4 +39,8 @@ func (s Service) Get(ctx context.Context, collection string, documentID string) 
 
 func (s Service) List(ctx context.Context, collection string) ([]documentmodels.Document, error) {
 	return s.storage.List(ctx, collection)
+}
+
+func (s Service) Delete(ctx context.Context, collection string, documentID string) error {
+	return s.storage.Delete(ctx, collection, uuid.MustParse(documentID))
 }

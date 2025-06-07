@@ -309,3 +309,91 @@ func TestService_List(t *testing.T) {
 		})
 	}
 }
+
+func TestService_Delete(t *testing.T) {
+	t.Parallel()
+
+	var (
+		collection string    = "users"
+		documentID uuid.UUID = uuid.New()
+	)
+
+	type fields struct {
+		mockSetup func(m *mocks.DocumentStorage)
+	}
+	type args struct {
+		ctx        context.Context
+		collection string
+		documentID string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "successful deletion",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentStorage) {
+					m.On("Delete", mock.Anything, collection, documentID).Return(nil)
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: documentID.String(),
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "collection not found",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentStorage) {
+					m.On("Delete", mock.Anything, collection, documentID).Return(documentstore.ErrCollectionNotFound)
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: documentID.String(),
+			},
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				assert.EqualError(t, err, documentstore.ErrCollectionNotFound.Error())
+			},
+		},
+		{
+			name: "document not found",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentStorage) {
+					m.On("Delete", mock.Anything, collection, documentID).Return(documentstore.ErrDocumentNotFound)
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: documentID.String(),
+			},
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				assert.EqualError(t, err, documentstore.ErrDocumentNotFound.Error())
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			mock := mocks.NewDocumentStorage(t)
+			tt.fields.mockSetup(mock)
+
+			service := documentsrv.New(mock)
+			err := service.Delete(tt.args.ctx, tt.args.collection, tt.args.documentID)
+
+			tt.wantErr(t, err)
+
+			mock.AssertExpectations(t)
+		})
+	}
+}

@@ -18,6 +18,7 @@ type DocumentService interface {
 	Create(ctx context.Context, collection string, content map[string]any) (documentmodels.Document, error)
 	Get(ctx context.Context, collection, documentID string) (documentmodels.Document, error)
 	List(ctx context.Context, collection string) ([]documentmodels.Document, error)
+	Delete(ctx context.Context, collection, documentID string) error
 }
 
 type ServerAPI struct {
@@ -46,9 +47,17 @@ func (s *ServerAPI) CreateDocument(ctx context.Context, req *dbv1.CreateDocument
 	return convert(doc)
 }
 
-func (s *ServerAPI) DeleteDocument(context.Context, *dbv1.DeleteDocumentRequest) (*emptypb.Empty, error) {
-	panic("implement")
+func (s *ServerAPI) DeleteDocument(ctx context.Context, req *dbv1.DeleteDocumentRequest) (*emptypb.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 
+	err := s.service.Delete(ctx, req.GetCollection(), req.GetDocumentId())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 func (s *ServerAPI) GetDocument(ctx context.Context, req *dbv1.GetDocumentRequest) (*dbv1.Document, error) {
