@@ -31,4 +31,7 @@ generate:
 		--go-grpc_out=$(PROTO_OUT_DIR) --go-grpc_opt=paths=source_relative \
 		--validate_out="lang=go:$(PROTO_OUT_DIR)"
 
+run:
+	@go run cmd/worker/main.go --config config/worker.yaml
+
 .PHONY: clean install deps generate

@@ -202,8 +202,7 @@ func (x *GetDocumentRequest) GetName() string {
 type CreateDocumentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	DocumentId    string                 `protobuf:"bytes,2,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
-	Document      *Document              `protobuf:"bytes,3,opt,name=document,proto3" json:"document,omitempty"`
+	Content       *structpb.Struct       `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -245,16 +244,9 @@ func (x *CreateDocumentRequest) GetParent() string {
 	return ""
 }
 
-func (x *CreateDocumentRequest) GetDocumentId() string {
+func (x *CreateDocumentRequest) GetContent() *structpb.Struct {
 	if x != nil {
-		return x.DocumentId
-	}
-	return ""
-}
-
-func (x *CreateDocumentRequest) GetDocument() *Document {
-	if x != nil {
-		return x.Document
+		return x.Content
 	}
 	return nil
 }
@@ -428,13 +420,11 @@ const file_worker_database_v1_document_service_proto_rawDesc = "" +
 	"page_token\x18\x03 \x01(\tR\tpageToken\"U\n" +
 	"\x12GetDocumentRequest\x12?\n" +
 	"\x04name\x18\x01 \x01(\tB+\xe0A\x02\xfaA\x1d\n" +
-	"\x1bworker.database.v1/Document\xfaB\x05r\x03\xb0\x01\x01R\x04name\"\xe5\x01\n" +
+	"\x1bworker.database.v1/Document\xfaB\x05r\x03\xb0\x01\x01R\x04name\"\xb3\x01\n" +
 	"\x15CreateDocumentRequest\x12Z\n" +
 	"\x06parent\x18\x01 \x01(\tBB\xe0A\x02\xfaA\x1d\n" +
-	"\x1bworker.database.v1/Database\xfaB\x1cr\x1a2\x18projects/.*/databases/.*R\x06parent\x12)\n" +
-	"\vdocument_id\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\n" +
-	"documentId\x12E\n" +
-	"\bdocument\x18\x03 \x01(\v2\x1c.worker.database.v1.DocumentB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\bdocument\"\xa0\x01\n" +
+	"\x1bworker.database.v1/Database\xfaB\x1cr\x1a2\x18projects/.*/databases/.*R\x06parent\x12>\n" +
+	"\acontent\x18\x03 \x01(\v2\x17.google.protobuf.StructB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\acontent\"\xa0\x01\n" +
 	"\x15UpdateDocumentRequest\x12E\n" +
 	"\bdocument\x18\x01 \x01(\v2\x1c.worker.database.v1.DocumentB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\bdocument\x12@\n" +
 	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskB\x03\xe0A\x01R\n" +
@@ -483,7 +473,7 @@ var file_worker_database_v1_document_service_proto_depIdxs = []int32{
 	7,  // 0: worker.database.v1.Document.content:type_name -> google.protobuf.Struct
 	8,  // 1: worker.database.v1.Document.created_at:type_name -> google.protobuf.Timestamp
 	8,  // 2: worker.database.v1.Document.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 3: worker.database.v1.CreateDocumentRequest.document:type_name -> worker.database.v1.Document
+	7,  // 3: worker.database.v1.CreateDocumentRequest.content:type_name -> google.protobuf.Struct
 	0,  // 4: worker.database.v1.UpdateDocumentRequest.document:type_name -> worker.database.v1.Document
 	9,  // 5: worker.database.v1.UpdateDocumentRequest.update_mask:type_name -> google.protobuf.FieldMask
 	0,  // 6: worker.database.v1.ListDocumentsResponse.documents:type_name -> worker.database.v1.Document

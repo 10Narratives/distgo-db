@@ -59,10 +59,7 @@ message CreateDocumentRequest {
     },
     (validate.rules).string.pattern = "projects/.*/databases/.*"
   ];
-  string document_id = 2 [
-    (validate.rules).string.uuid = true
-  ];
-  Document document = 3 [
+  google.protobuf.Struct content = 2 [
     (google.api.field_behavior) = REQUIRED,
     (validate.rules).message.required = true
   ];

@@ -538,21 +538,9 @@ func (m *CreateDocumentRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if err := m._validateUuid(m.GetDocumentId()); err != nil {
-		err = CreateDocumentRequestValidationError{
-			field:  "DocumentId",
-			reason: "value must be a valid UUID",
-			cause:  err,
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if m.GetDocument() == nil {
+	if m.GetContent() == nil {
 		err := CreateDocumentRequestValidationError{
-			field:  "Document",
+			field:  "Content",
 			reason: "value is required",
 		}
 		if !all {
@@ -562,11 +550,11 @@ func (m *CreateDocumentRequest) validate(all bool) error {
 	}
 
 	if all {
-		switch v := interface{}(m.GetDocument()).(type) {
+		switch v := interface{}(m.GetContent()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
 				errors = append(errors, CreateDocumentRequestValidationError{
-					field:  "Document",
+					field:  "Content",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
@@ -574,16 +562,16 @@ func (m *CreateDocumentRequest) validate(all bool) error {
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
 				errors = append(errors, CreateDocumentRequestValidationError{
-					field:  "Document",
+					field:  "Content",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
 			}
 		}
-	} else if v, ok := interface{}(m.GetDocument()).(interface{ Validate() error }); ok {
+	} else if v, ok := interface{}(m.GetContent()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return CreateDocumentRequestValidationError{
-				field:  "Document",
+				field:  "Content",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -592,14 +580,6 @@ func (m *CreateDocumentRequest) validate(all bool) error {
 
 	if len(errors) > 0 {
 		return CreateDocumentRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *CreateDocumentRequest) _validateUuid(uuid string) error {
-	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
 	}
 
 	return nil
