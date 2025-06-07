@@ -16,6 +16,7 @@ import (
 //go:generate mockery --name DocumentService --output ./mocks/
 type DocumentService interface {
 	Create(ctx context.Context, collection string, content map[string]any) (documentmodels.Document, error)
+	Get(ctx context.Context, collection, documentID string) (documentmodels.Document, error)
 }
 
 type ServerAPI struct {
@@ -41,13 +42,7 @@ func (s *ServerAPI) CreateDocument(ctx context.Context, req *dbv1.CreateDocument
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	content, _ := structpb.NewStruct(doc.Content)
-	return &dbv1.Document{
-		Name:      doc.ID.String(),
-		Content:   content,
-		CreatedAt: timestamppb.New(doc.CreatedAt),
-		UpdatedAt: timestamppb.New(doc.UpdatedAt),
-	}, nil
+	return convert(doc)
 }
 
 func (s *ServerAPI) DeleteDocument(context.Context, *dbv1.DeleteDocumentRequest) (*emptypb.Empty, error) {
@@ -55,9 +50,17 @@ func (s *ServerAPI) DeleteDocument(context.Context, *dbv1.DeleteDocumentRequest)
 
 }
 
-func (s *ServerAPI) GetDocument(context.Context, *dbv1.GetDocumentRequest) (*dbv1.Document, error) {
-	panic("implement")
+func (s *ServerAPI) GetDocument(ctx context.Context, req *dbv1.GetDocumentRequest) (*dbv1.Document, error) {
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 
+	doc, err := s.service.Get(ctx, req.GetCollection(), req.GetDocumentId())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return convert(doc)
 }
 
 func (s *ServerAPI) ListDocuments(context.Context, *dbv1.ListDocumentsRequest) (*dbv1.ListDocumentsResponse, error) {
@@ -67,4 +70,17 @@ func (s *ServerAPI) ListDocuments(context.Context, *dbv1.ListDocumentsRequest) (
 
 func (s *ServerAPI) UpdateDocument(context.Context, *dbv1.UpdateDocumentRequest) (*dbv1.Document, error) {
 	panic("implement")
+}
+
+func convert(src documentmodels.Document) (*dbv1.Document, error) {
+	content, err := structpb.NewStruct(src.Content)
+	if err != nil {
+		return &dbv1.Document{}, err
+	}
+	return &dbv1.Document{
+		Name:      src.ID.String(),
+		Content:   content,
+		CreatedAt: timestamppb.New(src.CreatedAt),
+		UpdatedAt: timestamppb.New(src.UpdatedAt),
+	}, nil
 }

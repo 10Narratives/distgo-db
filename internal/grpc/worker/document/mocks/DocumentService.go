@@ -43,6 +43,34 @@ func (_m *DocumentService) Create(ctx context.Context, collection string, conten
 	return r0, r1
 }
 
+// Get provides a mock function with given fields: ctx, collection, documentID
+func (_m *DocumentService) Get(ctx context.Context, collection string, documentID string) (documentmodels.Document, error) {
+	ret := _m.Called(ctx, collection, documentID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Get")
+	}
+
+	var r0 documentmodels.Document
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (documentmodels.Document, error)); ok {
+		return rf(ctx, collection, documentID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) documentmodels.Document); ok {
+		r0 = rf(ctx, collection, documentID)
+	} else {
+		r0 = ret.Get(0).(documentmodels.Document)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, collection, documentID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewDocumentService creates a new instance of DocumentService. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewDocumentService(t interface {

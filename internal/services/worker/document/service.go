@@ -30,3 +30,7 @@ func (s Service) Create(ctx context.Context, collection string, content map[stri
 	doc, err := s.storage.Get(ctx, collection, documentID)
 	return doc, err
 }
+
+func (s Service) Get(ctx context.Context, collection string, documentID string) (documentmodels.Document, error) {
+	return s.storage.Get(ctx, collection, uuid.MustParse(documentID))
+}

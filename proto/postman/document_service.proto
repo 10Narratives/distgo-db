@@ -25,12 +25,13 @@ message ListDocumentsRequest {
 }
 
 message GetDocumentRequest {
-  string name = 1;
+  string collection = 1;
+  string document_id = 2;
 }
 
 message CreateDocumentRequest {
   string parent = 1;
-  google.protobuf.Struct content = 3;
+  google.protobuf.Struct content =2;
 }
 
 message UpdateDocumentRequest {

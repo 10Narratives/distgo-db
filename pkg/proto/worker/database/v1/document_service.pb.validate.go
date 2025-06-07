@@ -405,9 +405,20 @@ func (m *GetDocumentRequest) validate(all bool) error {
 
 	var errors []error
 
-	if err := m._validateUuid(m.GetName()); err != nil {
+	if !_GetDocumentRequest_Collection_Pattern.MatchString(m.GetCollection()) {
+		err := GetDocumentRequestValidationError{
+			field:  "Collection",
+			reason: "value does not match regex pattern \"projects/.*/databases/.*\"",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if err := m._validateUuid(m.GetDocumentId()); err != nil {
 		err = GetDocumentRequestValidationError{
-			field:  "Name",
+			field:  "DocumentId",
 			reason: "value must be a valid UUID",
 			cause:  err,
 		}
@@ -504,6 +515,8 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetDocumentRequestValidationError{}
+
+var _GetDocumentRequest_Collection_Pattern = regexp.MustCompile("projects/.*/databases/.*")
 
 // Validate checks the field values on CreateDocumentRequest with the rules
 // defined in the proto definition for this message. If any rules are
