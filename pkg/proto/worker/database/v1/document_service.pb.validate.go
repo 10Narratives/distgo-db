@@ -405,9 +405,20 @@ func (m *GetDocumentRequest) validate(all bool) error {
 
 	var errors []error
 
-	if err := m._validateUuid(m.GetName()); err != nil {
+	if !_GetDocumentRequest_Collection_Pattern.MatchString(m.GetCollection()) {
+		err := GetDocumentRequestValidationError{
+			field:  "Collection",
+			reason: "value does not match regex pattern \"projects/.*/databases/.*\"",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if err := m._validateUuid(m.GetDocumentId()); err != nil {
 		err = GetDocumentRequestValidationError{
-			field:  "Name",
+			field:  "DocumentId",
 			reason: "value must be a valid UUID",
 			cause:  err,
 		}
@@ -505,6 +516,8 @@ var _ interface {
 	ErrorName() string
 } = GetDocumentRequestValidationError{}
 
+var _GetDocumentRequest_Collection_Pattern = regexp.MustCompile("projects/.*/databases/.*")
+
 // Validate checks the field values on CreateDocumentRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -538,21 +551,9 @@ func (m *CreateDocumentRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if err := m._validateUuid(m.GetDocumentId()); err != nil {
-		err = CreateDocumentRequestValidationError{
-			field:  "DocumentId",
-			reason: "value must be a valid UUID",
-			cause:  err,
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if m.GetDocument() == nil {
+	if m.GetContent() == nil {
 		err := CreateDocumentRequestValidationError{
-			field:  "Document",
+			field:  "Content",
 			reason: "value is required",
 		}
 		if !all {
@@ -562,11 +563,11 @@ func (m *CreateDocumentRequest) validate(all bool) error {
 	}
 
 	if all {
-		switch v := interface{}(m.GetDocument()).(type) {
+		switch v := interface{}(m.GetContent()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
 				errors = append(errors, CreateDocumentRequestValidationError{
-					field:  "Document",
+					field:  "Content",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
@@ -574,16 +575,16 @@ func (m *CreateDocumentRequest) validate(all bool) error {
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
 				errors = append(errors, CreateDocumentRequestValidationError{
-					field:  "Document",
+					field:  "Content",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
 			}
 		}
-	} else if v, ok := interface{}(m.GetDocument()).(interface{ Validate() error }); ok {
+	} else if v, ok := interface{}(m.GetContent()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return CreateDocumentRequestValidationError{
-				field:  "Document",
+				field:  "Content",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -592,14 +593,6 @@ func (m *CreateDocumentRequest) validate(all bool) error {
 
 	if len(errors) > 0 {
 		return CreateDocumentRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *CreateDocumentRequest) _validateUuid(uuid string) error {
-	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
 	}
 
 	return nil
@@ -702,9 +695,32 @@ func (m *UpdateDocumentRequest) validate(all bool) error {
 
 	var errors []error
 
-	if m.GetDocument() == nil {
+	if !_UpdateDocumentRequest_Collection_Pattern.MatchString(m.GetCollection()) {
 		err := UpdateDocumentRequestValidationError{
-			field:  "Document",
+			field:  "Collection",
+			reason: "value does not match regex pattern \"projects/.*/databases/.*\"",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if err := m._validateUuid(m.GetDocumentId()); err != nil {
+		err = UpdateDocumentRequestValidationError{
+			field:  "DocumentId",
+			reason: "value must be a valid UUID",
+			cause:  err,
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetContent() == nil {
+		err := UpdateDocumentRequestValidationError{
+			field:  "Content",
 			reason: "value is required",
 		}
 		if !all {
@@ -714,11 +730,11 @@ func (m *UpdateDocumentRequest) validate(all bool) error {
 	}
 
 	if all {
-		switch v := interface{}(m.GetDocument()).(type) {
+		switch v := interface{}(m.GetContent()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
 				errors = append(errors, UpdateDocumentRequestValidationError{
-					field:  "Document",
+					field:  "Content",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
@@ -726,45 +742,16 @@ func (m *UpdateDocumentRequest) validate(all bool) error {
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
 				errors = append(errors, UpdateDocumentRequestValidationError{
-					field:  "Document",
+					field:  "Content",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
 			}
 		}
-	} else if v, ok := interface{}(m.GetDocument()).(interface{ Validate() error }); ok {
+	} else if v, ok := interface{}(m.GetContent()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return UpdateDocumentRequestValidationError{
-				field:  "Document",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if all {
-		switch v := interface{}(m.GetUpdateMask()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, UpdateDocumentRequestValidationError{
-					field:  "UpdateMask",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, UpdateDocumentRequestValidationError{
-					field:  "UpdateMask",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetUpdateMask()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdateDocumentRequestValidationError{
-				field:  "UpdateMask",
+				field:  "Content",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -773,6 +760,14 @@ func (m *UpdateDocumentRequest) validate(all bool) error {
 
 	if len(errors) > 0 {
 		return UpdateDocumentRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+func (m *UpdateDocumentRequest) _validateUuid(uuid string) error {
+	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
 	}
 
 	return nil
@@ -851,6 +846,8 @@ var _ interface {
 	ErrorName() string
 } = UpdateDocumentRequestValidationError{}
 
+var _UpdateDocumentRequest_Collection_Pattern = regexp.MustCompile("projects/.*/databases/.*")
+
 // Validate checks the field values on DeleteDocumentRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -873,10 +870,22 @@ func (m *DeleteDocumentRequest) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetName()) < 1 {
+	if !_DeleteDocumentRequest_Collection_Pattern.MatchString(m.GetCollection()) {
 		err := DeleteDocumentRequestValidationError{
-			field:  "Name",
-			reason: "value length must be at least 1 runes",
+			field:  "Collection",
+			reason: "value does not match regex pattern \"projects/.*/databases/.*\"",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if err := m._validateUuid(m.GetDocumentId()); err != nil {
+		err = DeleteDocumentRequestValidationError{
+			field:  "DocumentId",
+			reason: "value must be a valid UUID",
+			cause:  err,
 		}
 		if !all {
 			return err
@@ -886,6 +895,14 @@ func (m *DeleteDocumentRequest) validate(all bool) error {
 
 	if len(errors) > 0 {
 		return DeleteDocumentRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+func (m *DeleteDocumentRequest) _validateUuid(uuid string) error {
+	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
 	}
 
 	return nil
@@ -963,6 +980,8 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteDocumentRequestValidationError{}
+
+var _DeleteDocumentRequest_Collection_Pattern = regexp.MustCompile("projects/.*/databases/.*")
 
 // Validate checks the field values on ListDocumentsResponse with the rules
 // defined in the proto definition for this message. If any rules are
