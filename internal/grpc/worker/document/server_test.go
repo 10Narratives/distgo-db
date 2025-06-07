@@ -546,3 +546,147 @@ func TestServerAPI_DeleteDocument(t *testing.T) {
 		})
 	}
 }
+
+func TestServerAPI_UpdateDocument(t *testing.T) {
+	t.Parallel()
+
+	var (
+		documentID     uuid.UUID      = uuid.New()
+		collection     string         = "projects/my-project/databases/main-db"
+		updatedContent map[string]any = map[string]any{
+			"fullname": "User Fullname",
+		}
+		createdAt time.Time = time.Now()
+		updatedAt time.Time = time.Now().Add(time.Microsecond)
+	)
+
+	type fields struct {
+		mockSetup func(m *mocks.DocumentService)
+	}
+	type args struct {
+		ctx context.Context
+		req *dbv1.UpdateDocumentRequest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantVal require.ValueAssertionFunc
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "successful update",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentService) {
+					m.On("Update", mock.Anything, collection, documentID.String(), updatedContent).
+						Return(documentmodels.Document{
+							ID:        documentID,
+							Content:   updatedContent,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
+						}, nil)
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.UpdateDocumentRequest{
+					Collection: collection,
+					DocumentId: documentID.String(),
+					Content: func() *structpb.Struct {
+						s, _ := structpb.NewStruct(updatedContent)
+						return s
+					}(),
+				},
+			},
+			wantVal: func(tt require.TestingT, got interface{}, i2 ...interface{}) {
+				doc, ok := got.(*dbv1.Document)
+				require.True(t, ok)
+
+				assert.Equal(t, documentID.String(), doc.Name)
+				assert.Equal(t, updatedContent, doc.Content.AsMap())
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "validation error",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentService) {},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.UpdateDocumentRequest{
+					Collection: "collection",
+					DocumentId: documentID.String(),
+					Content: func() *structpb.Struct {
+						s, _ := structpb.NewStruct(updatedContent)
+						return s
+					}(),
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: require.Error,
+		},
+		{
+			name: "collection not found",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentService) {
+					m.On("Update", mock.Anything, collection, documentID.String(), updatedContent).
+						Return(documentmodels.Document{}, documentstore.ErrCollectionNotFound)
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.UpdateDocumentRequest{
+					Collection: collection,
+					DocumentId: documentID.String(),
+					Content: func() *structpb.Struct {
+						s, _ := structpb.NewStruct(updatedContent)
+						return s
+					}(),
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: require.Error,
+		},
+		{
+			name: "document not found",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentService) {
+					m.On("Update", mock.Anything, collection, documentID.String(), updatedContent).
+						Return(documentmodels.Document{}, documentstore.ErrDocumentNotFound)
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.UpdateDocumentRequest{
+					Collection: collection,
+					DocumentId: documentID.String(),
+					Content: func() *structpb.Struct {
+						s, _ := structpb.NewStruct(updatedContent)
+						return s
+					}(),
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: require.Error,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			mock := mocks.NewDocumentService(t)
+			tt.fields.mockSetup(mock)
+
+			serverAPI := documentgrpc.New(mock)
+
+			doc, err := serverAPI.UpdateDocument(tt.args.ctx, tt.args.req)
+			tt.wantVal(t, doc)
+			tt.wantErr(t, err)
+
+			mock.AssertExpectations(t)
+		})
+	}
+}

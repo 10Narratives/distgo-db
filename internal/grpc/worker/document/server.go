@@ -19,6 +19,7 @@ type DocumentService interface {
 	Get(ctx context.Context, collection, documentID string) (documentmodels.Document, error)
 	List(ctx context.Context, collection string) ([]documentmodels.Document, error)
 	Delete(ctx context.Context, collection, documentID string) error
+	Update(ctx context.Context, collection, documentId string, changes map[string]any) (documentmodels.Document, error)
 }
 
 type ServerAPI struct {
@@ -92,8 +93,17 @@ func (s *ServerAPI) ListDocuments(ctx context.Context, req *dbv1.ListDocumentsRe
 	return &dbv1.ListDocumentsResponse{Documents: listed}, nil
 }
 
-func (s *ServerAPI) UpdateDocument(context.Context, *dbv1.UpdateDocumentRequest) (*dbv1.Document, error) {
-	panic("implement")
+func (s *ServerAPI) UpdateDocument(ctx context.Context, req *dbv1.UpdateDocumentRequest) (*dbv1.Document, error) {
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	doc, err := s.service.Update(ctx, req.GetCollection(), req.GetDocumentId(), req.GetContent().AsMap())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return convert(doc)
 }
 
 func convert(src documentmodels.Document) (*dbv1.Document, error) {

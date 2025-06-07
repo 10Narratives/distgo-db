@@ -12,7 +12,6 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
-	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 	structpb "google.golang.org/protobuf/types/known/structpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
@@ -261,8 +260,9 @@ func (x *CreateDocumentRequest) GetContent() *structpb.Struct {
 
 type UpdateDocumentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Document      *Document              `protobuf:"bytes,1,opt,name=document,proto3" json:"document,omitempty"`
-	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	Collection    string                 `protobuf:"bytes,1,opt,name=collection,proto3" json:"collection,omitempty"`
+	DocumentId    string                 `protobuf:"bytes,2,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	Content       *structpb.Struct       `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -297,16 +297,23 @@ func (*UpdateDocumentRequest) Descriptor() ([]byte, []int) {
 	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *UpdateDocumentRequest) GetDocument() *Document {
+func (x *UpdateDocumentRequest) GetCollection() string {
 	if x != nil {
-		return x.Document
+		return x.Collection
 	}
-	return nil
+	return ""
 }
 
-func (x *UpdateDocumentRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
+func (x *UpdateDocumentRequest) GetDocumentId() string {
 	if x != nil {
-		return x.UpdateMask
+		return x.DocumentId
+	}
+	return ""
+}
+
+func (x *UpdateDocumentRequest) GetContent() *structpb.Struct {
+	if x != nil {
+		return x.Content
 	}
 	return nil
 }
@@ -419,7 +426,7 @@ var File_worker_database_v1_document_service_proto protoreflect.FileDescriptor
 
 const file_worker_database_v1_document_service_proto_rawDesc = "" +
 	"\n" +
-	")worker/database/v1/document_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x19google/api/resource.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\"\xbb\x02\n" +
+	")worker/database/v1/document_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x19google/api/resource.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\"\xbb\x02\n" +
 	"\bDocument\x12\x1c\n" +
 	"\x04name\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\x04name\x12;\n" +
 	"\acontent\x18\x02 \x01(\v2\x17.google.protobuf.StructB\b\xfaB\x05\x8a\x01\x02\x10\x01R\acontent\x129\n" +
@@ -443,11 +450,14 @@ const file_worker_database_v1_document_service_proto_rawDesc = "" +
 	"\x15CreateDocumentRequest\x12Z\n" +
 	"\x06parent\x18\x01 \x01(\tBB\xe0A\x02\xfaA\x1d\n" +
 	"\x1bworker.database.v1/Database\xfaB\x1cr\x1a2\x18projects/.*/databases/.*R\x06parent\x12>\n" +
-	"\acontent\x18\x02 \x01(\v2\x17.google.protobuf.StructB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\acontent\"\xa0\x01\n" +
-	"\x15UpdateDocumentRequest\x12E\n" +
-	"\bdocument\x18\x01 \x01(\v2\x1c.worker.database.v1.DocumentB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\bdocument\x12@\n" +
-	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskB\x03\xe0A\x01R\n" +
-	"updateMask\"\x89\x01\n" +
+	"\acontent\x18\x02 \x01(\v2\x17.google.protobuf.StructB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\acontent\"\xc9\x01\n" +
+	"\x15UpdateDocumentRequest\x12B\n" +
+	"\n" +
+	"collection\x18\x01 \x01(\tB\"\xe0A\x02\xfaB\x1cr\x1a2\x18projects/.*/databases/.*R\n" +
+	"collection\x12,\n" +
+	"\vdocument_id\x18\x02 \x01(\tB\v\xe0A\x02\xfaB\x05r\x03\xb0\x01\x01R\n" +
+	"documentId\x12>\n" +
+	"\acontent\x18\x03 \x01(\v2\x17.google.protobuf.StructB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\acontent\"\x89\x01\n" +
 	"\x15DeleteDocumentRequest\x12B\n" +
 	"\n" +
 	"collection\x18\x01 \x01(\tB\"\xe0A\x02\xfaB\x1cr\x1a2\x18projects/.*/databases/.*R\n" +
@@ -488,32 +498,30 @@ var file_worker_database_v1_document_service_proto_goTypes = []any{
 	(*ListDocumentsResponse)(nil), // 6: worker.database.v1.ListDocumentsResponse
 	(*structpb.Struct)(nil),       // 7: google.protobuf.Struct
 	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
-	(*fieldmaskpb.FieldMask)(nil), // 9: google.protobuf.FieldMask
-	(*emptypb.Empty)(nil),         // 10: google.protobuf.Empty
+	(*emptypb.Empty)(nil),         // 9: google.protobuf.Empty
 }
 var file_worker_database_v1_document_service_proto_depIdxs = []int32{
 	7,  // 0: worker.database.v1.Document.content:type_name -> google.protobuf.Struct
 	8,  // 1: worker.database.v1.Document.created_at:type_name -> google.protobuf.Timestamp
 	8,  // 2: worker.database.v1.Document.updated_at:type_name -> google.protobuf.Timestamp
 	7,  // 3: worker.database.v1.CreateDocumentRequest.content:type_name -> google.protobuf.Struct
-	0,  // 4: worker.database.v1.UpdateDocumentRequest.document:type_name -> worker.database.v1.Document
-	9,  // 5: worker.database.v1.UpdateDocumentRequest.update_mask:type_name -> google.protobuf.FieldMask
-	0,  // 6: worker.database.v1.ListDocumentsResponse.documents:type_name -> worker.database.v1.Document
-	1,  // 7: worker.database.v1.DocumentService.ListDocuments:input_type -> worker.database.v1.ListDocumentsRequest
-	2,  // 8: worker.database.v1.DocumentService.GetDocument:input_type -> worker.database.v1.GetDocumentRequest
-	3,  // 9: worker.database.v1.DocumentService.CreateDocument:input_type -> worker.database.v1.CreateDocumentRequest
-	4,  // 10: worker.database.v1.DocumentService.UpdateDocument:input_type -> worker.database.v1.UpdateDocumentRequest
-	5,  // 11: worker.database.v1.DocumentService.DeleteDocument:input_type -> worker.database.v1.DeleteDocumentRequest
-	6,  // 12: worker.database.v1.DocumentService.ListDocuments:output_type -> worker.database.v1.ListDocumentsResponse
-	0,  // 13: worker.database.v1.DocumentService.GetDocument:output_type -> worker.database.v1.Document
-	0,  // 14: worker.database.v1.DocumentService.CreateDocument:output_type -> worker.database.v1.Document
-	0,  // 15: worker.database.v1.DocumentService.UpdateDocument:output_type -> worker.database.v1.Document
-	10, // 16: worker.database.v1.DocumentService.DeleteDocument:output_type -> google.protobuf.Empty
-	12, // [12:17] is the sub-list for method output_type
-	7,  // [7:12] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	7,  // 4: worker.database.v1.UpdateDocumentRequest.content:type_name -> google.protobuf.Struct
+	0,  // 5: worker.database.v1.ListDocumentsResponse.documents:type_name -> worker.database.v1.Document
+	1,  // 6: worker.database.v1.DocumentService.ListDocuments:input_type -> worker.database.v1.ListDocumentsRequest
+	2,  // 7: worker.database.v1.DocumentService.GetDocument:input_type -> worker.database.v1.GetDocumentRequest
+	3,  // 8: worker.database.v1.DocumentService.CreateDocument:input_type -> worker.database.v1.CreateDocumentRequest
+	4,  // 9: worker.database.v1.DocumentService.UpdateDocument:input_type -> worker.database.v1.UpdateDocumentRequest
+	5,  // 10: worker.database.v1.DocumentService.DeleteDocument:input_type -> worker.database.v1.DeleteDocumentRequest
+	6,  // 11: worker.database.v1.DocumentService.ListDocuments:output_type -> worker.database.v1.ListDocumentsResponse
+	0,  // 12: worker.database.v1.DocumentService.GetDocument:output_type -> worker.database.v1.Document
+	0,  // 13: worker.database.v1.DocumentService.CreateDocument:output_type -> worker.database.v1.Document
+	0,  // 14: worker.database.v1.DocumentService.UpdateDocument:output_type -> worker.database.v1.Document
+	9,  // 15: worker.database.v1.DocumentService.DeleteDocument:output_type -> google.protobuf.Empty
+	11, // [11:16] is the sub-list for method output_type
+	6,  // [6:11] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_worker_database_v1_document_service_proto_init() }

@@ -35,8 +35,9 @@ message CreateDocumentRequest {
 }
 
 message UpdateDocumentRequest {
-  Document document = 1;
-  google.protobuf.FieldMask update_mask = 2;
+  string collection = 1;
+  string document_id = 2;
+  google.protobuf.Struct content = 3;
 }
 
 message DeleteDocumentRequest {

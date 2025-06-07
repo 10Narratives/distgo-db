@@ -397,3 +397,121 @@ func TestService_Delete(t *testing.T) {
 		})
 	}
 }
+
+func TestService_Update(t *testing.T) {
+	t.Parallel()
+
+	var (
+		documentID uuid.UUID = uuid.New()
+		collection string    = "users"
+		// content    map[string]any = map[string]any{
+		// 	"fullname": "User Fullname",
+		// 	"email":    "user_email@gmail.com",
+		// }
+		updatedContent map[string]any = map[string]any{
+			"fullname": "User Fullname",
+		}
+		createdAt time.Time = time.Now()
+		updatedAt time.Time = time.Now().Add(time.Microsecond)
+	)
+
+	type fields struct {
+		mockSetup func(m *mocks.DocumentStorage)
+	}
+	type args struct {
+		ctx        context.Context
+		collection string
+		documentID string
+		content    map[string]any
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantVal require.ValueAssertionFunc
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "successful update",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentStorage) {
+					m.On("Replace", mock.Anything, collection, documentID, updatedContent).
+						Return(documentmodels.Document{
+							ID:        documentID,
+							Content:   updatedContent,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
+						}, nil)
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: documentID.String(),
+				content:    updatedContent,
+			},
+			wantVal: func(tt require.TestingT, got interface{}, i2 ...interface{}) {
+				doc, ok := got.(documentmodels.Document)
+				require.True(t, ok)
+
+				assert.Equal(t, documentID, doc.ID)
+				assert.Equal(t, updatedContent, doc.Content)
+				assert.Equal(t, createdAt, doc.CreatedAt)
+				assert.Equal(t, updatedAt, doc.UpdatedAt)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "collection not found",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentStorage) {
+					m.On("Replace", mock.Anything, collection, documentID, updatedContent).
+						Return(documentmodels.Document{}, documentstore.ErrCollectionNotFound)
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: documentID.String(),
+				content:    updatedContent,
+			},
+			wantVal: require.Empty,
+			wantErr: require.Error,
+		},
+		{
+			name: "document not found",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentStorage) {
+					m.On("Replace", mock.Anything, collection, documentID, updatedContent).
+						Return(documentmodels.Document{}, documentstore.ErrDocumentNotFound)
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: documentID.String(),
+				content:    updatedContent,
+			},
+			wantVal: require.Empty,
+			wantErr: require.Error,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			mock := mocks.NewDocumentStorage(t)
+			tt.fields.mockSetup(mock)
+
+			service := documentsrv.New(mock)
+			doc, err := service.Update(tt.args.ctx, tt.args.collection, tt.args.documentID, tt.args.content)
+
+			tt.wantVal(t, doc)
+			tt.wantErr(t, err)
+
+			mock.AssertExpectations(t)
+		})
+	}
+}

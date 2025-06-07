@@ -444,3 +444,129 @@ func TestStorage_Delete(t *testing.T) {
 		})
 	}
 }
+
+func TestStorage_Replace(t *testing.T) {
+	t.Parallel()
+
+	var (
+		documentID uuid.UUID      = uuid.New()
+		collection string         = "users"
+		content    map[string]any = map[string]any{
+			"fullname": "User Fullname",
+			"email":    "user_email@gmail.com",
+		}
+		updatedContent map[string]any = map[string]any{
+			"fullname": "User Fullname",
+		}
+		createdAt time.Time = time.Now()
+		// updatedAt time.Time = time.Now().Add(time.Microsecond)
+	)
+
+	type fields struct {
+		data map[string]documentstore.Collection
+	}
+	type args struct {
+		ctx        context.Context
+		collection string
+		documentID uuid.UUID
+		content    map[string]any
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantVal require.ValueAssertionFunc
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "successful replace",
+			fields: fields{
+				data: map[string]documentstore.Collection{
+					collection: documentstore.Collection{
+						documentID: documentmodels.Document{
+							ID:        documentID,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: createdAt,
+						},
+					},
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: documentID,
+				content:    updatedContent,
+			},
+			wantVal: func(tt require.TestingT, got interface{}, i2 ...interface{}) {
+				doc, ok := got.(documentmodels.Document)
+				require.True(t, ok)
+
+				assert.Equal(t, documentID, doc.ID)
+				assert.Equal(t, updatedContent, doc.Content)
+				assert.Equal(t, createdAt, doc.CreatedAt)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "collection not found",
+			fields: fields{
+				data: map[string]documentstore.Collection{
+					collection: documentstore.Collection{
+						documentID: documentmodels.Document{
+							ID:        documentID,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: createdAt,
+						},
+					},
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: "collection",
+				documentID: documentID,
+				content:    updatedContent,
+			},
+			wantVal: require.Empty,
+			wantErr: require.Error,
+		},
+		{
+			name: "document not found",
+			fields: fields{
+				data: map[string]documentstore.Collection{
+					collection: documentstore.Collection{
+						documentID: documentmodels.Document{
+							ID:        documentID,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: createdAt,
+						},
+					},
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: uuid.New(),
+				content:    updatedContent,
+			},
+			wantVal: require.Empty,
+			wantErr: require.Error,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			storage := documentstore.NewOf(tt.fields.data)
+
+			doc, err := storage.Replace(tt.args.ctx, tt.args.collection, tt.args.documentID, tt.args.content)
+
+			tt.wantVal(t, doc)
+			tt.wantErr(t, err)
+		})
+	}
+}

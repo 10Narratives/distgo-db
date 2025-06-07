@@ -98,3 +98,21 @@ func (s Storage) Delete(ctx context.Context, collection string, documentID uuid.
 
 	return nil
 }
+
+func (s Storage) Replace(ctx context.Context, collection string, documentID uuid.UUID, content map[string]any) (documentmodels.Document, error) {
+	col, exists := s.data[collection]
+	if !exists {
+		return documentmodels.Document{}, ErrCollectionNotFound
+	}
+
+	doc, exists := col[documentID]
+	if !exists {
+		return documentmodels.Document{}, ErrDocumentNotFound
+	}
+
+	doc.Content = content
+	doc.UpdatedAt = time.Now()
+	s.data[collection][documentID] = doc
+
+	return doc, nil
+}

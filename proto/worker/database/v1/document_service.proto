@@ -6,7 +6,6 @@ import "google/api/annotations.proto";
 import "google/api/field_behavior.proto";
 import "google/api/resource.proto";
 import "google/protobuf/empty.proto";
-import "google/protobuf/field_mask.proto";
 import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
 import "validate/validate.proto";
@@ -67,12 +66,17 @@ message CreateDocumentRequest {
 }
 
 message UpdateDocumentRequest {
-  Document document = 1 [
+  string collection = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (validate.rules).string.pattern = "projects/.*/databases/.*"
+  ];
+  string document_id = 2 [
+    (google.api.field_behavior) = REQUIRED,
+    (validate.rules).string.uuid = true
+  ];
+  google.protobuf.Struct content = 3 [
     (google.api.field_behavior) = REQUIRED,
     (validate.rules).message.required = true
-  ];
-  google.protobuf.FieldMask update_mask = 2 [
-    (google.api.field_behavior) = OPTIONAL
   ];
 }
 

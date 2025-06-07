@@ -119,6 +119,34 @@ func (_m *DocumentService) List(ctx context.Context, collection string) ([]docum
 	return r0, r1
 }
 
+// Update provides a mock function with given fields: ctx, collection, documentId, changes
+func (_m *DocumentService) Update(ctx context.Context, collection string, documentId string, changes map[string]interface{}) (documentmodels.Document, error) {
+	ret := _m.Called(ctx, collection, documentId, changes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Update")
+	}
+
+	var r0 documentmodels.Document
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, map[string]interface{}) (documentmodels.Document, error)); ok {
+		return rf(ctx, collection, documentId, changes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, map[string]interface{}) documentmodels.Document); ok {
+		r0 = rf(ctx, collection, documentId, changes)
+	} else {
+		r0 = ret.Get(0).(documentmodels.Document)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, map[string]interface{}) error); ok {
+		r1 = rf(ctx, collection, documentId, changes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewDocumentService creates a new instance of DocumentService. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewDocumentService(t interface {
