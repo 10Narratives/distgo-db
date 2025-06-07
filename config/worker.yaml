@@ -1,4 +1,4 @@
-name: worker#1
+name: worker_1
 grpc:
   port: 55055
   timeout: 4s
