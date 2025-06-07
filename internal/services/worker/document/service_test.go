@@ -209,3 +209,103 @@ func TestService_Get(t *testing.T) {
 		})
 	}
 }
+
+func TestService_List(t *testing.T) {
+	t.Parallel()
+
+	var (
+		id1        uuid.UUID      = uuid.New()
+		id2        uuid.UUID      = uuid.New()
+		collection string         = "users"
+		content    map[string]any = map[string]any{
+			"fullname": "User Fullname",
+			"email":    "user_email@gmail.com",
+		}
+		createdAt time.Time = time.Now()
+		updatedAt time.Time = time.Now()
+	)
+
+	type fields struct {
+		mockSetup func(m *mocks.DocumentStorage)
+	}
+	type args struct {
+		ctx        context.Context
+		collection string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantVal require.ValueAssertionFunc
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "successful list",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentStorage) {
+					m.On("List", mock.Anything, collection).
+						Return([]documentmodels.Document{
+							documentmodels.Document{
+								ID:        id1,
+								Content:   content,
+								CreatedAt: createdAt,
+								UpdatedAt: updatedAt,
+							},
+							documentmodels.Document{
+								ID:        id2,
+								Content:   content,
+								CreatedAt: createdAt,
+								UpdatedAt: updatedAt,
+							},
+						}, nil)
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+			},
+			wantVal: func(tt require.TestingT, got interface{}, i2 ...interface{}) {
+				list, ok := got.([]documentmodels.Document)
+				require.True(t, ok)
+
+				assert.Len(t, list, 2)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "collection not found",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentStorage) {
+					m.On("List", mock.Anything, "collection").
+						Return([]documentmodels.Document{}, documentstore.ErrCollectionNotFound)
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: "collection",
+			},
+			wantVal: require.Empty,
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				assert.EqualError(t, err, documentstore.ErrCollectionNotFound.Error())
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			mock := mocks.NewDocumentStorage(t)
+			tt.fields.mockSetup(mock)
+
+			service := documentsrv.New(mock)
+			docs, err := service.List(tt.args.ctx, tt.args.collection)
+
+			tt.wantVal(t, docs)
+			tt.wantErr(t, err)
+
+			mock.AssertExpectations(t)
+		})
+	}
+}

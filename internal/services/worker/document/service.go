@@ -12,6 +12,7 @@ import (
 type DocumentStorage interface {
 	Get(ctx context.Context, collection string, documentID uuid.UUID) (documentmodels.Document, error)
 	Set(ctx context.Context, collection string, documentID uuid.UUID, content map[string]any)
+	List(ctx context.Context, collection string) ([]documentmodels.Document, error)
 }
 
 type Service struct {
@@ -33,4 +34,8 @@ func (s Service) Create(ctx context.Context, collection string, content map[stri
 
 func (s Service) Get(ctx context.Context, collection string, documentID string) (documentmodels.Document, error) {
 	return s.storage.Get(ctx, collection, uuid.MustParse(documentID))
+}
+
+func (s Service) List(ctx context.Context, collection string) ([]documentmodels.Document, error) {
+	return s.storage.List(ctx, collection)
 }

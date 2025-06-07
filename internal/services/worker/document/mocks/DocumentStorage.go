@@ -45,6 +45,36 @@ func (_m *DocumentStorage) Get(ctx context.Context, collection string, documentI
 	return r0, r1
 }
 
+// List provides a mock function with given fields: ctx, collection
+func (_m *DocumentStorage) List(ctx context.Context, collection string) ([]documentmodels.Document, error) {
+	ret := _m.Called(ctx, collection)
+
+	if len(ret) == 0 {
+		panic("no return value specified for List")
+	}
+
+	var r0 []documentmodels.Document
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) ([]documentmodels.Document, error)); ok {
+		return rf(ctx, collection)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) []documentmodels.Document); ok {
+		r0 = rf(ctx, collection)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]documentmodels.Document)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, collection)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Set provides a mock function with given fields: ctx, collection, documentID, content
 func (_m *DocumentStorage) Set(ctx context.Context, collection string, documentID uuid.UUID, content map[string]interface{}) {
 	_m.Called(ctx, collection, documentID, content)

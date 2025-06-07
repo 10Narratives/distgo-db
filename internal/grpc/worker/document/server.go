@@ -17,6 +17,7 @@ import (
 type DocumentService interface {
 	Create(ctx context.Context, collection string, content map[string]any) (documentmodels.Document, error)
 	Get(ctx context.Context, collection, documentID string) (documentmodels.Document, error)
+	List(ctx context.Context, collection string) ([]documentmodels.Document, error)
 }
 
 type ServerAPI struct {
@@ -63,9 +64,23 @@ func (s *ServerAPI) GetDocument(ctx context.Context, req *dbv1.GetDocumentReques
 	return convert(doc)
 }
 
-func (s *ServerAPI) ListDocuments(context.Context, *dbv1.ListDocumentsRequest) (*dbv1.ListDocumentsResponse, error) {
-	panic("implement")
+func (s *ServerAPI) ListDocuments(ctx context.Context, req *dbv1.ListDocumentsRequest) (*dbv1.ListDocumentsResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 
+	docs, err := s.service.List(ctx, req.GetParent())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	listed := make([]*dbv1.Document, 0)
+	for _, doc := range docs {
+		converted, _ := convert(doc)
+		listed = append(listed, converted)
+	}
+
+	return &dbv1.ListDocumentsResponse{Documents: listed}, nil
 }
 
 func (s *ServerAPI) UpdateDocument(context.Context, *dbv1.UpdateDocumentRequest) (*dbv1.Document, error) {

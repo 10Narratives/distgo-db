@@ -3,6 +3,7 @@ package documentstore_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/document"
 	documentstore "github.com/10Narratives/distgo-db/internal/storages/worker/document"
@@ -223,6 +224,113 @@ func TestStorage_Set(t *testing.T) {
 
 			doc, _ := storage.Get(tt.args.ctx, tt.args.collection, tt.args.documentID)
 			tt.wantVal(t, doc)
+		})
+	}
+}
+
+func TestStorage_List(t *testing.T) {
+	t.Parallel()
+
+	var (
+		id1        uuid.UUID      = uuid.New()
+		id2        uuid.UUID      = uuid.New()
+		collection string         = "users"
+		content    map[string]any = map[string]any{
+			"fullname": "User Fullname",
+			"email":    "user_email@gmail.com",
+		}
+		createdAt time.Time = time.Now()
+		updatedAt time.Time = time.Now()
+	)
+
+	type fields struct {
+		data map[string]documentstore.Collection
+	}
+	type args struct {
+		ctx        context.Context
+		collection string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantVal require.ValueAssertionFunc
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "successful list",
+			fields: fields{
+				data: map[string]documentstore.Collection{
+					collection: documentstore.Collection{
+						id1: documentmodels.Document{
+							ID:        id1,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
+						},
+						id2: documentmodels.Document{
+							ID:        id2,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
+						},
+					},
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+			},
+			wantVal: func(tt require.TestingT, got interface{}, i2 ...interface{}) {
+				list, ok := got.([]documentmodels.Document)
+				require.True(t, ok)
+
+				assert.Len(t, list, 2)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "collection not found",
+			fields: fields{
+				data: map[string]documentstore.Collection{
+					collection: documentstore.Collection{
+						id1: documentmodels.Document{
+							ID:        id1,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
+						},
+						id2: documentmodels.Document{
+							ID:        id2,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
+						},
+					},
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: "collection",
+			},
+			wantVal: require.Empty,
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				assert.EqualError(t, err, documentstore.ErrCollectionNotFound.Error())
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			storage := documentstore.NewOf(tt.fields.data)
+			docs, err := storage.List(tt.args.ctx, tt.args.collection)
+
+			tt.wantVal(t, docs)
+			tt.wantErr(t, err)
 		})
 	}
 }

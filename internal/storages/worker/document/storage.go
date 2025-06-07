@@ -65,3 +65,17 @@ func (s Storage) Set(ctx context.Context, collection string, documentID uuid.UUI
 	}
 	col[documentID] = doc
 }
+
+func (s Storage) List(ctx context.Context, collection string) ([]documentmodels.Document, error) {
+	c, exists := s.data[collection]
+	if !exists {
+		return make([]documentmodels.Document, 0), ErrCollectionNotFound
+	}
+
+	listed := make([]documentmodels.Document, 0)
+	for _, doc := range c {
+		listed = append(listed, doc)
+	}
+
+	return listed, nil
+}

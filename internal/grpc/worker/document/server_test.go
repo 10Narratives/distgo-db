@@ -292,3 +292,125 @@ func TestServerAPI_GetDocument(t *testing.T) {
 		})
 	}
 }
+
+func TestServerAPI_ListDocuments(t *testing.T) {
+	t.Parallel()
+
+	var (
+		id1        uuid.UUID      = uuid.New()
+		id2        uuid.UUID      = uuid.New()
+		collection string         = "projects/my-project/databases/main-db"
+		content    map[string]any = map[string]any{
+			"fullname": "User Fullname",
+			"email":    "user_email@gmail.com",
+		}
+		createdAt time.Time = time.Now()
+		updatedAt time.Time = time.Now()
+	)
+
+	type fields struct {
+		mockSetup func(m *mocks.DocumentService)
+	}
+	type args struct {
+		ctx context.Context
+		req *dbv1.ListDocumentsRequest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantVal require.ValueAssertionFunc
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "successful list",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentService) {
+					m.On("List", mock.Anything, collection).
+						Return([]documentmodels.Document{
+							documentmodels.Document{
+								ID:        id1,
+								Content:   content,
+								CreatedAt: createdAt,
+								UpdatedAt: updatedAt,
+							},
+							documentmodels.Document{
+								ID:        id2,
+								Content:   content,
+								CreatedAt: createdAt,
+								UpdatedAt: updatedAt,
+							},
+						}, nil)
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.ListDocumentsRequest{
+					Parent:   collection,
+					PageSize: 10,
+				},
+			},
+			wantVal: func(tt require.TestingT, got interface{}, i2 ...interface{}) {
+				resp, ok := got.(*dbv1.ListDocumentsResponse)
+				require.True(t, ok)
+
+				assert.Len(t, resp.Documents, 2)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "validation error",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentService) {
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.ListDocumentsRequest{
+					Parent:   "collection",
+					PageSize: 10,
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				assert.EqualError(t, err, "rpc error: code = InvalidArgument desc = invalid ListDocumentsRequest.Parent: value does not match regex pattern \"projects/.*/databases/.*\"")
+			},
+		},
+		{
+			name: "internal error",
+			fields: fields{
+				mockSetup: func(m *mocks.DocumentService) {
+					m.On("List", mock.Anything, collection).
+						Return([]documentmodels.Document{}, documentstore.ErrCollectionNotFound)
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.ListDocumentsRequest{
+					Parent:   collection,
+					PageSize: 10,
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				assert.EqualError(t, err, "rpc error: code = Internal desc = collection not found")
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			mock := mocks.NewDocumentService(t)
+			tt.fields.mockSetup(mock)
+
+			serverAPI := documentgrpc.New(mock)
+			resp, err := serverAPI.ListDocuments(tt.args.ctx, tt.args.req)
+
+			tt.wantVal(t, resp)
+			tt.wantErr(t, err)
+		})
+	}
+}
