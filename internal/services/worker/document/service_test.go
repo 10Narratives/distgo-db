@@ -28,7 +28,8 @@ func TestService_Create(t *testing.T) {
 	)
 
 	type fields struct {
-		mockSetup func(m *mocks.DocumentStorage)
+		documentStoreMockSetup func(m *mocks.DocumentStorage)
+		walStorageMockSetup    func(m *mocks.WALStorage)
 	}
 	type args struct {
 		ctx        context.Context
@@ -46,13 +47,17 @@ func TestService_Create(t *testing.T) {
 		{
 			name: "successful document creation",
 			fields: fields{
-				mockSetup: func(m *mocks.DocumentStorage) {
+				documentStoreMockSetup: func(m *mocks.DocumentStorage) {
 					m.On("Set", mock.Anything, collection, mock.Anything, content)
 					m.On("Get", mock.Anything, collection, mock.Anything).
 						Return(documentmodels.Document{
 							ID:      documentID,
 							Content: content,
 						}, nil)
+				},
+				walStorageMockSetup: func(m *mocks.WALStorage) {
+					m.On("Replay", mock.Anything).Return(nil)
+					m.On("Write", mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -78,16 +83,19 @@ func TestService_Create(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			mock := mocks.NewDocumentStorage(t)
-			tt.fields.mockSetup(mock)
+			documentMock := mocks.NewDocumentStorage(t)
+			tt.fields.documentStoreMockSetup(documentMock)
 
-			service := documentsrv.New(mock)
+			walMock := mocks.NewWALStorage(t)
+			tt.fields.walStorageMockSetup(walMock)
+
+			service := documentsrv.New(documentMock, walMock)
 
 			doc, err := service.Create(tt.args.ctx, tt.args.collection, tt.args.content)
 			tt.wantVal(t, doc)
 			tt.wantErr(t, err)
 
-			mock.AssertExpectations(t)
+			documentMock.AssertExpectations(t)
 		})
 	}
 }
@@ -107,7 +115,8 @@ func TestService_Get(t *testing.T) {
 	)
 
 	type fields struct {
-		mockSetup func(m *mocks.DocumentStorage)
+		documentStoreMockSetup func(m *mocks.DocumentStorage)
+		walStoreMockSetup      func(m *mocks.WALStorage)
 	}
 
 	type args struct {
@@ -126,7 +135,7 @@ func TestService_Get(t *testing.T) {
 		{
 			name: "successful get",
 			fields: fields{
-				mockSetup: func(m *mocks.DocumentStorage) {
+				documentStoreMockSetup: func(m *mocks.DocumentStorage) {
 					m.On("Get", mock.Anything, collection, documentID).
 						Return(documentmodels.Document{
 							ID:        documentID,
@@ -134,6 +143,9 @@ func TestService_Get(t *testing.T) {
 							CreatedAt: createdAt,
 							UpdatedAt: updatedAt,
 						}, nil)
+				},
+				walStoreMockSetup: func(m *mocks.WALStorage) {
+					m.On("Replay", mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -155,9 +167,12 @@ func TestService_Get(t *testing.T) {
 		{
 			name: "collection not found",
 			fields: fields{
-				mockSetup: func(m *mocks.DocumentStorage) {
+				documentStoreMockSetup: func(m *mocks.DocumentStorage) {
 					m.On("Get", mock.Anything, collection, documentID).
 						Return(documentmodels.Document{}, documentstore.ErrCollectionNotFound)
+				},
+				walStoreMockSetup: func(m *mocks.WALStorage) {
+					m.On("Replay", mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -173,9 +188,12 @@ func TestService_Get(t *testing.T) {
 		{
 			name: "document not found",
 			fields: fields{
-				mockSetup: func(m *mocks.DocumentStorage) {
+				documentStoreMockSetup: func(m *mocks.DocumentStorage) {
 					m.On("Get", mock.Anything, collection, documentID).
 						Return(documentmodels.Document{}, documentstore.ErrDocumentNotFound)
+				},
+				walStoreMockSetup: func(m *mocks.WALStorage) {
+					m.On("Replay", mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -196,16 +214,19 @@ func TestService_Get(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			mock := mocks.NewDocumentStorage(t)
-			tt.fields.mockSetup(mock)
+			documentMock := mocks.NewDocumentStorage(t)
+			tt.fields.documentStoreMockSetup(documentMock)
 
-			service := documentsrv.New(mock)
+			walMock := mocks.NewWALStorage(t)
+			tt.fields.walStoreMockSetup(walMock)
+
+			service := documentsrv.New(documentMock, walMock)
 
 			doc, err := service.Get(tt.args.ctx, tt.args.collection, tt.args.documentID)
 			tt.wantVal(t, doc)
 			tt.wantErr(t, err)
 
-			mock.AssertExpectations(t)
+			documentMock.AssertExpectations(t)
 		})
 	}
 }
@@ -226,7 +247,8 @@ func TestService_List(t *testing.T) {
 	)
 
 	type fields struct {
-		mockSetup func(m *mocks.DocumentStorage)
+		documentStoreMockSetup func(m *mocks.DocumentStorage)
+		walStoreMockSetup      func(m *mocks.WALStorage)
 	}
 	type args struct {
 		ctx        context.Context
@@ -242,7 +264,7 @@ func TestService_List(t *testing.T) {
 		{
 			name: "successful list",
 			fields: fields{
-				mockSetup: func(m *mocks.DocumentStorage) {
+				documentStoreMockSetup: func(m *mocks.DocumentStorage) {
 					m.On("List", mock.Anything, collection).
 						Return([]documentmodels.Document{
 							documentmodels.Document{
@@ -258,6 +280,9 @@ func TestService_List(t *testing.T) {
 								UpdatedAt: updatedAt,
 							},
 						}, nil)
+				},
+				walStoreMockSetup: func(m *mocks.WALStorage) {
+					m.On("Replay", mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -275,9 +300,12 @@ func TestService_List(t *testing.T) {
 		{
 			name: "collection not found",
 			fields: fields{
-				mockSetup: func(m *mocks.DocumentStorage) {
+				documentStoreMockSetup: func(m *mocks.DocumentStorage) {
 					m.On("List", mock.Anything, "collection").
 						Return([]documentmodels.Document{}, documentstore.ErrCollectionNotFound)
+				},
+				walStoreMockSetup: func(m *mocks.WALStorage) {
+					m.On("Replay", mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -296,16 +324,19 @@ func TestService_List(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			mock := mocks.NewDocumentStorage(t)
-			tt.fields.mockSetup(mock)
+			documentMock := mocks.NewDocumentStorage(t)
+			tt.fields.documentStoreMockSetup(documentMock)
 
-			service := documentsrv.New(mock)
+			walMock := mocks.NewWALStorage(t)
+			tt.fields.walStoreMockSetup(walMock)
+
+			service := documentsrv.New(documentMock, walMock)
 			docs, err := service.List(tt.args.ctx, tt.args.collection)
 
 			tt.wantVal(t, docs)
 			tt.wantErr(t, err)
 
-			mock.AssertExpectations(t)
+			documentMock.AssertExpectations(t)
 		})
 	}
 }
@@ -319,7 +350,8 @@ func TestService_Delete(t *testing.T) {
 	)
 
 	type fields struct {
-		mockSetup func(m *mocks.DocumentStorage)
+		documentStoreMockSetup func(m *mocks.DocumentStorage)
+		walStorageMockSetup    func(m *mocks.WALStorage)
 	}
 	type args struct {
 		ctx        context.Context
@@ -335,8 +367,12 @@ func TestService_Delete(t *testing.T) {
 		{
 			name: "successful deletion",
 			fields: fields{
-				mockSetup: func(m *mocks.DocumentStorage) {
+				documentStoreMockSetup: func(m *mocks.DocumentStorage) {
 					m.On("Delete", mock.Anything, collection, documentID).Return(nil)
+				},
+				walStorageMockSetup: func(m *mocks.WALStorage) {
+					m.On("Replay", mock.Anything).Return(nil)
+					m.On("Write", mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -349,8 +385,12 @@ func TestService_Delete(t *testing.T) {
 		{
 			name: "collection not found",
 			fields: fields{
-				mockSetup: func(m *mocks.DocumentStorage) {
+				documentStoreMockSetup: func(m *mocks.DocumentStorage) {
 					m.On("Delete", mock.Anything, collection, documentID).Return(documentstore.ErrCollectionNotFound)
+				},
+				walStorageMockSetup: func(m *mocks.WALStorage) {
+					m.On("Replay", mock.Anything).Return(nil)
+					m.On("Write", mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -365,8 +405,12 @@ func TestService_Delete(t *testing.T) {
 		{
 			name: "document not found",
 			fields: fields{
-				mockSetup: func(m *mocks.DocumentStorage) {
+				documentStoreMockSetup: func(m *mocks.DocumentStorage) {
 					m.On("Delete", mock.Anything, collection, documentID).Return(documentstore.ErrDocumentNotFound)
+				},
+				walStorageMockSetup: func(m *mocks.WALStorage) {
+					m.On("Replay", mock.Anything).Return(nil)
+					m.On("Write", mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -385,15 +429,18 @@ func TestService_Delete(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			mock := mocks.NewDocumentStorage(t)
-			tt.fields.mockSetup(mock)
+			documentMock := mocks.NewDocumentStorage(t)
+			tt.fields.documentStoreMockSetup(documentMock)
 
-			service := documentsrv.New(mock)
+			walMock := mocks.NewWALStorage(t)
+			tt.fields.walStorageMockSetup(walMock)
+
+			service := documentsrv.New(documentMock, walMock)
 			err := service.Delete(tt.args.ctx, tt.args.collection, tt.args.documentID)
 
 			tt.wantErr(t, err)
 
-			mock.AssertExpectations(t)
+			documentMock.AssertExpectations(t)
 		})
 	}
 }
@@ -402,12 +449,8 @@ func TestService_Update(t *testing.T) {
 	t.Parallel()
 
 	var (
-		documentID uuid.UUID = uuid.New()
-		collection string    = "users"
-		// content    map[string]any = map[string]any{
-		// 	"fullname": "User Fullname",
-		// 	"email":    "user_email@gmail.com",
-		// }
+		documentID     uuid.UUID      = uuid.New()
+		collection     string         = "users"
 		updatedContent map[string]any = map[string]any{
 			"fullname": "User Fullname",
 		}
@@ -416,7 +459,8 @@ func TestService_Update(t *testing.T) {
 	)
 
 	type fields struct {
-		mockSetup func(m *mocks.DocumentStorage)
+		documentStoreMockSetup func(m *mocks.DocumentStorage)
+		walStorageMockSetup    func(m *mocks.WALStorage)
 	}
 	type args struct {
 		ctx        context.Context
@@ -434,7 +478,7 @@ func TestService_Update(t *testing.T) {
 		{
 			name: "successful update",
 			fields: fields{
-				mockSetup: func(m *mocks.DocumentStorage) {
+				documentStoreMockSetup: func(m *mocks.DocumentStorage) {
 					m.On("Replace", mock.Anything, collection, documentID, updatedContent).
 						Return(documentmodels.Document{
 							ID:        documentID,
@@ -442,6 +486,10 @@ func TestService_Update(t *testing.T) {
 							CreatedAt: createdAt,
 							UpdatedAt: updatedAt,
 						}, nil)
+				},
+				walStorageMockSetup: func(m *mocks.WALStorage) {
+					m.On("Replay", mock.Anything).Return(nil)
+					m.On("Write", mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -464,9 +512,13 @@ func TestService_Update(t *testing.T) {
 		{
 			name: "collection not found",
 			fields: fields{
-				mockSetup: func(m *mocks.DocumentStorage) {
+				documentStoreMockSetup: func(m *mocks.DocumentStorage) {
 					m.On("Replace", mock.Anything, collection, documentID, updatedContent).
 						Return(documentmodels.Document{}, documentstore.ErrCollectionNotFound)
+				},
+				walStorageMockSetup: func(m *mocks.WALStorage) {
+					m.On("Replay", mock.Anything).Return(nil)
+					m.On("Write", mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -481,9 +533,13 @@ func TestService_Update(t *testing.T) {
 		{
 			name: "document not found",
 			fields: fields{
-				mockSetup: func(m *mocks.DocumentStorage) {
+				documentStoreMockSetup: func(m *mocks.DocumentStorage) {
 					m.On("Replace", mock.Anything, collection, documentID, updatedContent).
 						Return(documentmodels.Document{}, documentstore.ErrDocumentNotFound)
+				},
+				walStorageMockSetup: func(m *mocks.WALStorage) {
+					m.On("Replay", mock.Anything).Return(nil)
+					m.On("Write", mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -502,16 +558,19 @@ func TestService_Update(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			mock := mocks.NewDocumentStorage(t)
-			tt.fields.mockSetup(mock)
+			documentMock := mocks.NewDocumentStorage(t)
+			tt.fields.documentStoreMockSetup(documentMock)
 
-			service := documentsrv.New(mock)
+			walMock := mocks.NewWALStorage(t)
+			tt.fields.walStorageMockSetup(walMock)
+
+			service := documentsrv.New(documentMock, walMock)
 			doc, err := service.Update(tt.args.ctx, tt.args.collection, tt.args.documentID, tt.args.content)
 
 			tt.wantVal(t, doc)
 			tt.wantErr(t, err)
 
-			mock.AssertExpectations(t)
+			documentMock.AssertExpectations(t)
 		})
 	}
 }

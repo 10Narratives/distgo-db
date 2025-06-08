@@ -2,9 +2,12 @@ package documentsrv
 
 import (
 	"context"
+	"encoding/json"
+	"time"
 
 	documentgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/document"
 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/document"
+	walmodels "github.com/10Narratives/distgo-db/internal/models/worker/wal"
 	"github.com/google/uuid"
 )
 
@@ -17,35 +20,108 @@ type DocumentStorage interface {
 	Replace(ctx context.Context, collection string, documentID uuid.UUID, content map[string]any) (documentmodels.Document, error)
 }
 
-type Service struct {
-	storage DocumentStorage
+//go:generate mockery --name WALStorage --output ./mocks/
+type WALStorage interface {
+	Write(entry walmodels.Entry) error
+	Replay(handler func(walmodels.Entry) error) error
 }
 
-func New(storage DocumentStorage) *Service {
-	return &Service{storage: storage}
+type Service struct {
+	documentStorage DocumentStorage
+	walStorage      WALStorage
+}
+
+func New(
+	documentStorage DocumentStorage,
+	walStorage WALStorage) *Service {
+	service := &Service{
+		documentStorage: documentStorage,
+		walStorage:      walStorage,
+	}
+
+	err := service.walStorage.Replay(func(entry walmodels.Entry) error {
+		var record walmodels.Record
+		if err := json.Unmarshal(entry, &record); err != nil {
+			return err
+		}
+
+		switch record.Op {
+		case documentmodels.OpCreate:
+			service.documentStorage.Set(context.Background(), record.Collection, record.DocumentID, record.Content)
+		case documentmodels.OpUpdate:
+			_, err := service.documentStorage.Replace(context.Background(), record.Collection, record.DocumentID, record.Content)
+			if err != nil {
+				return err
+			}
+		case documentmodels.OpDelete:
+			err := service.documentStorage.Delete(context.Background(), record.Collection, record.DocumentID)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		panic("failed to replay WAL")
+	}
+
+	return service
 }
 
 var _ documentgrpc.DocumentService = Service{}
 
 func (s Service) Create(ctx context.Context, collection string, content map[string]any) (documentmodels.Document, error) {
 	var documentID uuid.UUID = uuid.New()
-	s.storage.Set(ctx, collection, documentID, content)
-	doc, err := s.storage.Get(ctx, collection, documentID)
-	return doc, err
+
+	if err := s.log(documentmodels.OpCreate, collection, documentID, content); err != nil {
+		return documentmodels.Document{}, err
+	}
+
+	s.documentStorage.Set(ctx, collection, documentID, content)
+	return s.documentStorage.Get(ctx, collection, documentID)
 }
 
 func (s Service) Get(ctx context.Context, collection string, documentID string) (documentmodels.Document, error) {
-	return s.storage.Get(ctx, collection, uuid.MustParse(documentID))
+	return s.documentStorage.Get(ctx, collection, uuid.MustParse(documentID))
 }
 
 func (s Service) List(ctx context.Context, collection string) ([]documentmodels.Document, error) {
-	return s.storage.List(ctx, collection)
+	return s.documentStorage.List(ctx, collection)
 }
 
 func (s Service) Delete(ctx context.Context, collection string, documentID string) error {
-	return s.storage.Delete(ctx, collection, uuid.MustParse(documentID))
+	uuidID := uuid.MustParse(documentID)
+
+	if err := s.log(documentmodels.OpDelete, collection, uuidID, nil); err != nil {
+		return err
+	}
+
+	return s.documentStorage.Delete(ctx, collection, uuidID)
 }
 
 func (s Service) Update(ctx context.Context, collection string, documentID string, content map[string]any) (documentmodels.Document, error) {
-	return s.storage.Replace(ctx, collection, uuid.MustParse(documentID), content)
+	uuidID := uuid.MustParse(documentID)
+
+	if err := s.log(documentmodels.OpUpdate, collection, uuidID, content); err != nil {
+		return documentmodels.Document{}, err
+	}
+
+	return s.documentStorage.Replace(ctx, collection, uuidID, content)
+}
+
+func (s *Service) log(op documentmodels.OperationType, collection string, documentID uuid.UUID, content map[string]any) error {
+	record := walmodels.Record{
+		Op:         op,
+		Timestamp:  time.Now(),
+		Collection: collection,
+		DocumentID: documentID,
+		Content:    content,
+	}
+	data, err := json.Marshal(record)
+	if err != nil {
+		return err
+	}
+	return s.walStorage.Write(data)
 }

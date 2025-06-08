@@ -96,6 +96,43 @@ message ListDocumentsResponse {
   string next_page_token = 2;
 }
 
+message BeginTransactionRequest {
+  string collection = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference).type = "worker.database.v1/Database",
+    (validate.rules).string.pattern = "projects/.*/databases/.*"
+  ];
+}
+
+message CommitTransactionRequest {
+  string collection = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference).type = "worker.database.v1/Database"
+  ];
+  string transaction_id = 2 [(validate.rules).string.uuid = true];
+  repeated Write writes = 3 [(validate.rules).repeated.min_items = 1];
+}
+
+message RollbackTransactionRequest {
+  string collection = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference).type = "worker.database.v1/Database"
+  ];
+  string transaction_id = 2 [(validate.rules).string.uuid = true];
+}
+
+message Write {
+  oneof operation {
+    CreateDocumentRequest create = 1;
+    UpdateDocumentRequest update = 2;
+    DeleteDocumentRequest delete = 3;
+  }
+}
+
+message TransactionResponse {
+  string transaction_id = 2 [(validate.rules).string.uuid = true];
+}
+
 service DocumentService {
   rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse) {
     option (google.api.http) = {
@@ -126,6 +163,26 @@ service DocumentService {
   rpc DeleteDocument(DeleteDocumentRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/v1alpha1/{name=projects/*/databases/*/documents/*}"
+    };
+  }
+
+  rpc BeginTransaction(BeginTransactionRequest) returns (TransactionResponse) {
+    option (google.api.http) = {
+      post: "/v1alpha1/{database=projects/*/databases/*}:beginTransaction"
+    };
+  }
+
+  rpc CommitTransaction(CommitTransactionRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1alpha1/{database=projects/*/databases/*}:commit"
+      body: "*"
+    };
+  }
+
+  rpc RollbackTransaction(RollbackTransactionRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1alpha1/{database=projects/*/databases/*}:rollback"
+      body: "*"
     };
   }
 }
