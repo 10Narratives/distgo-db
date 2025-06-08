@@ -46,14 +46,14 @@ func New(
 		}
 
 		switch record.Op {
-		case walmodels.OpCreate:
+		case documentmodels.OpCreate:
 			service.documentStorage.Set(context.Background(), record.Collection, record.DocumentID, record.Content)
-		case walmodels.OpUpdate:
+		case documentmodels.OpUpdate:
 			_, err := service.documentStorage.Replace(context.Background(), record.Collection, record.DocumentID, record.Content)
 			if err != nil {
 				return err
 			}
-		case walmodels.OpDelete:
+		case documentmodels.OpDelete:
 			err := service.documentStorage.Delete(context.Background(), record.Collection, record.DocumentID)
 			if err != nil {
 				return err
@@ -75,7 +75,7 @@ var _ documentgrpc.DocumentService = Service{}
 func (s Service) Create(ctx context.Context, collection string, content map[string]any) (documentmodels.Document, error) {
 	var documentID uuid.UUID = uuid.New()
 
-	if err := s.log(walmodels.OpCreate, collection, documentID, content); err != nil {
+	if err := s.log(documentmodels.OpCreate, collection, documentID, content); err != nil {
 		return documentmodels.Document{}, err
 	}
 
@@ -94,7 +94,7 @@ func (s Service) List(ctx context.Context, collection string) ([]documentmodels.
 func (s Service) Delete(ctx context.Context, collection string, documentID string) error {
 	uuidID := uuid.MustParse(documentID)
 
-	if err := s.log(walmodels.OpDelete, collection, uuidID, nil); err != nil {
+	if err := s.log(documentmodels.OpDelete, collection, uuidID, nil); err != nil {
 		return err
 	}
 
@@ -104,14 +104,14 @@ func (s Service) Delete(ctx context.Context, collection string, documentID strin
 func (s Service) Update(ctx context.Context, collection string, documentID string, content map[string]any) (documentmodels.Document, error) {
 	uuidID := uuid.MustParse(documentID)
 
-	if err := s.log(walmodels.OpUpdate, collection, uuidID, content); err != nil {
+	if err := s.log(documentmodels.OpUpdate, collection, uuidID, content); err != nil {
 		return documentmodels.Document{}, err
 	}
 
 	return s.documentStorage.Replace(ctx, collection, uuidID, content)
 }
 
-func (s *Service) log(op walmodels.OperationType, collection string, documentID uuid.UUID, content map[string]any) error {
+func (s *Service) log(op documentmodels.OperationType, collection string, documentID uuid.UUID, content map[string]any) error {
 	record := walmodels.Record{
 		Op:         op,
 		Timestamp:  time.Now(),
