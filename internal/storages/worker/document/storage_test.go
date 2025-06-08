@@ -12,14 +12,132 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestStorage_Delete(t *testing.T) {
+	t.Parallel()
+
+	var (
+		collection string         = "users"
+		documentID uuid.UUID      = uuid.New()
+		content    map[string]any = map[string]any{
+			"name": "Peter",
+			"age":  100,
+		}
+		createdAt time.Time = time.Now()
+		updatedAt time.Time = time.Now()
+	)
+
+	type fields struct {
+		collections map[string]*documentstore.Collection
+	}
+	type args struct {
+		ctx        context.Context
+		collection string
+		documentID uuid.UUID
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "successful execution",
+			fields: fields{
+				collections: map[string]*documentstore.Collection{
+					collection: documentstore.NewCollectionOf(map[uuid.UUID]documentmodels.Document{
+						documentID: documentmodels.Document{
+							ID:        documentID,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
+						},
+					}),
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: documentID,
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "collection not found",
+			fields: fields{
+				collections: map[string]*documentstore.Collection{
+					collection: documentstore.NewCollectionOf(map[uuid.UUID]documentmodels.Document{
+						documentID: documentmodels.Document{
+							ID:        documentID,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
+						},
+					}),
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: "collection",
+				documentID: documentID,
+			},
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				assert.EqualError(t, err, documentstore.ErrCollectionNotFound.Error())
+			},
+		},
+		{
+			name: "document not found",
+			fields: fields{
+				collections: map[string]*documentstore.Collection{
+					collection: documentstore.NewCollectionOf(map[uuid.UUID]documentmodels.Document{
+						documentID: documentmodels.Document{
+							ID:        documentID,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
+						},
+					}),
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: uuid.New(),
+			},
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				assert.EqualError(t, err, documentstore.ErrDocumentNotFound.Error())
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			storage := documentstore.NewStorageOf(tt.fields.collections)
+			err := storage.Delete(tt.args.ctx, tt.args.collection, tt.args.documentID)
+
+			tt.wantErr(t, err)
+		})
+	}
+}
+
 func TestStorage_Get(t *testing.T) {
 	t.Parallel()
 
-	var id uuid.UUID = uuid.MustParse("c2cecd16-ed51-421e-8a4c-ccfbc4e82146")
-	var badID uuid.UUID = uuid.MustParse("c2cecd16-ed51-421e-8a4c-ccfbc4e80000")
+	var (
+		collection string         = "users"
+		documentID uuid.UUID      = uuid.New()
+		content    map[string]any = map[string]any{
+			"name": "Peter",
+			"age":  100,
+		}
+		createdAt time.Time = time.Now()
+		updatedAt time.Time = time.Now()
+	)
 
 	type fields struct {
-		data map[string]documentstore.Collection
+		collections map[string]*documentstore.Collection
 	}
 	type args struct {
 		ctx        context.Context
@@ -34,54 +152,53 @@ func TestStorage_Get(t *testing.T) {
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name: "successful get",
+			name: "successful execution",
 			fields: fields{
-				data: map[string]documentstore.Collection{
-					"users": documentstore.Collection{
-						id: documentmodels.Document{
-							ID: id,
-							Content: map[string]any{
-								"fullname": "User user user",
-								"email":    "email email email",
-							},
+				collections: map[string]*documentstore.Collection{
+					collection: documentstore.NewCollectionOf(map[uuid.UUID]documentmodels.Document{
+						documentID: documentmodels.Document{
+							ID:        documentID,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
 						},
-					},
+					}),
 				},
 			},
 			args: args{
 				ctx:        context.Background(),
-				collection: "users",
-				documentID: id,
+				collection: collection,
+				documentID: documentID,
 			},
-			wantVal: func(tt require.TestingT, got interface{}, _ ...interface{}) {
+			wantVal: func(tt require.TestingT, got interface{}, i2 ...interface{}) {
 				document, ok := got.(documentmodels.Document)
 				require.True(t, ok)
 
-				assert.Equal(t, id, document.ID)
-				assert.Equal(t, "User user user", document.Content["fullname"])
-				assert.Equal(t, "email email email", document.Content["email"])
+				assert.Equal(t, documentID, document.ID)
+				assert.Equal(t, content, document.Content)
+				assert.Equal(t, createdAt, document.CreatedAt)
+				assert.Equal(t, updatedAt, document.UpdatedAt)
 			},
 			wantErr: require.NoError,
 		},
 		{
 			name: "collection not found",
 			fields: fields{
-				data: map[string]documentstore.Collection{
-					"users": documentstore.Collection{
-						id: documentmodels.Document{
-							ID: id,
-							Content: map[string]any{
-								"fullname": "User user user",
-								"email":    "email email email",
-							},
+				collections: map[string]*documentstore.Collection{
+					collection: documentstore.NewCollectionOf(map[uuid.UUID]documentmodels.Document{
+						documentID: documentmodels.Document{
+							ID:        documentID,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
 						},
-					},
+					}),
 				},
 			},
 			args: args{
 				ctx:        context.Background(),
-				collection: "teachers",
-				documentID: id,
+				collection: "collection",
+				documentID: documentID,
 			},
 			wantVal: require.Empty,
 			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
@@ -91,22 +208,21 @@ func TestStorage_Get(t *testing.T) {
 		{
 			name: "document not found",
 			fields: fields{
-				data: map[string]documentstore.Collection{
-					"users": documentstore.Collection{
-						id: documentmodels.Document{
-							ID: id,
-							Content: map[string]any{
-								"fullname": "User user user",
-								"email":    "email email email",
-							},
+				collections: map[string]*documentstore.Collection{
+					collection: documentstore.NewCollectionOf(map[uuid.UUID]documentmodels.Document{
+						documentID: documentmodels.Document{
+							ID:        documentID,
+							Content:   content,
+							CreatedAt: createdAt,
+							UpdatedAt: updatedAt,
 						},
-					},
+					}),
 				},
 			},
 			args: args{
 				ctx:        context.Background(),
-				collection: "users",
-				documentID: badID,
+				collection: collection,
+				documentID: uuid.New(),
 			},
 			wantVal: require.Empty,
 			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
@@ -114,116 +230,17 @@ func TestStorage_Get(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range tests {
 		tt := tt
 
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			storage := documentstore.NewOf(tt.fields.data)
-			doc, err := storage.Get(tt.args.ctx,
-				tt.args.collection, tt.args.documentID)
+			storage := documentstore.NewStorageOf(tt.fields.collections)
+			doc, err := storage.Get(tt.args.ctx, tt.args.collection, tt.args.documentID)
+
 			tt.wantVal(t, doc)
 			tt.wantErr(t, err)
-		})
-	}
-}
-
-func TestStorage_Set(t *testing.T) {
-	t.Parallel()
-
-	var id uuid.UUID = uuid.MustParse("c2cecd16-ed51-421e-8a4c-ccfbc4e82146")
-
-	type fields struct {
-		data map[string]documentstore.Collection
-	}
-	type args struct {
-		ctx        context.Context
-		collection string
-		documentID uuid.UUID
-		content    map[string]any
-	}
-
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantVal require.ValueAssertionFunc
-	}{
-		{
-			name: "successful set",
-			fields: fields{
-				data: map[string]documentstore.Collection{
-					"users": documentstore.Collection{
-						id: documentmodels.Document{
-							ID: id,
-							Content: map[string]any{
-								"fullname": "User user user",
-								"email":    "email email email",
-							},
-						},
-					},
-				},
-			},
-			args: args{
-				ctx:        context.Background(),
-				collection: "users",
-				documentID: id,
-				content: map[string]any{
-					"fullname": "User user user",
-					"email":    "email email email",
-					"age":      100,
-				},
-			},
-			wantVal: func(tt require.TestingT, got interface{}, i2 ...interface{}) {
-				document, ok := got.(documentmodels.Document)
-				require.True(t, ok)
-
-				assert.Equal(t, id, document.ID)
-				assert.Equal(t, "User user user", document.Content["fullname"])
-				assert.Equal(t, "email email email", document.Content["email"])
-				assert.Equal(t, 100, document.Content["age"])
-			},
-		},
-		{
-			name: "successful creation",
-			fields: fields{
-				data: map[string]documentstore.Collection{},
-			},
-			args: args{
-				ctx:        context.Background(),
-				collection: "users",
-				documentID: id,
-				content: map[string]any{
-					"fullname": "User user user",
-					"email":    "email email email",
-					"age":      100,
-				},
-			},
-			wantVal: func(tt require.TestingT, got interface{}, i2 ...interface{}) {
-				document, ok := got.(documentmodels.Document)
-				require.True(t, ok)
-
-				assert.Equal(t, id, document.ID)
-				assert.Equal(t, "User user user", document.Content["fullname"])
-				assert.Equal(t, "email email email", document.Content["email"])
-				assert.Equal(t, 100, document.Content["age"])
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		tt := tt
-
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			storage := documentstore.NewOf(tt.fields.data)
-			storage.Set(tt.args.ctx, tt.args.collection, tt.args.documentID, tt.args.content)
-
-			doc, _ := storage.Get(tt.args.ctx, tt.args.collection, tt.args.documentID)
-			tt.wantVal(t, doc)
 		})
 	}
 }
@@ -232,19 +249,18 @@ func TestStorage_List(t *testing.T) {
 	t.Parallel()
 
 	var (
-		id1        uuid.UUID      = uuid.New()
-		id2        uuid.UUID      = uuid.New()
 		collection string         = "users"
+		documentID uuid.UUID      = uuid.New()
 		content    map[string]any = map[string]any{
-			"fullname": "User Fullname",
-			"email":    "user_email@gmail.com",
+			"name": "Peter",
+			"age":  100,
 		}
 		createdAt time.Time = time.Now()
 		updatedAt time.Time = time.Now()
 	)
 
 	type fields struct {
-		data map[string]documentstore.Collection
+		collections map[string]*documentstore.Collection
 	}
 	type args struct {
 		ctx        context.Context
@@ -258,57 +274,41 @@ func TestStorage_List(t *testing.T) {
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name: "successful list",
-			fields: fields{
-				data: map[string]documentstore.Collection{
-					collection: documentstore.Collection{
-						id1: documentmodels.Document{
-							ID:        id1,
-							Content:   content,
-							CreatedAt: createdAt,
-							UpdatedAt: updatedAt,
-						},
-						id2: documentmodels.Document{
-							ID:        id2,
-							Content:   content,
-							CreatedAt: createdAt,
-							UpdatedAt: updatedAt,
-						},
+			name: "successful execution",
+			fields: fields{collections: map[string]*documentstore.Collection{
+				collection: documentstore.NewCollectionOf(map[uuid.UUID]documentmodels.Document{
+					documentID: documentmodels.Document{
+						ID:        documentID,
+						Content:   content,
+						CreatedAt: createdAt,
+						UpdatedAt: updatedAt,
 					},
-				},
-			},
+				}),
+			}},
 			args: args{
 				ctx:        context.Background(),
 				collection: collection,
 			},
 			wantVal: func(tt require.TestingT, got interface{}, i2 ...interface{}) {
-				list, ok := got.([]documentmodels.Document)
+				listed, ok := got.([]documentmodels.Document)
 				require.True(t, ok)
 
-				assert.Len(t, list, 2)
+				assert.Len(t, listed, 1)
 			},
 			wantErr: require.NoError,
 		},
 		{
 			name: "collection not found",
-			fields: fields{
-				data: map[string]documentstore.Collection{
-					collection: documentstore.Collection{
-						id1: documentmodels.Document{
-							ID:        id1,
-							Content:   content,
-							CreatedAt: createdAt,
-							UpdatedAt: updatedAt,
-						},
-						id2: documentmodels.Document{
-							ID:        id2,
-							Content:   content,
-							CreatedAt: createdAt,
-							UpdatedAt: updatedAt,
-						},
+			fields: fields{collections: map[string]*documentstore.Collection{
+				collection: documentstore.NewCollectionOf(map[uuid.UUID]documentmodels.Document{
+					documentID: documentmodels.Document{
+						ID:        documentID,
+						Content:   content,
+						CreatedAt: createdAt,
+						UpdatedAt: updatedAt,
 					},
-				},
-			},
+				}),
+			}},
 			args: args{
 				ctx:        context.Background(),
 				collection: "collection",
@@ -319,127 +319,16 @@ func TestStorage_List(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range tests {
 		tt := tt
 
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			storage := documentstore.NewOf(tt.fields.data)
-			docs, err := storage.List(tt.args.ctx, tt.args.collection)
+			storage := documentstore.NewStorageOf(tt.fields.collections)
+			listed, err := storage.List(tt.args.ctx, tt.args.collection)
 
-			tt.wantVal(t, docs)
-			tt.wantErr(t, err)
-		})
-	}
-}
-
-func TestStorage_Delete(t *testing.T) {
-	t.Parallel()
-
-	var (
-		collection string         = "users"
-		documentID uuid.UUID      = uuid.New()
-		content    map[string]any = map[string]any{
-			"fullname": "User Fullname",
-			"email":    "email@gmail.com",
-		}
-		createdAt time.Time = time.Now()
-		updatedAt time.Time = time.Now()
-	)
-
-	type fields struct {
-		data map[string]documentstore.Collection
-	}
-	type args struct {
-		ctx        context.Context
-		collection string
-		documentID uuid.UUID
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr require.ErrorAssertionFunc
-	}{
-		{
-			name: "successful deletion",
-			fields: fields{
-				data: map[string]documentstore.Collection{
-					collection: documentstore.Collection{
-						documentID: documentmodels.Document{
-							ID:        documentID,
-							Content:   content,
-							CreatedAt: createdAt,
-							UpdatedAt: updatedAt,
-						},
-					},
-				},
-			},
-			args: args{
-				ctx:        context.Background(),
-				collection: collection,
-				documentID: documentID,
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "collection not found",
-			fields: fields{
-				data: map[string]documentstore.Collection{
-					collection: documentstore.Collection{
-						documentID: documentmodels.Document{
-							ID:        documentID,
-							Content:   content,
-							CreatedAt: createdAt,
-							UpdatedAt: updatedAt,
-						},
-					},
-				},
-			},
-			args: args{
-				ctx:        context.Background(),
-				collection: "collection",
-				documentID: documentID,
-			},
-			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
-				assert.EqualError(t, err, documentstore.ErrCollectionNotFound.Error())
-			},
-		},
-		{
-			name: "document not found",
-			fields: fields{
-				data: map[string]documentstore.Collection{
-					collection: documentstore.Collection{
-						documentID: documentmodels.Document{
-							ID:        documentID,
-							Content:   content,
-							CreatedAt: createdAt,
-							UpdatedAt: updatedAt,
-						},
-					},
-				},
-			},
-			args: args{
-				ctx:        context.Background(),
-				collection: collection,
-				documentID: uuid.MustParse("c2cecd16-ed51-421e-8a4c-ccfbc4e80000"),
-			},
-			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
-				assert.EqualError(t, err, documentstore.ErrDocumentNotFound.Error())
-			},
-		},
-	}
-	for _, tt := range tests {
-		tt := tt
-
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			storage := documentstore.NewOf(tt.fields.data)
-			err := storage.Delete(tt.args.ctx, tt.args.collection, tt.args.documentID)
-
+			tt.wantVal(t, listed)
 			tt.wantErr(t, err)
 		})
 	}
@@ -449,21 +338,16 @@ func TestStorage_Replace(t *testing.T) {
 	t.Parallel()
 
 	var (
-		documentID uuid.UUID      = uuid.New()
-		collection string         = "users"
-		content    map[string]any = map[string]any{
-			"fullname": "User Fullname",
-			"email":    "user_email@gmail.com",
-		}
-		updatedContent map[string]any = map[string]any{
-			"fullname": "User Fullname",
-		}
-		createdAt time.Time = time.Now()
-		// updatedAt time.Time = time.Now().Add(time.Microsecond)
+		collection      string    = "users"
+		documentID      uuid.UUID = uuid.New()
+		content                   = map[string]any{"name": "Peter", "age": 100}
+		replacedContent           = map[string]any{"name": "Peter", "age": 10}
+		createdAt       time.Time = time.Now()
+		updatedAt       time.Time = time.Now()
 	)
 
 	type fields struct {
-		data map[string]documentstore.Collection
+		collections map[string]*documentstore.Collection
 	}
 	type args struct {
 		ctx        context.Context
@@ -479,80 +363,58 @@ func TestStorage_Replace(t *testing.T) {
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name: "successful replace",
+			name: "successful execution",
 			fields: fields{
-				data: map[string]documentstore.Collection{
-					collection: documentstore.Collection{
+				collections: map[string]*documentstore.Collection{
+					collection: documentstore.NewCollectionOf(map[uuid.UUID]documentmodels.Document{
 						documentID: documentmodels.Document{
 							ID:        documentID,
 							Content:   content,
 							CreatedAt: createdAt,
-							UpdatedAt: createdAt,
+							UpdatedAt: updatedAt,
 						},
-					},
+					}),
 				},
 			},
 			args: args{
 				ctx:        context.Background(),
 				collection: collection,
 				documentID: documentID,
-				content:    updatedContent,
+				content:    replacedContent,
 			},
 			wantVal: func(tt require.TestingT, got interface{}, i2 ...interface{}) {
-				doc, ok := got.(documentmodels.Document)
+				document, ok := got.(documentmodels.Document)
 				require.True(t, ok)
 
-				assert.Equal(t, documentID, doc.ID)
-				assert.Equal(t, updatedContent, doc.Content)
-				assert.Equal(t, createdAt, doc.CreatedAt)
+				assert.Equal(t, documentID, document.ID)
+				assert.Equal(t, replacedContent, document.Content)
 			},
 			wantErr: require.NoError,
 		},
 		{
 			name: "collection not found",
 			fields: fields{
-				data: map[string]documentstore.Collection{
-					collection: documentstore.Collection{
+				collections: map[string]*documentstore.Collection{
+					collection: documentstore.NewCollectionOf(map[uuid.UUID]documentmodels.Document{
 						documentID: documentmodels.Document{
 							ID:        documentID,
 							Content:   content,
 							CreatedAt: createdAt,
-							UpdatedAt: createdAt,
+							UpdatedAt: updatedAt,
 						},
-					},
+					}),
 				},
 			},
 			args: args{
 				ctx:        context.Background(),
 				collection: "collection",
 				documentID: documentID,
-				content:    updatedContent,
+				content:    replacedContent,
 			},
 			wantVal: require.Empty,
-			wantErr: require.Error,
-		},
-		{
-			name: "document not found",
-			fields: fields{
-				data: map[string]documentstore.Collection{
-					collection: documentstore.Collection{
-						documentID: documentmodels.Document{
-							ID:        documentID,
-							Content:   content,
-							CreatedAt: createdAt,
-							UpdatedAt: createdAt,
-						},
-					},
-				},
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				assert.EqualError(t, err, documentstore.ErrCollectionNotFound.Error())
 			},
-			args: args{
-				ctx:        context.Background(),
-				collection: collection,
-				documentID: uuid.New(),
-				content:    updatedContent,
-			},
-			wantVal: require.Empty,
-			wantErr: require.Error,
 		},
 	}
 	for _, tt := range tests {
@@ -561,12 +423,72 @@ func TestStorage_Replace(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			storage := documentstore.NewOf(tt.fields.data)
+			storage := documentstore.NewStorageOf(tt.fields.collections)
+			document, err := storage.Replace(tt.args.ctx, tt.args.collection, tt.args.documentID, tt.args.content)
 
-			doc, err := storage.Replace(tt.args.ctx, tt.args.collection, tt.args.documentID, tt.args.content)
-
-			tt.wantVal(t, doc)
+			tt.wantVal(t, document)
 			tt.wantErr(t, err)
+		})
+	}
+}
+
+func TestStorage_Set(t *testing.T) {
+	t.Parallel()
+
+	var (
+		collection string    = "users"
+		documentID uuid.UUID = uuid.New()
+		content              = map[string]any{"name": "Peter", "age": 100}
+	)
+
+	type fields struct {
+		collections map[string]*documentstore.Collection
+	}
+	type args struct {
+		ctx        context.Context
+		collection string
+		documentID uuid.UUID
+		content    map[string]any
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantVal require.ValueAssertionFunc
+	}{
+		{
+			name: "successful set",
+			fields: fields{
+				collections: map[string]*documentstore.Collection{
+					collection: documentstore.NewCollectionOf(map[uuid.UUID]documentmodels.Document{}),
+				},
+			},
+			args: args{
+				ctx:        context.Background(),
+				collection: collection,
+				documentID: documentID,
+				content:    content,
+			},
+			wantVal: func(tt require.TestingT, got interface{}, i2 ...interface{}) {
+				document, ok := got.(documentmodels.Document)
+				require.True(t, ok)
+
+				assert.Equal(t, documentID, document.ID)
+				assert.Equal(t, content, document.Content)
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			storage := documentstore.NewStorageOf(tt.fields.collections)
+			storage.Set(tt.args.ctx, tt.args.collection, tt.args.documentID, tt.args.content)
+			document, _ := storage.Get(tt.args.ctx, tt.args.collection, tt.args.documentID)
+
+			tt.wantVal(t, document)
 		})
 	}
 }
