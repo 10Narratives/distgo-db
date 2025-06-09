@@ -39,23 +39,7 @@ func New(documentStorage DocumentStorage, walStorage WALStorage) *Service {
 
 var _ documentgrpc.DocumentService = Service{}
 
-func (s Service) CreateDocument(ctx context.Context, collection string, content string) (documentmodels.Document, error) {
-	panic("unimplemented")
-}
-
-func (s Service) Document(ctx context.Context, collection string, documentID string) (documentmodels.Document, error) {
-	panic("unimplemented")
-}
-
-func (s Service) Documents(ctx context.Context, collection string) ([]documentmodels.Document, error) {
-	panic("unimplemented")
-}
-
-func (s Service) DeleteDocument(ctx context.Context, collection string, documentID string) error {
-	panic("unimplemented")
-}
-
-func (s Service) UpdateDocument(ctx context.Context, collection string, documentID string, changes string) (documentmodels.Document, error) {
+func (s Service) Collection(ctx context.Context, collectionID string) (documentmodels.Collection, error) {
 	panic("unimplemented")
 }
 
@@ -64,5 +48,25 @@ func (s Service) Collections(ctx context.Context, size int, token string) ([]doc
 }
 
 func (s Service) CreateCollection(ctx context.Context, collectionID string) (documentmodels.Collection, error) {
+	panic("unimplemented")
+}
+
+func (s Service) CreateDocument(ctx context.Context, collectionID string, content string) (documentmodels.Document, error) {
+	panic("unimplemented")
+}
+
+func (s Service) DeleteDocument(ctx context.Context, collectionID string, documentID string) error {
+	panic("unimplemented")
+}
+
+func (s Service) Document(ctx context.Context, collectionID string, documentID string) (documentmodels.Document, error) {
+	panic("unimplemented")
+}
+
+func (s Service) Documents(ctx context.Context, collectionID string, size int, token string) ([]documentmodels.Document, string, int, error) {
+	panic("unimplemented")
+}
+
+func (s Service) UpdateDocument(ctx context.Context, collectionID string, documentID string, changes string) (documentmodels.Document, error) {
 	panic("unimplemented")
 }
