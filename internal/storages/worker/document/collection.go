@@ -3,7 +3,6 @@ package documentstore
 import (
 	"context"
 	"sync"
-	"time"
 
 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/document"
 	"github.com/google/uuid"
@@ -27,94 +26,94 @@ func NewCollectionOf(documents map[uuid.UUID]documentmodels.Document) *Collectio
 }
 
 func (c *Collection) Create(ctx context.Context, documentID uuid.UUID, content map[string]any) (documentmodels.Document, error) {
-	if err := ctx.Err(); err != nil {
-		return documentmodels.Document{}, err
-	}
+	// if err := ctx.Err(); err != nil {
+	// 	return documentmodels.Document{}, err
+	// }
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	// c.mu.Lock()
+	// defer c.mu.Unlock()
 
-	now := time.Now()
-	document := documentmodels.Document{
-		ID:        documentID,
-		Content:   content,
-		CreatedAt: now,
-		UpdatedAt: now,
-	}
-	c.documents[documentID] = document
+	// now := time.Now()
+	// document := documentmodels.Document{
+	// 	ID:         documentID,
+	// 	Content:    content,
+	// 	CreateTime: now,
+	// 	UpdateTime: now,
+	// }
+	// c.documents[documentID] = document
 
-	return document.Copy(), nil
+	return documentmodels.Document{}, nil
 }
 
 func (c *Collection) Document(ctx context.Context, documentID uuid.UUID) (documentmodels.Document, error) {
-	if err := ctx.Err(); err != nil {
-		return documentmodels.Document{}, err
-	}
+	// if err := ctx.Err(); err != nil {
+	// 	return documentmodels.Document{}, err
+	// }
 
-	c.mu.RLock()
-	defer c.mu.RUnlock()
+	// c.mu.RLock()
+	// defer c.mu.RUnlock()
 
-	document, exists := c.documents[documentID]
-	if !exists {
-		return documentmodels.Document{}, ErrDocumentNotFound
-	}
+	// document, exists := c.documents[documentID]
+	// if !exists {
+	// 	return documentmodels.Document{}, ErrDocumentNotFound
+	// }
 
-	return document.Copy(), nil
+	return documentmodels.Document{}, nil
 }
 
 func (c *Collection) Documents(ctx context.Context) ([]documentmodels.Document, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
+	// if err := ctx.Err(); err != nil {
+	// 	return nil, err
+	// }
 
-	c.mu.RLock()
-	defer c.mu.RUnlock()
+	// c.mu.RLock()
+	// defer c.mu.RUnlock()
 
-	listed := make([]documentmodels.Document, 0, len(c.documents))
-	for _, doc := range c.documents {
-		listed = append(listed, doc.Copy())
-	}
+	// listed := make([]documentmodels.Document, 0, len(c.documents))
+	// for _, doc := range c.documents {
+	// 	listed = append(listed, doc.Copy())
+	// }
 
-	return listed, nil
+	return make([]documentmodels.Document, 0), nil
 }
 
 func (c *Collection) Replace(ctx context.Context, documentID uuid.UUID, content map[string]any) (documentmodels.Document, error) {
-	if err := ctx.Err(); err != nil {
-		return documentmodels.Document{}, err
-	}
+	// if err := ctx.Err(); err != nil {
+	// 	return documentmodels.Document{}, err
+	// }
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	// c.mu.Lock()
+	// defer c.mu.Unlock()
 
-	now := time.Now()
-	document, exists := c.documents[documentID]
-	if !exists {
-		document = documentmodels.Document{
-			ID:        documentID,
-			Content:   content,
-			CreatedAt: now,
-		}
-	} else {
-		document.Content = content
-	}
-	document.UpdatedAt = now
-	c.documents[documentID] = document
+	// now := time.Now()
+	// document, exists := c.documents[documentID]
+	// if !exists {
+	// 	document = documentmodels.Document{
+	// 		ID:         documentID,
+	// 		Content:    content,
+	// 		CreateTime: now,
+	// 	}
+	// } else {
+	// 	document.Content = content
+	// }
+	// document.UpdateTime = now
+	// c.documents[documentID] = document
 
-	return document.Copy(), nil
+	return documentmodels.Document{}, nil
 }
 
 func (c *Collection) Delete(ctx context.Context, documentID uuid.UUID) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
+	// if err := ctx.Err(); err != nil {
+	// 	return err
+	// }
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	// c.mu.Lock()
+	// defer c.mu.Unlock()
 
-	if _, exists := c.documents[documentID]; !exists {
-		return ErrDocumentNotFound
-	}
-	delete(c.documents, documentID)
+	// if _, exists := c.documents[documentID]; !exists {
+	// 	return ErrDocumentNotFound
+	// }
+	// delete(c.documents, documentID)
 
 	return nil
 }
