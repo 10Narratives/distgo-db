@@ -16,7 +16,7 @@ type App struct {
 }
 
 func New(log *slog.Logger, cfg workercfg.Config) *App {
-	documentStorage := documentstore.NewStorage()
+	documentStorage := documentstore.New()
 	walStorage, err := walstore.New("logs/" + cfg.Name + ".log")
 	if err != nil {
 		panic(err.Error())

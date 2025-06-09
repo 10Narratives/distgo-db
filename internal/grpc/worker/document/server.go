@@ -11,46 +11,63 @@ import (
 
 //go:generate mockery --name DocumentService --output ./mocks/
 type DocumentService interface {
-	Create(ctx context.Context, collection string, content map[string]any) (documentmodels.Document, error)
-	Get(ctx context.Context, collection, documentID string) (documentmodels.Document, error)
-	List(ctx context.Context, collection string) ([]documentmodels.Document, error)
-	Delete(ctx context.Context, collection, documentID string) error
-	Update(ctx context.Context, collection, documentId string, changes map[string]any) (documentmodels.Document, error)
+	CreateDocument(ctx context.Context, collection, content string) (documentmodels.Document, error)
+	Document(ctx context.Context, collection, documentID string) (documentmodels.Document, error)
+	Documents(ctx context.Context, collection string) ([]documentmodels.Document, error)
+	DeleteDocument(ctx context.Context, collection, documentID string) error
+	UpdateDocument(ctx context.Context, collection, documentID string, changes string) (documentmodels.Document, error)
+
+	CreateCollection(ctx context.Context, collectionID string) (documentmodels.Collection, error)
+	Collections(ctx context.Context, size int, token string) ([]documentmodels.Collection, string, int)
 }
 
-type ServerAPI struct {
+type serverAPI struct {
 	dbv1.UnimplementedDocumentServiceServer
 	service DocumentService
 }
 
-func New(service DocumentService) *ServerAPI {
-	return &ServerAPI{service: service}
-}
+var _ dbv1.DocumentServiceServer = &serverAPI{}
 
 func Register(server *grpc.Server, service DocumentService) {
-	dbv1.RegisterDocumentServiceServer(server, New(service))
+	dbv1.RegisterDocumentServiceServer(server, &serverAPI{service: service})
 }
 
-func (s *ServerAPI) CreateDocument(ctx context.Context, req *dbv1.CreateDocumentRequest) (*dbv1.Document, error) {
+func (s *serverAPI) CreateDocument(ctx context.Context, req *dbv1.CreateDocumentRequest) (*dbv1.Document, error) {
 	return nil, nil
 }
 
-func (s *ServerAPI) DeleteDocument(ctx context.Context, req *dbv1.DeleteDocumentRequest) (*emptypb.Empty, error) {
+func (s *serverAPI) DeleteDocument(ctx context.Context, req *dbv1.DeleteDocumentRequest) (*emptypb.Empty, error) {
 	return nil, nil
 }
 
-func (s *ServerAPI) GetDocument(ctx context.Context, req *dbv1.GetDocumentRequest) (*dbv1.Document, error) {
+func (s *serverAPI) GetDocument(ctx context.Context, req *dbv1.GetDocumentRequest) (*dbv1.Document, error) {
 	return nil, nil
 }
 
-func (s *ServerAPI) ListDocuments(ctx context.Context, req *dbv1.ListDocumentsRequest) (*dbv1.ListDocumentsResponse, error) {
+func (s *serverAPI) ListDocuments(ctx context.Context, req *dbv1.ListDocumentsRequest) (*dbv1.ListDocumentsResponse, error) {
 	return nil, nil
 }
 
-func (s *ServerAPI) UpdateDocument(ctx context.Context, req *dbv1.UpdateDocumentRequest) (*dbv1.Document, error) {
+func (s *serverAPI) UpdateDocument(ctx context.Context, req *dbv1.UpdateDocumentRequest) (*dbv1.Document, error) {
 	return nil, nil
 }
 
-func convert(src documentmodels.Document) (*dbv1.Document, error) {
-	return nil, nil
+func (s *serverAPI) CreateCollection(context.Context, *dbv1.CreateCollectionRequest) (*dbv1.Collection, error) {
+	panic("unimplemented")
+}
+
+func (s *serverAPI) ListCollections(context.Context, *dbv1.ListCollectionsRequest) (*dbv1.ListCollectionsResponse, error) {
+	panic("unimplemented")
+}
+
+func (s *serverAPI) BeginTransaction(context.Context, *dbv1.BeginTransactionRequest) (*dbv1.BeginTransactionResponse, error) {
+	panic("unimplemented")
+}
+
+func (s *serverAPI) CommitTransaction(context.Context, *dbv1.CommitTransactionRequest) (*dbv1.CommitTransactionResponse, error) {
+	panic("unimplemented")
+}
+
+func (s *serverAPI) RollbackTransaction(context.Context, *dbv1.RollbackTransactionRequest) (*emptypb.Empty, error) {
+	panic("unimplemented")
 }

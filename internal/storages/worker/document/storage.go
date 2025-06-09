@@ -9,60 +9,27 @@ import (
 )
 
 type Storage struct {
-	collections map[string]*Collection
+	collections map[string]*documentmodels.Collection
 }
 
 var _ documentsrv.DocumentStorage = Storage{}
 
-func NewStorage() *Storage {
-	return &Storage{collections: make(map[string]*Collection)}
-}
-
-func NewStorageOf(collections map[string]*Collection) *Storage {
-	return &Storage{collections: collections}
+func New() *Storage {
+	return nil
 }
 
 func (s Storage) Delete(ctx context.Context, collection string, documentID uuid.UUID) error {
-	c, exists := s.collections[collection]
-	if !exists {
-		return ErrCollectionNotFound
-	}
-
-	return c.Delete(ctx, documentID)
+	panic("unimplemented")
 }
 
 func (s Storage) Get(ctx context.Context, collection string, documentID uuid.UUID) (documentmodels.Document, error) {
-	c, exists := s.collections[collection]
-	if !exists {
-		return documentmodels.Document{}, ErrCollectionNotFound
-	}
-
-	return c.Document(ctx, documentID)
+	panic("unimplemented")
 }
 
 func (s Storage) List(ctx context.Context, collection string) ([]documentmodels.Document, error) {
-	c, exists := s.collections[collection]
-	if !exists {
-		return []documentmodels.Document{}, ErrCollectionNotFound
-	}
-
-	return c.Documents(ctx)
-}
-
-func (s Storage) Replace(ctx context.Context, collection string, documentID uuid.UUID, content map[string]any) (documentmodels.Document, error) {
-	c, exists := s.collections[collection]
-	if !exists {
-		return documentmodels.Document{}, ErrCollectionNotFound
-	}
-
-	return c.Replace(ctx, documentID, content)
+	panic("unimplemented")
 }
 
 func (s Storage) Set(ctx context.Context, collection string, documentID uuid.UUID, content map[string]any) {
-	c, exists := s.collections[collection]
-	if !exists {
-		c = NewCollection()
-	}
-
-	c.Replace(ctx, documentID, content)
+	panic("unimplemented")
 }
