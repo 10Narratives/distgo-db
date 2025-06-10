@@ -3,57 +3,146 @@ syntax = "proto3";
 package worker.database.v1;
 
 import "google/protobuf/empty.proto";
-import "google/protobuf/field_mask.proto";
-import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/field_mask.proto";
 
 option java_multiple_files = true;
 option java_package = "com.google.worker.database.v1";
 option go_package = "github.com/10Narratives/distgo-db/pkg/proto/worker/database/v1;dbv1";
 
+service DocumentService {
+  rpc CreateDocument(CreateDocumentRequest) returns (Document);
+  rpc GetDocument(GetDocumentRequest) returns (Document);
+  rpc UpdateDocument(UpdateDocumentRequest) returns (Document);
+  rpc DeleteDocument(DeleteDocumentRequest) returns (google.protobuf.Empty);
+  rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse);
+  rpc CreateCollection(CreateCollectionRequest) returns (Collection);
+  rpc ListCollections(ListCollectionsRequest) returns (ListCollectionsResponse);
+  rpc CommitTransaction(CommitTransactionRequest) returns (CommitTransactionResponse);
+  rpc BeginTransaction(BeginTransactionRequest) returns (BeginTransactionResponse);
+  rpc RollbackTransaction(RollbackTransactionRequest) returns (google.protobuf.Empty);
+}
+
+message Collection {
+  string name = 1;
+  string display_name = 2;
+  google.protobuf.Timestamp create_time = 3;
+  google.protobuf.Timestamp update_time = 4;
+}
+
 message Document {
   string name = 1;
-  google.protobuf.Struct content = 2;
-  google.protobuf.Timestamp created_at = 3;
-  google.protobuf.Timestamp updated_at = 4;
+  string content = 2;
+  google.protobuf.Timestamp create_time = 3;
+  google.protobuf.Timestamp update_time = 4;
+  string etag = 5;
+}
+
+message TransactionOperation {
+  oneof operation {
+    CreateDocumentOp create_document = 1;
+    UpdateDocumentOp update_document = 2;
+    DeleteDocumentOp delete_document = 3;
+  }
+}
+
+message CreateDocumentOp {
+  string parent = 1;
+  Document document = 2;
+  string document_id = 3;
+}
+
+message UpdateDocumentOp {
+  Document document = 1;
+  google.protobuf.FieldMask update_mask = 2;
+  string if_match = 3;
+}
+
+message DeleteDocumentOp {
+  string name = 1;
+  string if_match = 2;
+}
+
+message CommitTransactionRequest {
+  string transaction_id = 1;
+  repeated TransactionOperation operations = 2;
+  int32 timeout_seconds = 3;
+}
+
+message OperationResult {
+  oneof result {
+    Document document = 1;
+    google.protobuf.Empty deleted = 2;
+  }
+  
+  int32 operation_index = 3;
+}
+
+message CommitTransactionResponse {
+  repeated OperationResult results = 1;
+  google.protobuf.Timestamp commit_time = 2;
+}
+
+message BeginTransactionRequest {
+  string parent = 1;
+  
+  int32 timeout_seconds = 2;
+}
+
+message BeginTransactionResponse {
+  string transaction_id = 1;
+}
+
+message RollbackTransactionRequest {
+  string transaction_id = 1;
+}
+
+message CreateDocumentRequest {
+  string parent = 1;
+  Document document = 2;
+  string document_id = 3;
+}
+
+message GetDocumentRequest {
+  string name = 1;
+}
+
+message UpdateDocumentRequest {
+  Document document = 1;
+  google.protobuf.FieldMask update_mask = 2;
+  string if_match = 3;
+}
+
+message DeleteDocumentRequest {
+  string name = 1;
 }
 
 message ListDocumentsRequest {
   string parent = 1;
   int32 page_size = 2;
   string page_token = 3;
-}
-
-message GetDocumentRequest {
-  string collection = 1;
-  string document_id = 2;
-}
-
-message CreateDocumentRequest {
-  string parent = 1;
-  google.protobuf.Struct content =2;
-}
-
-message UpdateDocumentRequest {
-  string collection = 1;
-  string document_id = 2;
-  google.protobuf.Struct content = 3;
-}
-
-message DeleteDocumentRequest {
-  string collection = 1;
-  string document_id = 2;
+  string filter = 4;
+  string order_by = 5;
 }
 
 message ListDocumentsResponse {
   repeated Document documents = 1;
   string next_page_token = 2;
+  int32 total_size = 3;
 }
 
-service DocumentService {
-  rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse);
-  rpc GetDocument(GetDocumentRequest) returns (Document);
-  rpc CreateDocument(CreateDocumentRequest) returns (Document);
-  rpc UpdateDocument(UpdateDocumentRequest) returns (Document);
-  rpc DeleteDocument(DeleteDocumentRequest) returns (google.protobuf.Empty);
+message CreateCollectionRequest {
+  Collection collection = 1;
+  string collection_id = 2;
+}
+
+message ListCollectionsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListCollectionsResponse {
+  repeated Collection collections = 1;
+  string next_page_token = 2;
+  int32 total_size = 3;
 }

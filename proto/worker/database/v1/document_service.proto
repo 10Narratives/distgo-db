@@ -249,7 +249,10 @@ message GetDocumentRequest {
     (google.api.resource_reference) = {
       type: "documentdb.myorg.com/Document"
     },
-    (validate.rules).string = {min_len: 1}
+    (validate.rules).string = {
+      min_len: 1,
+      pattern: "^collections/[^/]+/documents/[^/]+$"
+    }
   ];
 }
 
@@ -272,8 +275,6 @@ message DeleteDocumentRequest {
     },
     (validate.rules).string = {min_len: 1}
   ];
-  
-  string if_match = 2;
 }
 
 message ListDocumentsRequest {

@@ -949,7 +949,6 @@ func (x *UpdateDocumentRequest) GetIfMatch() string {
 type DeleteDocumentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	IfMatch       string                 `protobuf:"bytes,2,opt,name=if_match,json=ifMatch,proto3" json:"if_match,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -987,13 +986,6 @@ func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) {
 func (x *DeleteDocumentRequest) GetName() string {
 	if x != nil {
 		return x.Name
-	}
-	return ""
-}
-
-func (x *DeleteDocumentRequest) GetIfMatch() string {
-	if x != nil {
-		return x.IfMatch
 	}
 	return ""
 }
@@ -1368,19 +1360,18 @@ const file_worker_database_v1_document_service_proto_rawDesc = "" +
 	"\x1fdocumentdb.myorg.com/Collection\xfaB\x04r\x02\x10\x01R\x06parent\x12E\n" +
 	"\bdocument\x18\x02 \x01(\v2\x1c.worker.database.v1.DocumentB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\bdocument\x12)\n" +
 	"\vdocument_id\x18\x03 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\n" +
-	"documentId\"V\n" +
-	"\x12GetDocumentRequest\x12@\n" +
-	"\x04name\x18\x01 \x01(\tB,\xe0A\x02\xfaA\x1f\n" +
-	"\x1ddocumentdb.myorg.com/Document\xfaB\x04r\x02\x10\x01R\x04name\"\xb6\x01\n" +
+	"documentId\"{\n" +
+	"\x12GetDocumentRequest\x12e\n" +
+	"\x04name\x18\x01 \x01(\tBQ\xe0A\x02\xfaA\x1f\n" +
+	"\x1ddocumentdb.myorg.com/Document\xfaB)r'\x10\x012#^collections/[^/]+/documents/[^/]+$R\x04name\"\xb6\x01\n" +
 	"\x15UpdateDocumentRequest\x12E\n" +
 	"\bdocument\x18\x01 \x01(\v2\x1c.worker.database.v1.DocumentB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\bdocument\x12;\n" +
 	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
 	"updateMask\x12\x19\n" +
-	"\bif_match\x18\x03 \x01(\tR\aifMatch\"t\n" +
+	"\bif_match\x18\x03 \x01(\tR\aifMatch\"Y\n" +
 	"\x15DeleteDocumentRequest\x12@\n" +
 	"\x04name\x18\x01 \x01(\tB,\xe0A\x02\xfaA\x1f\n" +
-	"\x1ddocumentdb.myorg.com/Document\xfaB\x04r\x02\x10\x01R\x04name\x12\x19\n" +
-	"\bif_match\x18\x02 \x01(\tR\aifMatch\"\xd9\x01\n" +
+	"\x1ddocumentdb.myorg.com/Document\xfaB\x04r\x02\x10\x01R\x04name\"\xd9\x01\n" +
 	"\x14ListDocumentsRequest\x12F\n" +
 	"\x06parent\x18\x01 \x01(\tB.\xe0A\x02\xfaA!\n" +
 	"\x1fdocumentdb.myorg.com/Collection\xfaB\x04r\x02\x10\x01R\x06parent\x12'\n" +

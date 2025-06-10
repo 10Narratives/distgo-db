@@ -55,11 +55,11 @@ func (s Service) CreateDocument(ctx context.Context, collectionID string, conten
 	panic("unimplemented")
 }
 
-func (s Service) DeleteDocument(ctx context.Context, collectionID string, documentID string) error {
+func (s Service) DeleteDocument(ctx context.Context, collectionID string, documentID uuid.UUID) error {
 	panic("unimplemented")
 }
 
-func (s Service) Document(ctx context.Context, collectionID string, documentID string) (documentmodels.Document, error) {
+func (s Service) Document(ctx context.Context, collectionID string, documentID uuid.UUID) (documentmodels.Document, error) {
 	panic("unimplemented")
 }
 
@@ -67,6 +67,6 @@ func (s Service) Documents(ctx context.Context, collectionID string, size int, t
 	panic("unimplemented")
 }
 
-func (s Service) UpdateDocument(ctx context.Context, collectionID string, documentID string, changes string) (documentmodels.Document, error) {
+func (s Service) UpdateDocument(ctx context.Context, collectionID string, documentID uuid.UUID, changes string) (documentmodels.Document, error) {
 	panic("unimplemented")
 }

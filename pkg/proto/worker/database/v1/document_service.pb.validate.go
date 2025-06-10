@@ -2162,6 +2162,17 @@ func (m *GetDocumentRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	if !_GetDocumentRequest_Name_Pattern.MatchString(m.GetName()) {
+		err := GetDocumentRequestValidationError{
+			field:  "Name",
+			reason: "value does not match regex pattern \"^collections/[^/]+/documents/[^/]+$\"",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
 	if len(errors) > 0 {
 		return GetDocumentRequestMultiError(errors)
 	}
@@ -2241,6 +2252,8 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetDocumentRequestValidationError{}
+
+var _GetDocumentRequest_Name_Pattern = regexp.MustCompile("^collections/[^/]+/documents/[^/]+$")
 
 // Validate checks the field values on UpdateDocumentRequest with the rules
 // defined in the proto definition for this message. If any rules are
@@ -2447,8 +2460,6 @@ func (m *DeleteDocumentRequest) validate(all bool) error {
 		}
 		errors = append(errors, err)
 	}
-
-	// no validation rules for IfMatch
 
 	if len(errors) > 0 {
 		return DeleteDocumentRequestMultiError(errors)
