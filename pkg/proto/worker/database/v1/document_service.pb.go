@@ -26,88 +26,20 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Collection struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
-	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Collection) Reset() {
-	*x = Collection{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Collection) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Collection) ProtoMessage() {}
-
-func (x *Collection) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Collection.ProtoReflect.Descriptor instead.
-func (*Collection) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *Collection) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *Collection) GetDisplayName() string {
-	if x != nil {
-		return x.DisplayName
-	}
-	return ""
-}
-
-func (x *Collection) GetCreateTime() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreateTime
-	}
-	return nil
-}
-
-func (x *Collection) GetUpdateTime() *timestamppb.Timestamp {
-	if x != nil {
-		return x.UpdateTime
-	}
-	return nil
-}
-
 type Document struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
-	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	Etag          string                 `protobuf:"bytes,5,opt,name=etag,proto3" json:"etag,omitempty"`
+	Id            string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	Value         string                 `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Document) Reset() {
 	*x = Document{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[1]
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -119,7 +51,7 @@ func (x *Document) String() string {
 func (*Document) ProtoMessage() {}
 
 func (x *Document) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[1]
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -132,7 +64,7 @@ func (x *Document) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Document.ProtoReflect.Descriptor instead.
 func (*Document) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{1}
+	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Document) GetName() string {
@@ -142,852 +74,32 @@ func (x *Document) GetName() string {
 	return ""
 }
 
-func (x *Document) GetContent() string {
+func (x *Document) GetId() string {
 	if x != nil {
-		return x.Content
+		return x.Id
 	}
 	return ""
 }
 
-func (x *Document) GetCreateTime() *timestamppb.Timestamp {
+func (x *Document) GetValue() string {
 	if x != nil {
-		return x.CreateTime
-	}
-	return nil
-}
-
-func (x *Document) GetUpdateTime() *timestamppb.Timestamp {
-	if x != nil {
-		return x.UpdateTime
-	}
-	return nil
-}
-
-func (x *Document) GetEtag() string {
-	if x != nil {
-		return x.Etag
+		return x.Value
 	}
 	return ""
 }
 
-type TransactionOperation struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to Operation:
-	//
-	//	*TransactionOperation_CreateDocument
-	//	*TransactionOperation_UpdateDocument
-	//	*TransactionOperation_DeleteDocument
-	Operation     isTransactionOperation_Operation `protobuf_oneof:"operation"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *TransactionOperation) Reset() {
-	*x = TransactionOperation{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TransactionOperation) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TransactionOperation) ProtoMessage() {}
-
-func (x *TransactionOperation) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[2]
+func (x *Document) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TransactionOperation.ProtoReflect.Descriptor instead.
-func (*TransactionOperation) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *TransactionOperation) GetOperation() isTransactionOperation_Operation {
-	if x != nil {
-		return x.Operation
+		return x.CreatedAt
 	}
 	return nil
 }
 
-func (x *TransactionOperation) GetCreateDocument() *CreateDocumentOp {
+func (x *Document) GetUpdatedAt() *timestamppb.Timestamp {
 	if x != nil {
-		if x, ok := x.Operation.(*TransactionOperation_CreateDocument); ok {
-			return x.CreateDocument
-		}
+		return x.UpdatedAt
 	}
 	return nil
-}
-
-func (x *TransactionOperation) GetUpdateDocument() *UpdateDocumentOp {
-	if x != nil {
-		if x, ok := x.Operation.(*TransactionOperation_UpdateDocument); ok {
-			return x.UpdateDocument
-		}
-	}
-	return nil
-}
-
-func (x *TransactionOperation) GetDeleteDocument() *DeleteDocumentOp {
-	if x != nil {
-		if x, ok := x.Operation.(*TransactionOperation_DeleteDocument); ok {
-			return x.DeleteDocument
-		}
-	}
-	return nil
-}
-
-type isTransactionOperation_Operation interface {
-	isTransactionOperation_Operation()
-}
-
-type TransactionOperation_CreateDocument struct {
-	CreateDocument *CreateDocumentOp `protobuf:"bytes,1,opt,name=create_document,json=createDocument,proto3,oneof"`
-}
-
-type TransactionOperation_UpdateDocument struct {
-	UpdateDocument *UpdateDocumentOp `protobuf:"bytes,2,opt,name=update_document,json=updateDocument,proto3,oneof"`
-}
-
-type TransactionOperation_DeleteDocument struct {
-	DeleteDocument *DeleteDocumentOp `protobuf:"bytes,3,opt,name=delete_document,json=deleteDocument,proto3,oneof"`
-}
-
-func (*TransactionOperation_CreateDocument) isTransactionOperation_Operation() {}
-
-func (*TransactionOperation_UpdateDocument) isTransactionOperation_Operation() {}
-
-func (*TransactionOperation_DeleteDocument) isTransactionOperation_Operation() {}
-
-type CreateDocumentOp struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	Document      *Document              `protobuf:"bytes,2,opt,name=document,proto3" json:"document,omitempty"`
-	DocumentId    string                 `protobuf:"bytes,3,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateDocumentOp) Reset() {
-	*x = CreateDocumentOp{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateDocumentOp) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateDocumentOp) ProtoMessage() {}
-
-func (x *CreateDocumentOp) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateDocumentOp.ProtoReflect.Descriptor instead.
-func (*CreateDocumentOp) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *CreateDocumentOp) GetParent() string {
-	if x != nil {
-		return x.Parent
-	}
-	return ""
-}
-
-func (x *CreateDocumentOp) GetDocument() *Document {
-	if x != nil {
-		return x.Document
-	}
-	return nil
-}
-
-func (x *CreateDocumentOp) GetDocumentId() string {
-	if x != nil {
-		return x.DocumentId
-	}
-	return ""
-}
-
-type UpdateDocumentOp struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Document      *Document              `protobuf:"bytes,1,opt,name=document,proto3" json:"document,omitempty"`
-	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
-	IfMatch       string                 `protobuf:"bytes,3,opt,name=if_match,json=ifMatch,proto3" json:"if_match,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateDocumentOp) Reset() {
-	*x = UpdateDocumentOp{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateDocumentOp) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateDocumentOp) ProtoMessage() {}
-
-func (x *UpdateDocumentOp) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateDocumentOp.ProtoReflect.Descriptor instead.
-func (*UpdateDocumentOp) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *UpdateDocumentOp) GetDocument() *Document {
-	if x != nil {
-		return x.Document
-	}
-	return nil
-}
-
-func (x *UpdateDocumentOp) GetUpdateMask() *fieldmaskpb.FieldMask {
-	if x != nil {
-		return x.UpdateMask
-	}
-	return nil
-}
-
-func (x *UpdateDocumentOp) GetIfMatch() string {
-	if x != nil {
-		return x.IfMatch
-	}
-	return ""
-}
-
-type DeleteDocumentOp struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	IfMatch       string                 `protobuf:"bytes,2,opt,name=if_match,json=ifMatch,proto3" json:"if_match,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteDocumentOp) Reset() {
-	*x = DeleteDocumentOp{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteDocumentOp) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteDocumentOp) ProtoMessage() {}
-
-func (x *DeleteDocumentOp) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteDocumentOp.ProtoReflect.Descriptor instead.
-func (*DeleteDocumentOp) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *DeleteDocumentOp) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *DeleteDocumentOp) GetIfMatch() string {
-	if x != nil {
-		return x.IfMatch
-	}
-	return ""
-}
-
-type CommitTransactionRequest struct {
-	state          protoimpl.MessageState  `protogen:"open.v1"`
-	TransactionId  string                  `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
-	Operations     []*TransactionOperation `protobuf:"bytes,2,rep,name=operations,proto3" json:"operations,omitempty"`
-	TimeoutSeconds int32                   `protobuf:"varint,3,opt,name=timeout_seconds,json=timeoutSeconds,proto3" json:"timeout_seconds,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *CommitTransactionRequest) Reset() {
-	*x = CommitTransactionRequest{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CommitTransactionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CommitTransactionRequest) ProtoMessage() {}
-
-func (x *CommitTransactionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CommitTransactionRequest.ProtoReflect.Descriptor instead.
-func (*CommitTransactionRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *CommitTransactionRequest) GetTransactionId() string {
-	if x != nil {
-		return x.TransactionId
-	}
-	return ""
-}
-
-func (x *CommitTransactionRequest) GetOperations() []*TransactionOperation {
-	if x != nil {
-		return x.Operations
-	}
-	return nil
-}
-
-func (x *CommitTransactionRequest) GetTimeoutSeconds() int32 {
-	if x != nil {
-		return x.TimeoutSeconds
-	}
-	return 0
-}
-
-type OperationResult struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to Result:
-	//
-	//	*OperationResult_Document
-	//	*OperationResult_Deleted
-	Result         isOperationResult_Result `protobuf_oneof:"result"`
-	OperationIndex int32                    `protobuf:"varint,3,opt,name=operation_index,json=operationIndex,proto3" json:"operation_index,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *OperationResult) Reset() {
-	*x = OperationResult{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *OperationResult) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*OperationResult) ProtoMessage() {}
-
-func (x *OperationResult) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use OperationResult.ProtoReflect.Descriptor instead.
-func (*OperationResult) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *OperationResult) GetResult() isOperationResult_Result {
-	if x != nil {
-		return x.Result
-	}
-	return nil
-}
-
-func (x *OperationResult) GetDocument() *Document {
-	if x != nil {
-		if x, ok := x.Result.(*OperationResult_Document); ok {
-			return x.Document
-		}
-	}
-	return nil
-}
-
-func (x *OperationResult) GetDeleted() *emptypb.Empty {
-	if x != nil {
-		if x, ok := x.Result.(*OperationResult_Deleted); ok {
-			return x.Deleted
-		}
-	}
-	return nil
-}
-
-func (x *OperationResult) GetOperationIndex() int32 {
-	if x != nil {
-		return x.OperationIndex
-	}
-	return 0
-}
-
-type isOperationResult_Result interface {
-	isOperationResult_Result()
-}
-
-type OperationResult_Document struct {
-	Document *Document `protobuf:"bytes,1,opt,name=document,proto3,oneof"`
-}
-
-type OperationResult_Deleted struct {
-	Deleted *emptypb.Empty `protobuf:"bytes,2,opt,name=deleted,proto3,oneof"`
-}
-
-func (*OperationResult_Document) isOperationResult_Result() {}
-
-func (*OperationResult_Deleted) isOperationResult_Result() {}
-
-type CommitTransactionResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Results       []*OperationResult     `protobuf:"bytes,1,rep,name=results,proto3" json:"results,omitempty"`
-	CommitTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=commit_time,json=commitTime,proto3" json:"commit_time,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CommitTransactionResponse) Reset() {
-	*x = CommitTransactionResponse{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CommitTransactionResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CommitTransactionResponse) ProtoMessage() {}
-
-func (x *CommitTransactionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CommitTransactionResponse.ProtoReflect.Descriptor instead.
-func (*CommitTransactionResponse) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *CommitTransactionResponse) GetResults() []*OperationResult {
-	if x != nil {
-		return x.Results
-	}
-	return nil
-}
-
-func (x *CommitTransactionResponse) GetCommitTime() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CommitTime
-	}
-	return nil
-}
-
-type BeginTransactionRequest struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Parent         string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	TimeoutSeconds int32                  `protobuf:"varint,2,opt,name=timeout_seconds,json=timeoutSeconds,proto3" json:"timeout_seconds,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *BeginTransactionRequest) Reset() {
-	*x = BeginTransactionRequest{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *BeginTransactionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*BeginTransactionRequest) ProtoMessage() {}
-
-func (x *BeginTransactionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use BeginTransactionRequest.ProtoReflect.Descriptor instead.
-func (*BeginTransactionRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *BeginTransactionRequest) GetParent() string {
-	if x != nil {
-		return x.Parent
-	}
-	return ""
-}
-
-func (x *BeginTransactionRequest) GetTimeoutSeconds() int32 {
-	if x != nil {
-		return x.TimeoutSeconds
-	}
-	return 0
-}
-
-type BeginTransactionResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *BeginTransactionResponse) Reset() {
-	*x = BeginTransactionResponse{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *BeginTransactionResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*BeginTransactionResponse) ProtoMessage() {}
-
-func (x *BeginTransactionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use BeginTransactionResponse.ProtoReflect.Descriptor instead.
-func (*BeginTransactionResponse) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *BeginTransactionResponse) GetTransactionId() string {
-	if x != nil {
-		return x.TransactionId
-	}
-	return ""
-}
-
-type RollbackTransactionRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RollbackTransactionRequest) Reset() {
-	*x = RollbackTransactionRequest{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RollbackTransactionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RollbackTransactionRequest) ProtoMessage() {}
-
-func (x *RollbackTransactionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RollbackTransactionRequest.ProtoReflect.Descriptor instead.
-func (*RollbackTransactionRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *RollbackTransactionRequest) GetTransactionId() string {
-	if x != nil {
-		return x.TransactionId
-	}
-	return ""
-}
-
-type CreateDocumentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	Document      *Document              `protobuf:"bytes,2,opt,name=document,proto3" json:"document,omitempty"`
-	DocumentId    string                 `protobuf:"bytes,3,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateDocumentRequest) Reset() {
-	*x = CreateDocumentRequest{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateDocumentRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateDocumentRequest) ProtoMessage() {}
-
-func (x *CreateDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateDocumentRequest.ProtoReflect.Descriptor instead.
-func (*CreateDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{12}
-}
-
-func (x *CreateDocumentRequest) GetParent() string {
-	if x != nil {
-		return x.Parent
-	}
-	return ""
-}
-
-func (x *CreateDocumentRequest) GetDocument() *Document {
-	if x != nil {
-		return x.Document
-	}
-	return nil
-}
-
-func (x *CreateDocumentRequest) GetDocumentId() string {
-	if x != nil {
-		return x.DocumentId
-	}
-	return ""
-}
-
-type GetDocumentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetDocumentRequest) Reset() {
-	*x = GetDocumentRequest{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[13]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetDocumentRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetDocumentRequest) ProtoMessage() {}
-
-func (x *GetDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[13]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetDocumentRequest.ProtoReflect.Descriptor instead.
-func (*GetDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{13}
-}
-
-func (x *GetDocumentRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-type UpdateDocumentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Document      *Document              `protobuf:"bytes,1,opt,name=document,proto3" json:"document,omitempty"`
-	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
-	IfMatch       string                 `protobuf:"bytes,3,opt,name=if_match,json=ifMatch,proto3" json:"if_match,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateDocumentRequest) Reset() {
-	*x = UpdateDocumentRequest{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[14]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateDocumentRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateDocumentRequest) ProtoMessage() {}
-
-func (x *UpdateDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[14]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateDocumentRequest.ProtoReflect.Descriptor instead.
-func (*UpdateDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{14}
-}
-
-func (x *UpdateDocumentRequest) GetDocument() *Document {
-	if x != nil {
-		return x.Document
-	}
-	return nil
-}
-
-func (x *UpdateDocumentRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
-	if x != nil {
-		return x.UpdateMask
-	}
-	return nil
-}
-
-func (x *UpdateDocumentRequest) GetIfMatch() string {
-	if x != nil {
-		return x.IfMatch
-	}
-	return ""
-}
-
-type DeleteDocumentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteDocumentRequest) Reset() {
-	*x = DeleteDocumentRequest{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[15]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteDocumentRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteDocumentRequest) ProtoMessage() {}
-
-func (x *DeleteDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[15]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteDocumentRequest.ProtoReflect.Descriptor instead.
-func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{15}
-}
-
-func (x *DeleteDocumentRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
 }
 
 type ListDocumentsRequest struct {
@@ -995,15 +107,13 @@ type ListDocumentsRequest struct {
 	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
 	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	Filter        string                 `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
-	OrderBy       string                 `protobuf:"bytes,5,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListDocumentsRequest) Reset() {
 	*x = ListDocumentsRequest{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[16]
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1015,7 +125,7 @@ func (x *ListDocumentsRequest) String() string {
 func (*ListDocumentsRequest) ProtoMessage() {}
 
 func (x *ListDocumentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[16]
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1028,7 +138,7 @@ func (x *ListDocumentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDocumentsRequest.ProtoReflect.Descriptor instead.
 func (*ListDocumentsRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{16}
+	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ListDocumentsRequest) GetParent() string {
@@ -1052,32 +162,17 @@ func (x *ListDocumentsRequest) GetPageToken() string {
 	return ""
 }
 
-func (x *ListDocumentsRequest) GetFilter() string {
-	if x != nil {
-		return x.Filter
-	}
-	return ""
-}
-
-func (x *ListDocumentsRequest) GetOrderBy() string {
-	if x != nil {
-		return x.OrderBy
-	}
-	return ""
-}
-
 type ListDocumentsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Documents     []*Document            `protobuf:"bytes,1,rep,name=documents,proto3" json:"documents,omitempty"`
 	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-	TotalSize     int32                  `protobuf:"varint,3,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListDocumentsResponse) Reset() {
 	*x = ListDocumentsResponse{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[17]
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1089,7 +184,7 @@ func (x *ListDocumentsResponse) String() string {
 func (*ListDocumentsResponse) ProtoMessage() {}
 
 func (x *ListDocumentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[17]
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1102,7 +197,7 @@ func (x *ListDocumentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDocumentsResponse.ProtoReflect.Descriptor instead.
 func (*ListDocumentsResponse) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{17}
+	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ListDocumentsResponse) GetDocuments() []*Document {
@@ -1119,36 +214,28 @@ func (x *ListDocumentsResponse) GetNextPageToken() string {
 	return ""
 }
 
-func (x *ListDocumentsResponse) GetTotalSize() int32 {
-	if x != nil {
-		return x.TotalSize
-	}
-	return 0
-}
-
-type CreateCollectionRequest struct {
+type GetDocumentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Collection    *Collection            `protobuf:"bytes,1,opt,name=collection,proto3" json:"collection,omitempty"`
-	CollectionId  string                 `protobuf:"bytes,2,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CreateCollectionRequest) Reset() {
-	*x = CreateCollectionRequest{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[18]
+func (x *GetDocumentRequest) Reset() {
+	*x = GetDocumentRequest{}
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateCollectionRequest) String() string {
+func (x *GetDocumentRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateCollectionRequest) ProtoMessage() {}
+func (*GetDocumentRequest) ProtoMessage() {}
 
-func (x *CreateCollectionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[18]
+func (x *GetDocumentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1159,48 +246,101 @@ func (x *CreateCollectionRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateCollectionRequest.ProtoReflect.Descriptor instead.
-func (*CreateCollectionRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{18}
+// Deprecated: Use GetDocumentRequest.ProtoReflect.Descriptor instead.
+func (*GetDocumentRequest) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CreateCollectionRequest) GetCollection() *Collection {
+func (x *GetDocumentRequest) GetName() string {
 	if x != nil {
-		return x.Collection
+		return x.Name
+	}
+	return ""
+}
+
+type CreateDocumentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	DocumentId    string                 `protobuf:"bytes,2,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	Document      *Document              `protobuf:"bytes,3,opt,name=document,proto3" json:"document,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateDocumentRequest) Reset() {
+	*x = CreateDocumentRequest{}
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateDocumentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateDocumentRequest) ProtoMessage() {}
+
+func (x *CreateDocumentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateDocumentRequest.ProtoReflect.Descriptor instead.
+func (*CreateDocumentRequest) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CreateDocumentRequest) GetParent() string {
+	if x != nil {
+		return x.Parent
+	}
+	return ""
+}
+
+func (x *CreateDocumentRequest) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+func (x *CreateDocumentRequest) GetDocument() *Document {
+	if x != nil {
+		return x.Document
 	}
 	return nil
 }
 
-func (x *CreateCollectionRequest) GetCollectionId() string {
-	if x != nil {
-		return x.CollectionId
-	}
-	return ""
-}
-
-type ListCollectionsRequest struct {
+type UpdateDocumentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	Document      *Document              `protobuf:"bytes,1,opt,name=document,proto3" json:"document,omitempty"`
+	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListCollectionsRequest) Reset() {
-	*x = ListCollectionsRequest{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[19]
+func (x *UpdateDocumentRequest) Reset() {
+	*x = UpdateDocumentRequest{}
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListCollectionsRequest) String() string {
+func (x *UpdateDocumentRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListCollectionsRequest) ProtoMessage() {}
+func (*UpdateDocumentRequest) ProtoMessage() {}
 
-func (x *ListCollectionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[19]
+func (x *UpdateDocumentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1211,208 +351,111 @@ func (x *ListCollectionsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListCollectionsRequest.ProtoReflect.Descriptor instead.
-func (*ListCollectionsRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{19}
+// Deprecated: Use UpdateDocumentRequest.ProtoReflect.Descriptor instead.
+func (*UpdateDocumentRequest) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *ListCollectionsRequest) GetPageSize() int32 {
+func (x *UpdateDocumentRequest) GetDocument() *Document {
 	if x != nil {
-		return x.PageSize
-	}
-	return 0
-}
-
-func (x *ListCollectionsRequest) GetPageToken() string {
-	if x != nil {
-		return x.PageToken
-	}
-	return ""
-}
-
-type ListCollectionsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Collections   []*Collection          `protobuf:"bytes,1,rep,name=collections,proto3" json:"collections,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-	TotalSize     int32                  `protobuf:"varint,3,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListCollectionsResponse) Reset() {
-	*x = ListCollectionsResponse{}
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[20]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListCollectionsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListCollectionsResponse) ProtoMessage() {}
-
-func (x *ListCollectionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_document_service_proto_msgTypes[20]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListCollectionsResponse.ProtoReflect.Descriptor instead.
-func (*ListCollectionsResponse) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{20}
-}
-
-func (x *ListCollectionsResponse) GetCollections() []*Collection {
-	if x != nil {
-		return x.Collections
+		return x.Document
 	}
 	return nil
 }
 
-func (x *ListCollectionsResponse) GetNextPageToken() string {
+func (x *UpdateDocumentRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	if x != nil {
-		return x.NextPageToken
+		return x.UpdateMask
 	}
-	return ""
+	return nil
 }
 
-func (x *ListCollectionsResponse) GetTotalSize() int32 {
+type DeleteDocumentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteDocumentRequest) Reset() {
+	*x = DeleteDocumentRequest{}
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteDocumentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDocumentRequest) ProtoMessage() {}
+
+func (x *DeleteDocumentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_document_service_proto_msgTypes[6]
 	if x != nil {
-		return x.TotalSize
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
 	}
-	return 0
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDocumentRequest.ProtoReflect.Descriptor instead.
+func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_document_service_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *DeleteDocumentRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
 }
 
 var File_worker_database_v1_document_service_proto protoreflect.FileDescriptor
 
 const file_worker_database_v1_document_service_proto_rawDesc = "" +
 	"\n" +
-	")worker/database/v1/document_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x19google/api/resource.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a google/protobuf/field_mask.proto\x1a\x17validate/validate.proto\"\xa0\x02\n" +
+	")worker/database/v1/document_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x19google/api/resource.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a google/protobuf/field_mask.proto\x1a\x17validate/validate.proto\"\xe3\x02\n" +
+	"\bDocument\x12\x17\n" +
+	"\x04name\x18\x01 \x01(\tB\x03\xe0A\x03R\x04name\x123\n" +
+	"\x02id\x18\x02 \x01(\tB#\xe0A\x04\xfaB\x1dr\x1b\x10\x01\x18@2\x12^[a-zA-Z0-9\\-_.]*$\xd0\x01\x01R\x02id\x12#\n" +
+	"\x05value\x18\x03 \x01(\tB\r\xe0A\x02\xfaB\ar\x05\x10\x01\x18\x80 R\x05value\x12>\n" +
 	"\n" +
-	"Collection\x12\x1a\n" +
-	"\x04name\x18\x01 \x01(\tB\x06\xe0A\x03\xe0A\x05R\x04name\x12/\n" +
-	"\fdisplay_name\x18\x02 \x01(\tB\f\xe0A\x02\xfaB\x06r\x04\x10\x01\x18dR\vdisplayName\x12@\n" +
-	"\vcreate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\n" +
-	"createTime\x12@\n" +
-	"\vupdate_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\n" +
-	"updateTime:A\xeaA>\n" +
-	"\x1fdocumentdb.myorg.com/Collection\x12\x1bcollections/{collection_id}\"\xbd\x02\n" +
-	"\bDocument\x12\x1a\n" +
-	"\x04name\x18\x01 \x01(\tB\x06\xe0A\x03\xe0A\x05R\x04name\x12$\n" +
-	"\acontent\x18\x02 \x01(\tB\n" +
-	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\acontent\x12@\n" +
-	"\vcreate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\n" +
-	"createTime\x12@\n" +
-	"\vupdate_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\n" +
-	"updateTime\x12\x12\n" +
-	"\x04etag\x18\x05 \x01(\tR\x04etag:W\xeaAT\n" +
-	"\x1ddocumentdb.myorg.com/Document\x123collections/{collection_id}/documents/{document_id}\"\x96\x02\n" +
-	"\x14TransactionOperation\x12O\n" +
-	"\x0fcreate_document\x18\x01 \x01(\v2$.worker.database.v1.CreateDocumentOpH\x00R\x0ecreateDocument\x12O\n" +
-	"\x0fupdate_document\x18\x02 \x01(\v2$.worker.database.v1.UpdateDocumentOpH\x00R\x0eupdateDocument\x12O\n" +
-	"\x0fdelete_document\x18\x03 \x01(\v2$.worker.database.v1.DeleteDocumentOpH\x00R\x0edeleteDocumentB\v\n" +
-	"\toperation\"\xa2\x01\n" +
-	"\x10CreateDocumentOp\x12\x1f\n" +
-	"\x06parent\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x06parent\x12B\n" +
-	"\bdocument\x18\x02 \x01(\v2\x1c.worker.database.v1.DocumentB\b\xfaB\x05\x8a\x01\x02\x10\x01R\bdocument\x12)\n" +
-	"\vdocument_id\x18\x03 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\n" +
-	"documentId\"\xae\x01\n" +
-	"\x10UpdateDocumentOp\x12B\n" +
-	"\bdocument\x18\x01 \x01(\v2\x1c.worker.database.v1.DocumentB\b\xfaB\x05\x8a\x01\x02\x10\x01R\bdocument\x12;\n" +
-	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
-	"updateMask\x12\x19\n" +
-	"\bif_match\x18\x03 \x01(\tR\aifMatch\"J\n" +
-	"\x10DeleteDocumentOp\x12\x1b\n" +
-	"\x04name\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x04name\x12\x19\n" +
-	"\bif_match\x18\x02 \x01(\tR\aifMatch\"\xd5\x01\n" +
-	"\x18CommitTransactionRequest\x12/\n" +
-	"\x0etransaction_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\rtransactionId\x12T\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\tcreatedAt\x12>\n" +
 	"\n" +
-	"operations\x18\x02 \x03(\v2(.worker.database.v1.TransactionOperationB\n" +
-	"\xfaB\a\x92\x01\x04\b\x01\x10dR\n" +
-	"operations\x122\n" +
-	"\x0ftimeout_seconds\x18\x03 \x01(\x05B\t\xfaB\x06\x1a\x04\x18<(\x01R\x0etimeoutSeconds\"\xb4\x01\n" +
-	"\x0fOperationResult\x12:\n" +
-	"\bdocument\x18\x01 \x01(\v2\x1c.worker.database.v1.DocumentH\x00R\bdocument\x122\n" +
-	"\adeleted\x18\x02 \x01(\v2\x16.google.protobuf.EmptyH\x00R\adeleted\x12'\n" +
-	"\x0foperation_index\x18\x03 \x01(\x05R\x0eoperationIndexB\b\n" +
-	"\x06result\"\x97\x01\n" +
-	"\x19CommitTransactionResponse\x12=\n" +
-	"\aresults\x18\x01 \x03(\v2#.worker.database.v1.OperationResultR\aresults\x12;\n" +
-	"\vcommit_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"commitTime\"e\n" +
-	"\x17BeginTransactionRequest\x12\x16\n" +
-	"\x06parent\x18\x01 \x01(\tR\x06parent\x122\n" +
-	"\x0ftimeout_seconds\x18\x02 \x01(\x05B\t\xfaB\x06\x1a\x04\x18<(\x01R\x0etimeoutSeconds\"K\n" +
-	"\x18BeginTransactionResponse\x12/\n" +
-	"\x0etransaction_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\rtransactionId\"M\n" +
-	"\x1aRollbackTransactionRequest\x12/\n" +
-	"\x0etransaction_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\rtransactionId\"\xd1\x01\n" +
-	"\x15CreateDocumentRequest\x12F\n" +
-	"\x06parent\x18\x01 \x01(\tB.\xe0A\x02\xfaA!\n" +
-	"\x1fdocumentdb.myorg.com/Collection\xfaB\x04r\x02\x10\x01R\x06parent\x12E\n" +
-	"\bdocument\x18\x02 \x01(\v2\x1c.worker.database.v1.DocumentB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\bdocument\x12)\n" +
-	"\vdocument_id\x18\x03 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\n" +
-	"documentId\"{\n" +
-	"\x12GetDocumentRequest\x12e\n" +
-	"\x04name\x18\x01 \x01(\tBQ\xe0A\x02\xfaA\x1f\n" +
-	"\x1ddocumentdb.myorg.com/Document\xfaB)r'\x10\x012#^collections/[^/]+/documents/[^/]+$R\x04name\"\xb6\x01\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\tupdatedAt:d\xeaAa\n" +
+	"\x1bworker.database.v1/Document\x12Bdatabases/{database}/collections/{collection}/documents/{document}\"\xaa\x01\n" +
+	"\x14ListDocumentsRequest\x12J\n" +
+	"\x06parent\x18\x01 \x01(\tB2\xe0A\x02\xfaB,r*2(^databases\\/[^\\/]+\\/collections\\/[^\\/]+$R\x06parent\x12'\n" +
+	"\tpage_size\x18\x02 \x01(\x05B\n" +
+	"\xfaB\a\x1a\x05\x18\xe8\a(\x00R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\"{\n" +
+	"\x15ListDocumentsResponse\x12:\n" +
+	"\tdocuments\x18\x01 \x03(\v2\x1c.worker.database.v1.DocumentR\tdocuments\x12&\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"o\n" +
+	"\x12GetDocumentRequest\x12Y\n" +
+	"\x04name\x18\x01 \x01(\tBE\xe0A\x02\xfaB?r=2;^databases\\/[^\\/]+\\/collections\\/[^\\/]+\\/documents\\/[^\\/]+$R\x04name\"\xf0\x01\n" +
+	"\x15CreateDocumentRequest\x12J\n" +
+	"\x06parent\x18\x01 \x01(\tB2\xe0A\x02\xfaB,r*2(^databases\\/[^\\/]+\\/collections\\/[^\\/]+$R\x06parent\x12D\n" +
+	"\vdocument_id\x18\x02 \x01(\tB#\xe0A\x01\xfaB\x1dr\x1b\x10\x01\x18@2\x12^[a-zA-Z0-9\\-_.]*$\xd0\x01\x01R\n" +
+	"documentId\x12E\n" +
+	"\bdocument\x18\x03 \x01(\v2\x1c.worker.database.v1.DocumentB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\bdocument\"\x9b\x01\n" +
 	"\x15UpdateDocumentRequest\x12E\n" +
 	"\bdocument\x18\x01 \x01(\v2\x1c.worker.database.v1.DocumentB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\bdocument\x12;\n" +
 	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
-	"updateMask\x12\x19\n" +
-	"\bif_match\x18\x03 \x01(\tR\aifMatch\"Y\n" +
-	"\x15DeleteDocumentRequest\x12@\n" +
-	"\x04name\x18\x01 \x01(\tB,\xe0A\x02\xfaA\x1f\n" +
-	"\x1ddocumentdb.myorg.com/Document\xfaB\x04r\x02\x10\x01R\x04name\"\xd9\x01\n" +
-	"\x14ListDocumentsRequest\x12F\n" +
-	"\x06parent\x18\x01 \x01(\tB.\xe0A\x02\xfaA!\n" +
-	"\x1fdocumentdb.myorg.com/Collection\xfaB\x04r\x02\x10\x01R\x06parent\x12'\n" +
-	"\tpage_size\x18\x02 \x01(\x05B\n" +
-	"\xfaB\a\x1a\x05\x18\xe8\a(\x01R\bpageSize\x12\x1d\n" +
-	"\n" +
-	"page_token\x18\x03 \x01(\tR\tpageToken\x12\x16\n" +
-	"\x06filter\x18\x04 \x01(\tR\x06filter\x12\x19\n" +
-	"\border_by\x18\x05 \x01(\tR\aorderBy\"\x9a\x01\n" +
-	"\x15ListDocumentsResponse\x12:\n" +
-	"\tdocuments\x18\x01 \x03(\v2\x1c.worker.database.v1.DocumentR\tdocuments\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12\x1d\n" +
-	"\n" +
-	"total_size\x18\x03 \x01(\x05R\ttotalSize\"\x95\x01\n" +
-	"\x17CreateCollectionRequest\x12K\n" +
-	"\n" +
-	"collection\x18\x01 \x01(\v2\x1e.worker.database.v1.CollectionB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\n" +
-	"collection\x12-\n" +
-	"\rcollection_id\x18\x02 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\fcollectionId\"`\n" +
-	"\x16ListCollectionsRequest\x12'\n" +
-	"\tpage_size\x18\x01 \x01(\x05B\n" +
-	"\xfaB\a\x1a\x05\x18\xe8\a(\x01R\bpageSize\x12\x1d\n" +
-	"\n" +
-	"page_token\x18\x02 \x01(\tR\tpageToken\"\xa2\x01\n" +
-	"\x17ListCollectionsResponse\x12@\n" +
-	"\vcollections\x18\x01 \x03(\v2\x1e.worker.database.v1.CollectionR\vcollections\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12\x1d\n" +
-	"\n" +
-	"total_size\x18\x03 \x01(\x05R\ttotalSize2\x9c\v\n" +
-	"\x0fDocumentService\x12\x91\x01\n" +
-	"\x0eCreateDocument\x12).worker.database.v1.CreateDocumentRequest\x1a\x1c.worker.database.v1.Document\"6\x82\xd3\xe4\x93\x020:\bdocument\"$/v1/{parent=collections/*}/documents\x12\x81\x01\n" +
-	"\vGetDocument\x12&.worker.database.v1.GetDocumentRequest\x1a\x1c.worker.database.v1.Document\",\x82\xd3\xe4\x93\x02&\x12$/v1/{name=collections/*/documents/*}\x12\x9a\x01\n" +
-	"\x0eUpdateDocument\x12).worker.database.v1.UpdateDocumentRequest\x1a\x1c.worker.database.v1.Document\"?\x82\xd3\xe4\x93\x029:\bdocument2-/v1/{document.name=collections/*/documents/*}\x12\x81\x01\n" +
-	"\x0eDeleteDocument\x12).worker.database.v1.DeleteDocumentRequest\x1a\x16.google.protobuf.Empty\",\x82\xd3\xe4\x93\x02&*$/v1/{name=collections/*/documents/*}\x12\x92\x01\n" +
-	"\rListDocuments\x12(.worker.database.v1.ListDocumentsRequest\x1a).worker.database.v1.ListDocumentsResponse\",\x82\xd3\xe4\x93\x02&\x12$/v1/{parent=collections/*}/documents\x12\x84\x01\n" +
-	"\x10CreateCollection\x12+.worker.database.v1.CreateCollectionRequest\x1a\x1e.worker.database.v1.Collection\"#\x82\xd3\xe4\x93\x02\x1d:\n" +
-	"collection\"\x0f/v1/collections\x12\x83\x01\n" +
-	"\x0fListCollections\x12*.worker.database.v1.ListCollectionsRequest\x1a+.worker.database.v1.ListCollectionsResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/v1/collections\x12\x94\x01\n" +
-	"\x11CommitTransaction\x12,.worker.database.v1.CommitTransactionRequest\x1a-.worker.database.v1.CommitTransactionResponse\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/v1/transactions:commit\x12\x90\x01\n" +
-	"\x10BeginTransaction\x12+.worker.database.v1.BeginTransactionRequest\x1a,.worker.database.v1.BeginTransactionResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/v1/transactions:begin\x12\x83\x01\n" +
-	"\x13RollbackTransaction\x12..worker.database.v1.RollbackTransactionRequest\x1a\x16.google.protobuf.Empty\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/transactions:rollbackBf\n" +
+	"updateMask\"r\n" +
+	"\x15DeleteDocumentRequest\x12Y\n" +
+	"\x04name\x18\x01 \x01(\tBE\xe0A\x02\xfaB?r=2;^databases\\/[^\\/]+\\/collections\\/[^\\/]+\\/documents\\/[^\\/]+$R\x04name2\xb9\x06\n" +
+	"\x0fDocumentService\x12\xa4\x01\n" +
+	"\rListDocuments\x12(.worker.database.v1.ListDocumentsRequest\x1a).worker.database.v1.ListDocumentsResponse\">\x82\xd3\xe4\x93\x028\x126/v1alpha1/{parent=databases/*/collections/*}/documents\x12\x93\x01\n" +
+	"\vGetDocument\x12&.worker.database.v1.GetDocumentRequest\x1a\x1c.worker.database.v1.Document\">\x82\xd3\xe4\x93\x028\x126/v1alpha1/{name=databases/*/collections/*/documents/*}\x12\xa3\x01\n" +
+	"\x0eCreateDocument\x12).worker.database.v1.CreateDocumentRequest\x1a\x1c.worker.database.v1.Document\"H\x82\xd3\xe4\x93\x02B:\bdocument\"6/v1alpha1/{parent=databases/*/collections/*}/documents\x12\xac\x01\n" +
+	"\x0eUpdateDocument\x12).worker.database.v1.UpdateDocumentRequest\x1a\x1c.worker.database.v1.Document\"Q\x82\xd3\xe4\x93\x02K:\bdocument2?/v1alpha1/{document.name=databases/*/collections/*/documents/*}\x12\x93\x01\n" +
+	"\x0eDeleteDocument\x12).worker.database.v1.DeleteDocumentRequest\x1a\x16.google.protobuf.Empty\">\x82\xd3\xe4\x93\x028*6/v1alpha1/{name=databases/*/collections/*/documents/*}Bf\n" +
 	"\x1dcom.google.worker.database.v1P\x01ZCgithub.com/10Narratives/distgo-db/pkg/proto/worker/database/v1;dbv1b\x06proto3"
 
 var (
@@ -1427,80 +470,41 @@ func file_worker_database_v1_document_service_proto_rawDescGZIP() []byte {
 	return file_worker_database_v1_document_service_proto_rawDescData
 }
 
-var file_worker_database_v1_document_service_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_worker_database_v1_document_service_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_worker_database_v1_document_service_proto_goTypes = []any{
-	(*Collection)(nil),                 // 0: worker.database.v1.Collection
-	(*Document)(nil),                   // 1: worker.database.v1.Document
-	(*TransactionOperation)(nil),       // 2: worker.database.v1.TransactionOperation
-	(*CreateDocumentOp)(nil),           // 3: worker.database.v1.CreateDocumentOp
-	(*UpdateDocumentOp)(nil),           // 4: worker.database.v1.UpdateDocumentOp
-	(*DeleteDocumentOp)(nil),           // 5: worker.database.v1.DeleteDocumentOp
-	(*CommitTransactionRequest)(nil),   // 6: worker.database.v1.CommitTransactionRequest
-	(*OperationResult)(nil),            // 7: worker.database.v1.OperationResult
-	(*CommitTransactionResponse)(nil),  // 8: worker.database.v1.CommitTransactionResponse
-	(*BeginTransactionRequest)(nil),    // 9: worker.database.v1.BeginTransactionRequest
-	(*BeginTransactionResponse)(nil),   // 10: worker.database.v1.BeginTransactionResponse
-	(*RollbackTransactionRequest)(nil), // 11: worker.database.v1.RollbackTransactionRequest
-	(*CreateDocumentRequest)(nil),      // 12: worker.database.v1.CreateDocumentRequest
-	(*GetDocumentRequest)(nil),         // 13: worker.database.v1.GetDocumentRequest
-	(*UpdateDocumentRequest)(nil),      // 14: worker.database.v1.UpdateDocumentRequest
-	(*DeleteDocumentRequest)(nil),      // 15: worker.database.v1.DeleteDocumentRequest
-	(*ListDocumentsRequest)(nil),       // 16: worker.database.v1.ListDocumentsRequest
-	(*ListDocumentsResponse)(nil),      // 17: worker.database.v1.ListDocumentsResponse
-	(*CreateCollectionRequest)(nil),    // 18: worker.database.v1.CreateCollectionRequest
-	(*ListCollectionsRequest)(nil),     // 19: worker.database.v1.ListCollectionsRequest
-	(*ListCollectionsResponse)(nil),    // 20: worker.database.v1.ListCollectionsResponse
-	(*timestamppb.Timestamp)(nil),      // 21: google.protobuf.Timestamp
-	(*fieldmaskpb.FieldMask)(nil),      // 22: google.protobuf.FieldMask
-	(*emptypb.Empty)(nil),              // 23: google.protobuf.Empty
+	(*Document)(nil),              // 0: worker.database.v1.Document
+	(*ListDocumentsRequest)(nil),  // 1: worker.database.v1.ListDocumentsRequest
+	(*ListDocumentsResponse)(nil), // 2: worker.database.v1.ListDocumentsResponse
+	(*GetDocumentRequest)(nil),    // 3: worker.database.v1.GetDocumentRequest
+	(*CreateDocumentRequest)(nil), // 4: worker.database.v1.CreateDocumentRequest
+	(*UpdateDocumentRequest)(nil), // 5: worker.database.v1.UpdateDocumentRequest
+	(*DeleteDocumentRequest)(nil), // 6: worker.database.v1.DeleteDocumentRequest
+	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
+	(*fieldmaskpb.FieldMask)(nil), // 8: google.protobuf.FieldMask
+	(*emptypb.Empty)(nil),         // 9: google.protobuf.Empty
 }
 var file_worker_database_v1_document_service_proto_depIdxs = []int32{
-	21, // 0: worker.database.v1.Collection.create_time:type_name -> google.protobuf.Timestamp
-	21, // 1: worker.database.v1.Collection.update_time:type_name -> google.protobuf.Timestamp
-	21, // 2: worker.database.v1.Document.create_time:type_name -> google.protobuf.Timestamp
-	21, // 3: worker.database.v1.Document.update_time:type_name -> google.protobuf.Timestamp
-	3,  // 4: worker.database.v1.TransactionOperation.create_document:type_name -> worker.database.v1.CreateDocumentOp
-	4,  // 5: worker.database.v1.TransactionOperation.update_document:type_name -> worker.database.v1.UpdateDocumentOp
-	5,  // 6: worker.database.v1.TransactionOperation.delete_document:type_name -> worker.database.v1.DeleteDocumentOp
-	1,  // 7: worker.database.v1.CreateDocumentOp.document:type_name -> worker.database.v1.Document
-	1,  // 8: worker.database.v1.UpdateDocumentOp.document:type_name -> worker.database.v1.Document
-	22, // 9: worker.database.v1.UpdateDocumentOp.update_mask:type_name -> google.protobuf.FieldMask
-	2,  // 10: worker.database.v1.CommitTransactionRequest.operations:type_name -> worker.database.v1.TransactionOperation
-	1,  // 11: worker.database.v1.OperationResult.document:type_name -> worker.database.v1.Document
-	23, // 12: worker.database.v1.OperationResult.deleted:type_name -> google.protobuf.Empty
-	7,  // 13: worker.database.v1.CommitTransactionResponse.results:type_name -> worker.database.v1.OperationResult
-	21, // 14: worker.database.v1.CommitTransactionResponse.commit_time:type_name -> google.protobuf.Timestamp
-	1,  // 15: worker.database.v1.CreateDocumentRequest.document:type_name -> worker.database.v1.Document
-	1,  // 16: worker.database.v1.UpdateDocumentRequest.document:type_name -> worker.database.v1.Document
-	22, // 17: worker.database.v1.UpdateDocumentRequest.update_mask:type_name -> google.protobuf.FieldMask
-	1,  // 18: worker.database.v1.ListDocumentsResponse.documents:type_name -> worker.database.v1.Document
-	0,  // 19: worker.database.v1.CreateCollectionRequest.collection:type_name -> worker.database.v1.Collection
-	0,  // 20: worker.database.v1.ListCollectionsResponse.collections:type_name -> worker.database.v1.Collection
-	12, // 21: worker.database.v1.DocumentService.CreateDocument:input_type -> worker.database.v1.CreateDocumentRequest
-	13, // 22: worker.database.v1.DocumentService.GetDocument:input_type -> worker.database.v1.GetDocumentRequest
-	14, // 23: worker.database.v1.DocumentService.UpdateDocument:input_type -> worker.database.v1.UpdateDocumentRequest
-	15, // 24: worker.database.v1.DocumentService.DeleteDocument:input_type -> worker.database.v1.DeleteDocumentRequest
-	16, // 25: worker.database.v1.DocumentService.ListDocuments:input_type -> worker.database.v1.ListDocumentsRequest
-	18, // 26: worker.database.v1.DocumentService.CreateCollection:input_type -> worker.database.v1.CreateCollectionRequest
-	19, // 27: worker.database.v1.DocumentService.ListCollections:input_type -> worker.database.v1.ListCollectionsRequest
-	6,  // 28: worker.database.v1.DocumentService.CommitTransaction:input_type -> worker.database.v1.CommitTransactionRequest
-	9,  // 29: worker.database.v1.DocumentService.BeginTransaction:input_type -> worker.database.v1.BeginTransactionRequest
-	11, // 30: worker.database.v1.DocumentService.RollbackTransaction:input_type -> worker.database.v1.RollbackTransactionRequest
-	1,  // 31: worker.database.v1.DocumentService.CreateDocument:output_type -> worker.database.v1.Document
-	1,  // 32: worker.database.v1.DocumentService.GetDocument:output_type -> worker.database.v1.Document
-	1,  // 33: worker.database.v1.DocumentService.UpdateDocument:output_type -> worker.database.v1.Document
-	23, // 34: worker.database.v1.DocumentService.DeleteDocument:output_type -> google.protobuf.Empty
-	17, // 35: worker.database.v1.DocumentService.ListDocuments:output_type -> worker.database.v1.ListDocumentsResponse
-	0,  // 36: worker.database.v1.DocumentService.CreateCollection:output_type -> worker.database.v1.Collection
-	20, // 37: worker.database.v1.DocumentService.ListCollections:output_type -> worker.database.v1.ListCollectionsResponse
-	8,  // 38: worker.database.v1.DocumentService.CommitTransaction:output_type -> worker.database.v1.CommitTransactionResponse
-	10, // 39: worker.database.v1.DocumentService.BeginTransaction:output_type -> worker.database.v1.BeginTransactionResponse
-	23, // 40: worker.database.v1.DocumentService.RollbackTransaction:output_type -> google.protobuf.Empty
-	31, // [31:41] is the sub-list for method output_type
-	21, // [21:31] is the sub-list for method input_type
-	21, // [21:21] is the sub-list for extension type_name
-	21, // [21:21] is the sub-list for extension extendee
-	0,  // [0:21] is the sub-list for field type_name
+	7,  // 0: worker.database.v1.Document.created_at:type_name -> google.protobuf.Timestamp
+	7,  // 1: worker.database.v1.Document.updated_at:type_name -> google.protobuf.Timestamp
+	0,  // 2: worker.database.v1.ListDocumentsResponse.documents:type_name -> worker.database.v1.Document
+	0,  // 3: worker.database.v1.CreateDocumentRequest.document:type_name -> worker.database.v1.Document
+	0,  // 4: worker.database.v1.UpdateDocumentRequest.document:type_name -> worker.database.v1.Document
+	8,  // 5: worker.database.v1.UpdateDocumentRequest.update_mask:type_name -> google.protobuf.FieldMask
+	1,  // 6: worker.database.v1.DocumentService.ListDocuments:input_type -> worker.database.v1.ListDocumentsRequest
+	3,  // 7: worker.database.v1.DocumentService.GetDocument:input_type -> worker.database.v1.GetDocumentRequest
+	4,  // 8: worker.database.v1.DocumentService.CreateDocument:input_type -> worker.database.v1.CreateDocumentRequest
+	5,  // 9: worker.database.v1.DocumentService.UpdateDocument:input_type -> worker.database.v1.UpdateDocumentRequest
+	6,  // 10: worker.database.v1.DocumentService.DeleteDocument:input_type -> worker.database.v1.DeleteDocumentRequest
+	2,  // 11: worker.database.v1.DocumentService.ListDocuments:output_type -> worker.database.v1.ListDocumentsResponse
+	0,  // 12: worker.database.v1.DocumentService.GetDocument:output_type -> worker.database.v1.Document
+	0,  // 13: worker.database.v1.DocumentService.CreateDocument:output_type -> worker.database.v1.Document
+	0,  // 14: worker.database.v1.DocumentService.UpdateDocument:output_type -> worker.database.v1.Document
+	9,  // 15: worker.database.v1.DocumentService.DeleteDocument:output_type -> google.protobuf.Empty
+	11, // [11:16] is the sub-list for method output_type
+	6,  // [6:11] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_worker_database_v1_document_service_proto_init() }
@@ -1508,22 +512,13 @@ func file_worker_database_v1_document_service_proto_init() {
 	if File_worker_database_v1_document_service_proto != nil {
 		return
 	}
-	file_worker_database_v1_document_service_proto_msgTypes[2].OneofWrappers = []any{
-		(*TransactionOperation_CreateDocument)(nil),
-		(*TransactionOperation_UpdateDocument)(nil),
-		(*TransactionOperation_DeleteDocument)(nil),
-	}
-	file_worker_database_v1_document_service_proto_msgTypes[7].OneofWrappers = []any{
-		(*OperationResult_Document)(nil),
-		(*OperationResult_Deleted)(nil),
-	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_worker_database_v1_document_service_proto_rawDesc), len(file_worker_database_v1_document_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   21,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
