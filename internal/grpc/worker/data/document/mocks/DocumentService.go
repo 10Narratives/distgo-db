@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/document"
+	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -15,9 +15,9 @@ type DocumentService struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: ctx, collection, content
-func (_m *DocumentService) Create(ctx context.Context, collection string, content map[string]interface{}) (documentmodels.Document, error) {
-	ret := _m.Called(ctx, collection, content)
+// Create provides a mock function with given fields: ctx, collection, documentID, value
+func (_m *DocumentService) Create(ctx context.Context, collection string, documentID string, value string) (documentmodels.Document, error) {
+	ret := _m.Called(ctx, collection, documentID, value)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Create")
@@ -25,17 +25,17 @@ func (_m *DocumentService) Create(ctx context.Context, collection string, conten
 
 	var r0 documentmodels.Document
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, map[string]interface{}) (documentmodels.Document, error)); ok {
-		return rf(ctx, collection, content)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) (documentmodels.Document, error)); ok {
+		return rf(ctx, collection, documentID, value)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, map[string]interface{}) documentmodels.Document); ok {
-		r0 = rf(ctx, collection, content)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) documentmodels.Document); ok {
+		r0 = rf(ctx, collection, documentID, value)
 	} else {
 		r0 = ret.Get(0).(documentmodels.Document)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, map[string]interface{}) error); ok {
-		r1 = rf(ctx, collection, content)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, collection, documentID, value)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -61,12 +61,12 @@ func (_m *DocumentService) Delete(ctx context.Context, collection string, docume
 	return r0
 }
 
-// Get provides a mock function with given fields: ctx, collection, documentID
-func (_m *DocumentService) Get(ctx context.Context, collection string, documentID string) (documentmodels.Document, error) {
+// Document provides a mock function with given fields: ctx, collection, documentID
+func (_m *DocumentService) Document(ctx context.Context, collection string, documentID string) (documentmodels.Document, error) {
 	ret := _m.Called(ctx, collection, documentID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Get")
+		panic("no return value specified for Document")
 	}
 
 	var r0 documentmodels.Document
@@ -89,29 +89,29 @@ func (_m *DocumentService) Get(ctx context.Context, collection string, documentI
 	return r0, r1
 }
 
-// List provides a mock function with given fields: ctx, collection
-func (_m *DocumentService) List(ctx context.Context, collection string) ([]documentmodels.Document, error) {
-	ret := _m.Called(ctx, collection)
+// Documents provides a mock function with given fields: ctx, collection, pageSize, pageToken
+func (_m *DocumentService) Documents(ctx context.Context, collection string, pageSize int32, pageToken string) ([]documentmodels.Document, error) {
+	ret := _m.Called(ctx, collection, pageSize, pageToken)
 
 	if len(ret) == 0 {
-		panic("no return value specified for List")
+		panic("no return value specified for Documents")
 	}
 
 	var r0 []documentmodels.Document
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) ([]documentmodels.Document, error)); ok {
-		return rf(ctx, collection)
+	if rf, ok := ret.Get(0).(func(context.Context, string, int32, string) ([]documentmodels.Document, error)); ok {
+		return rf(ctx, collection, pageSize, pageToken)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) []documentmodels.Document); ok {
-		r0 = rf(ctx, collection)
+	if rf, ok := ret.Get(0).(func(context.Context, string, int32, string) []documentmodels.Document); ok {
+		r0 = rf(ctx, collection, pageSize, pageToken)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]documentmodels.Document)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, collection)
+	if rf, ok := ret.Get(1).(func(context.Context, string, int32, string) error); ok {
+		r1 = rf(ctx, collection, pageSize, pageToken)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -119,9 +119,9 @@ func (_m *DocumentService) List(ctx context.Context, collection string) ([]docum
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: ctx, collection, documentId, changes
-func (_m *DocumentService) Update(ctx context.Context, collection string, documentId string, changes map[string]interface{}) (documentmodels.Document, error) {
-	ret := _m.Called(ctx, collection, documentId, changes)
+// Update provides a mock function with given fields: ctx, collection, documentID, value, paths
+func (_m *DocumentService) Update(ctx context.Context, collection string, documentID string, value string, paths []string) (documentmodels.Document, error) {
+	ret := _m.Called(ctx, collection, documentID, value, paths)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Update")
@@ -129,17 +129,17 @@ func (_m *DocumentService) Update(ctx context.Context, collection string, docume
 
 	var r0 documentmodels.Document
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, map[string]interface{}) (documentmodels.Document, error)); ok {
-		return rf(ctx, collection, documentId, changes)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, []string) (documentmodels.Document, error)); ok {
+		return rf(ctx, collection, documentID, value, paths)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, map[string]interface{}) documentmodels.Document); ok {
-		r0 = rf(ctx, collection, documentId, changes)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, []string) documentmodels.Document); ok {
+		r0 = rf(ctx, collection, documentID, value, paths)
 	} else {
 		r0 = ret.Get(0).(documentmodels.Document)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string, map[string]interface{}) error); ok {
-		r1 = rf(ctx, collection, documentId, changes)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, []string) error); ok {
+		r1 = rf(ctx, collection, documentID, value, paths)
 	} else {
 		r1 = ret.Error(1)
 	}

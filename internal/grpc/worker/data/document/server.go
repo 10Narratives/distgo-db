@@ -1,203 +1,177 @@
 package documentgrpc
 
-// import (
-// 	"context"
-// 	"errors"
-// 	"strings"
+import (
+	"context"
+	"fmt"
 
-// 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/document"
-// 	workerstore "github.com/10Narratives/distgo-db/internal/storages/worker"
-// 	dbv1 "github.com/10Narratives/distgo-db/pkg/proto/worker/database/v1"
-// 	"github.com/google/uuid"
-// 	"google.golang.org/grpc"
-// 	"google.golang.org/grpc/codes"
-// 	"google.golang.org/grpc/status"
-// 	"google.golang.org/protobuf/types/known/emptypb"
-// 	"google.golang.org/protobuf/types/known/timestamppb"
-// )
+	"github.com/10Narratives/distgo-db/internal/lib/grpc/utils"
+	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
+	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
+	dbv1 "github.com/10Narratives/distgo-db/pkg/proto/worker/database/v1"
 
-// //go:generate mockery --name DocumentService --output ./mocks/
-// type DocumentService interface {
-// 	CreateDocument(ctx context.Context, collectionID, content string) (documentmodels.Document, error)
-// 	Document(ctx context.Context, collectionID string, documentID uuid.UUID) (documentmodels.Document, error)
-// 	Documents(ctx context.Context, collectionID string, size int, token string) ([]documentmodels.Document, string, int, error)
-// 	DeleteDocument(ctx context.Context, collectionID string, documentID uuid.UUID) error
-// 	UpdateDocument(ctx context.Context, collectionID string, documentID uuid.UUID, changes string) (documentmodels.Document, error)
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
 
-// 	CreateCollection(ctx context.Context, collectionID string) (documentmodels.Collection, error)
-// 	Collection(ctx context.Context, collectionID string) (documentmodels.Collection, error)
-// 	Collections(ctx context.Context, size int, token string) ([]documentmodels.Collection, string, int)
-// }
+//go:generate mockery --name DocumentService --output ./mocks/
+type DocumentService interface {
+	Create(ctx context.Context, collection, documentID, value string) (documentmodels.Document, error)
+	Delete(ctx context.Context, collection, documentID string) error
+	Document(ctx context.Context, collection, documentID string) (documentmodels.Document, error)
+	Documents(ctx context.Context, collection string, pageSize int32, pageToken string) ([]documentmodels.Document, error)
+	Update(ctx context.Context, collection, documentID, value string, paths []string) (documentmodels.Document, error)
+}
 
-// type serverAPI struct {
-// 	dbv1.UnimplementedDocumentServiceServer
-// 	service DocumentService
-// }
+//go:generate mockery --name CollectionService --output ./mocks/
+type CollectionService interface {
+	Collection(ctx context.Context, collection string) (collectionmodels.Collection, error)
+}
 
-// var _ dbv1.DocumentServiceServer = &serverAPI{}
+type ServerAPI struct {
+	dbv1.UnimplementedDocumentServiceServer
 
-// func Register(server *grpc.Server, service DocumentService) {
-// 	dbv1.RegisterDocumentServiceServer(server, &serverAPI{service: service})
-// }
+	documentSrv   DocumentService
+	collectionSrv CollectionService
+}
 
-// func (s *serverAPI) CreateDocument(ctx context.Context, req *dbv1.CreateDocumentRequest) (*dbv1.Document, error) {
-// 	if err := req.Validate(); err != nil {
-// 		return nil, status.Error(codes.InvalidArgument, "invalid create document request: "+err.Error())
-// 	}
+func New(documentSrv DocumentService, collectionSrv CollectionService) *ServerAPI {
+	return &ServerAPI{
+		documentSrv:   documentSrv,
+		collectionSrv: collectionSrv,
+	}
+}
 
-// 	_, err := s.service.Collection(ctx, req.GetParent())
-// 	if errors.Is(err, workerstore.ErrCollectionNotFound) {
-// 		return nil, status.Error(codes.NotFound, "cannot find required collection: "+err.Error())
-// 	} else if err != nil {
-// 		return nil, status.Error(codes.Internal, "cannot create document: "+err.Error())
-// 	}
+func Register(server *grpc.Server, documentSrv DocumentService, collectionSrv CollectionService) {
+	dbv1.RegisterDocumentServiceServer(server, New(documentSrv, collectionSrv))
+}
 
-// 	document, err := s.service.CreateDocument(ctx, req.GetParent(), req.Document.GetContent())
-// 	if err != nil {
-// 		return nil, status.Error(codes.Internal, "cannot create document: "+err.Error())
-// 	}
+func (s *ServerAPI) CreateDocument(ctx context.Context, req *dbv1.CreateDocumentRequest) (*dbv1.Document, error) {
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 
-// 	return convert(document), nil
-// }
+	_, err := s.collectionSrv.Collection(ctx, req.GetParent())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-// func (s *serverAPI) DeleteDocument(ctx context.Context, req *dbv1.DeleteDocumentRequest) (*emptypb.Empty, error) {
-// 	if err := req.Validate(); err != nil {
-// 		return nil, status.Error(codes.InvalidArgument, "invalid create document request: "+err.Error())
-// 	}
+	document, err := s.documentSrv.Create(ctx, req.GetParent(), req.GetDocumentId(), req.GetDocument().GetValue())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-// 	collectionID, documentID, err := splitName(req.GetName())
-// 	if err != nil {
-// 		return nil, status.Error(codes.InvalidArgument, "document id is invalid: "+err.Error())
-// 	}
+	return &dbv1.Document{
+		Name:      document.Name,
+		Id:        document.ID,
+		Value:     string(document.Value),
+		CreatedAt: timestamppb.New(document.CreatedAt),
+		UpdatedAt: timestamppb.New(document.UpdatedAt),
+	}, nil
+}
 
-// 	err = s.service.DeleteDocument(ctx, collectionID, documentID)
-// 	if errors.Is(err, workerstore.ErrCollectionNotFound) {
-// 		return nil, status.Error(codes.NotFound, "cannot find required collection")
-// 	} else if errors.Is(err, workerstore.ErrDocumentNotFound) {
-// 		return nil, status.Error(codes.NotFound, "cannot find required document")
-// 	} else if err != nil {
-// 		return nil, status.Error(codes.Internal, "cannot get document: "+err.Error())
-// 	}
+func (s *ServerAPI) DeleteDocument(ctx context.Context, req *dbv1.DeleteDocumentRequest) (*emptypb.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 
-// 	return &emptypb.Empty{}, nil
-// }
+	n := utils.ParseName(req.GetName())
 
-// func (s *serverAPI) GetDocument(ctx context.Context, req *dbv1.GetDocumentRequest) (*dbv1.Document, error) {
-// 	if err := req.Validate(); err != nil {
-// 		return nil, status.Error(codes.InvalidArgument, "invalid create document request: "+err.Error())
-// 	}
+	_, err := s.collectionSrv.Collection(ctx, n.CollectionID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-// 	collectionID, documentID, err := splitName(req.GetName())
-// 	if err != nil {
-// 		return nil, status.Error(codes.InvalidArgument, "document id is invalid: "+err.Error())
-// 	}
+	err = s.documentSrv.Delete(ctx, n.CollectionID, n.DocumentID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-// 	document, err := s.service.Document(ctx, collectionID, documentID)
-// 	if errors.Is(err, workerstore.ErrCollectionNotFound) {
-// 		return nil, status.Error(codes.NotFound, "cannot find required collection")
-// 	} else if errors.Is(err, workerstore.ErrDocumentNotFound) {
-// 		return nil, status.Error(codes.NotFound, "cannot find required document")
-// 	} else if err != nil {
-// 		return nil, status.Error(codes.Internal, "cannot get document: "+err.Error())
-// 	}
+	return &emptypb.Empty{}, nil
+}
 
-// 	return convert(document), nil
-// }
+func (s *ServerAPI) GetDocument(ctx context.Context, req *dbv1.GetDocumentRequest) (*dbv1.Document, error) {
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	parsed := utils.ParseName(req.GetName())
 
-// func (s *serverAPI) ListDocuments(ctx context.Context, req *dbv1.ListDocumentsRequest) (*dbv1.ListDocumentsResponse, error) {
-// 	if err := req.Validate(); err != nil {
-// 		return nil, status.Error(codes.InvalidArgument, "invalid create document request: "+err.Error())
-// 	}
+	collection, err := s.collectionSrv.Collection(ctx, parsed.CollectionID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-// 	listed, token, tSize, err := s.service.Documents(ctx, req.GetParent(), int(req.GetPageSize()), req.GetPageToken())
-// 	if errors.Is(err, workerstore.ErrCollectionNotFound) {
-// 		return nil, status.Error(codes.NotFound, "cannot find required collection")
-// 	} else if err != nil {
-// 		return nil, status.Error(codes.Internal, "cannot list documents: "+err.Error())
-// 	}
+	document, err := s.documentSrv.Document(ctx, collection.Name, parsed.DocumentID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-// 	converted := make([]*dbv1.Document, 0, len(listed))
-// 	for _, document := range listed {
-// 		converted = append(converted, convert(document))
-// 	}
+	return &dbv1.Document{
+		Name:      document.Name,
+		Id:        document.ID,
+		Value:     string(document.Value),
+		CreatedAt: timestamppb.New(document.CreatedAt),
+		UpdatedAt: timestamppb.New(document.UpdatedAt),
+	}, nil
+}
 
-// 	return &dbv1.ListDocumentsResponse{
-// 		Documents:     converted,
-// 		NextPageToken: token,
-// 		TotalSize:     int32(tSize),
-// 	}, nil
-// }
+func (s *ServerAPI) ListDocuments(ctx context.Context, req *dbv1.ListDocumentsRequest) (*dbv1.ListDocumentsResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	parsed := utils.ParseName(req.GetParent())
+	fmt.Println(parsed)
 
-// func (s *serverAPI) UpdateDocument(ctx context.Context, req *dbv1.UpdateDocumentRequest) (*dbv1.Document, error) {
-// 	if err := req.Validate(); err != nil {
-// 		return nil, status.Error(codes.InvalidArgument, "invalid create document request: "+err.Error())
-// 	}
+	collection, err := s.collectionSrv.Collection(ctx, parsed.CollectionID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-// 	collectionID, documentID, err := splitName(req.GetDocument().GetName())
-// 	if err != nil {
-// 		return nil, status.Error(codes.InvalidArgument, "document id is invalid: "+err.Error())
-// 	}
+	docs, err := s.documentSrv.Documents(ctx, collection.Name, req.GetPageSize(), req.GetPageToken())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-// 	_, err = s.service.UpdateDocument(ctx, collectionID, documentID, req.GetDocument().GetContent())
-// 	if errors.Is(err, workerstore.ErrCollectionNotFound) {
-// 		return nil, status.Error(codes.NotFound, "cannot find required collection")
-// 	} else if errors.Is(err, workerstore.ErrDocumentNotFound) {
-// 		return nil, status.Error(codes.NotFound, "cannot find required document")
-// 	} else if err != nil {
-// 		return nil, status.Error(codes.Internal, "cannot update document: "+err.Error())
-// 	}
+	responseDocs := make([]*dbv1.Document, len(docs))
+	for i, doc := range docs {
+		responseDocs[i] = &dbv1.Document{
+			Name:      doc.Name,
+			Id:        doc.ID,
+			Value:     string(doc.Value),
+			CreatedAt: timestamppb.New(doc.CreatedAt),
+			UpdatedAt: timestamppb.New(doc.UpdatedAt),
+		}
+	}
 
-// 	return nil, nil
-// }
+	return &dbv1.ListDocumentsResponse{
+		Documents:     responseDocs,
+		NextPageToken: "",
+	}, nil
+}
 
-// func (s *serverAPI) CreateCollection(ctx context.Context, req *dbv1.CreateCollectionRequest) (*dbv1.Collection, error) {
-// 	if err := req.Validate(); err != nil {
-// 		return nil, status.Error(codes.InvalidArgument, err.Error())
-// 	}
+func (s *ServerAPI) UpdateDocument(ctx context.Context, req *dbv1.UpdateDocumentRequest) (*dbv1.Document, error) {
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	parsed := utils.ParseName(req.GetDocument().GetName())
 
-// 	collection, err := s.service.CreateCollection(ctx, req.GetCollectionId())
-// 	if errors.Is(err, workerstore.ErrCollectionNotFound) {
-// 		return nil, status.Error(codes.NotFound, "cannot find required collection")
-// 	} else if err != nil {
-// 		return nil, status.Error(codes.Internal, "cannot create collection"+err.Error())
-// 	}
+	collection, err := s.collectionSrv.Collection(ctx, parsed.CollectionID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-// 	return &dbv1.Collection{
-// 		Name: collection.Name,
-// 	}, nil
-// }
+	document, err := s.documentSrv.Update(ctx, collection.Name, parsed.DocumentID, req.Document.GetValue(), req.UpdateMask.Paths)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-// func (s *serverAPI) ListCollections(context.Context, *dbv1.ListCollectionsRequest) (*dbv1.ListCollectionsResponse, error) {
-// 	panic("unimplemented")
-// }
-
-// func (s *serverAPI) BeginTransaction(context.Context, *dbv1.BeginTransactionRequest) (*dbv1.BeginTransactionResponse, error) {
-// 	panic("unimplemented")
-// }
-
-// func (s *serverAPI) CommitTransaction(context.Context, *dbv1.CommitTransactionRequest) (*dbv1.CommitTransactionResponse, error) {
-// 	panic("unimplemented")
-// }
-
-// func (s *serverAPI) RollbackTransaction(context.Context, *dbv1.RollbackTransactionRequest) (*emptypb.Empty, error) {
-// 	panic("unimplemented")
-// }
-
-// func splitName(name string) (string, uuid.UUID, error) {
-// 	sliced := strings.Split(name, "/")
-// 	collection, document := sliced[1], sliced[3]
-// 	documentID, err := uuid.Parse(document)
-// 	if err != nil {
-// 		return "", uuid.UUID{}, err
-// 	}
-// 	return collection, documentID, nil
-// }
-
-// func convert(src documentmodels.Document) *dbv1.Document {
-// 	return &dbv1.Document{
-// 		Name:       src.ID.String(),
-// 		Content:    src.Content,
-// 		CreateTime: timestamppb.New(src.CreateTime),
-// 		UpdateTime: timestamppb.New(src.UpdateTime),
-// 	}
-// }
+	return &dbv1.Document{
+		Name:      document.Name,
+		Id:        document.ID,
+		Value:     string(document.Value),
+		CreatedAt: timestamppb.New(document.CreatedAt),
+		UpdatedAt: timestamppb.New(document.UpdatedAt),
+	}, nil
+}
