@@ -96,7 +96,7 @@ message CreateDatabaseRequest {
       ignore_empty: true,
       min_len: 1,
       max_len: 64,
-      pattern: "^[a-zA-Z0-9\\-_.]*$"
+      pattern: "^[a-z0-9\\-_.]*$"
     },
     (google.api.field_behavior) = OPTIONAL
   ];

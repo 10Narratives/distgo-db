@@ -12,14 +12,6 @@ type App struct {
 }
 
 func New(log *slog.Logger, cfg workercfg.Config) *App {
-	// documentStorage := documentstore.New()
-	// walStorage, err := walstore.New("logs/" + cfg.Name + ".log")
-	// if err != nil {
-	// 	panic(err.Error())
-	// }
-
-	// documentService := documentsrv.New(documentStorage, walStorage)
-
-	grpcApp := workergrpc.New(log, cfg.GRPC.Port)
+	grpcApp := workergrpc.New(log, nil, cfg.GRPC.Port)
 	return &App{GRPC: grpcApp}
 }
