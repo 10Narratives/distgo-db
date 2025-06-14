@@ -1,0 +1,107 @@
+syntax = "proto3";
+
+package worker.database.v1;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/field_mask.proto";
+import "validate/validate.proto";
+import "worker/database/v1/operation_type.proto";
+
+option java_multiple_files = true;
+option java_package = "com.google.worker.database.v1";
+option go_package = "github.com/10Narratives/distgo-db/pkg/proto/worker/database/v1;dbv1";
+
+service TransactionService {
+  rpc BeginTransaction(BeginTransactionRequest) returns (BeginTransactionResponse) {
+    option (google.api.http) = {
+      post: "/v1alpha1/transactions:begin"
+      body: "*"
+    };
+  }
+
+  rpc ExecuteTransaction(ExecuteTransactionRequest) returns (ExecuteTransactionResponse) {
+    option (google.api.http) = {
+      post: "/v1alpha1/transactions:execute"
+      body: "transaction"
+    };
+  }
+
+  rpc CommitTransaction(CommitTransactionRequest) returns (CommitTransactionResponse) {
+    option (google.api.http) = {
+      post: "/v1alpha1/transactions:commit"
+      body: "transaction_id"
+    };
+  }
+
+  rpc RollbackTransaction(RollbackTransactionRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1alpha1/transactions:rollback"
+      body: "transaction_id"
+    };
+  }
+}
+
+message BeginTransactionRequest {
+  string description = 1 [(validate.rules).string.max_len = 512];
+}
+
+message BeginTransactionResponse {
+  string transaction_id = 1 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  google.protobuf.Timestamp started_at = 2;
+}
+
+message TransactionOperation {
+  MutationType type = 1 [
+    (validate.rules).enum.defined_only = true,
+    (google.api.field_behavior) = REQUIRED
+  ];
+  string document_path = 2 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+  bytes new_value = 3;
+  bytes old_value = 4;
+  google.protobuf.FieldMask update_mask = 5;
+}
+
+message ExecuteTransactionRequest {
+  string transaction_id = 1 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  repeated TransactionOperation operations = 2 [
+    (validate.rules).repeated = { min_items: 1, max_items: 100 },
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message ExecuteTransactionResponse {
+  int32 operations_executed = 1;
+  google.protobuf.Timestamp executed_at = 2;
+}
+
+message CommitTransactionRequest {
+  string transaction_id = 1 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message CommitTransactionResponse {
+  google.protobuf.Timestamp committed_at = 1;
+}
+
+message RollbackTransactionRequest {
+  string transaction_id = 1 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
