@@ -20,6 +20,8 @@ func TestServerAPI_CreateCollection(t *testing.T) {
 	var (
 		parent       = "databases/database_001"
 		collectionID = "coll1"
+		name         = parent + "/collections/" + collectionID
+		description  = "My test collection description"
 	)
 	type fields struct {
 		setupCollectionServiceMock func(m *mocks.CollectionService)
@@ -36,12 +38,13 @@ func TestServerAPI_CreateCollection(t *testing.T) {
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name: "successful execution",
+			name: "successful execution with description",
 			fields: fields{
 				setupCollectionServiceMock: func(m *mocks.CollectionService) {
-					m.On("CreateCollection", mock.Anything, parent, collectionID).
+					m.On("CreateCollection", mock.Anything, parent, collectionID, description).
 						Return(collectionmodels.Collection{
-							Name: parent + "/collections/" + collectionID,
+							Name:        name,
+							Description: description,
 						}, nil)
 				},
 			},
@@ -51,19 +54,49 @@ func TestServerAPI_CreateCollection(t *testing.T) {
 					Parent:       parent,
 					CollectionId: collectionID,
 					Collection: &dbv1.Collection{
-						Name: parent + "/collections/" + collectionID,
+						Name:        name,
+						Description: description,
 					},
 				},
 			},
 			wantVal: func(tt require.TestingT, got interface{}, i ...interface{}) {
 				coll, ok := got.(*dbv1.Collection)
 				require.True(tt, ok)
-				assert.Equal(tt, parent+"/collections/"+collectionID, coll.GetName())
+				assert.Equal(tt, name, coll.GetName())
+				assert.Equal(tt, description, coll.GetDescription())
 			},
 			wantErr: require.NoError,
 		},
 		{
-			name: "validation error",
+			name: "successful execution without description (empty)",
+			fields: fields{
+				setupCollectionServiceMock: func(m *mocks.CollectionService) {
+					m.On("CreateCollection", mock.Anything, parent, collectionID, "").
+						Return(collectionmodels.Collection{
+							Name: name,
+						}, nil)
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: &dbv1.CreateCollectionRequest{
+					Parent:       parent,
+					CollectionId: collectionID,
+					Collection: &dbv1.Collection{
+						Name: name,
+					},
+				},
+			},
+			wantVal: func(tt require.TestingT, got interface{}, i ...interface{}) {
+				coll, ok := got.(*dbv1.Collection)
+				require.True(tt, ok)
+				assert.Equal(tt, name, coll.GetName())
+				assert.Empty(tt, coll.GetDescription())
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "validation error (invalid parent)",
 			fields: fields{
 				setupCollectionServiceMock: func(m *mocks.CollectionService) {},
 			},
@@ -72,6 +105,9 @@ func TestServerAPI_CreateCollection(t *testing.T) {
 				req: &dbv1.CreateCollectionRequest{
 					Parent:       "",
 					CollectionId: collectionID,
+					Collection: &dbv1.Collection{
+						Name: name,
+					},
 				},
 			},
 			wantVal: require.Empty,
@@ -81,7 +117,7 @@ func TestServerAPI_CreateCollection(t *testing.T) {
 			name: "internal error",
 			fields: fields{
 				setupCollectionServiceMock: func(m *mocks.CollectionService) {
-					m.On("CreateCollection", mock.Anything, parent, collectionID).
+					m.On("CreateCollection", mock.Anything, parent, collectionID, description).
 						Return(collectionmodels.Collection{}, errors.New("internal error"))
 				},
 			},
@@ -91,7 +127,8 @@ func TestServerAPI_CreateCollection(t *testing.T) {
 					Parent:       parent,
 					CollectionId: collectionID,
 					Collection: &dbv1.Collection{
-						Name: parent + "/collections/" + collectionID,
+						Name:        name,
+						Description: description,
 					},
 				},
 			},
@@ -113,7 +150,6 @@ func TestServerAPI_CreateCollection(t *testing.T) {
 		})
 	}
 }
-
 func TestServerAPI_DeleteCollection(t *testing.T) {
 	t.Parallel()
 	var (

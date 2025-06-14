@@ -80,9 +80,9 @@ func (_m *CollectionService) Collections(ctx context.Context, parent string, siz
 	return r0, r1, r2
 }
 
-// CreateCollection provides a mock function with given fields: ctx, parent, collectionID
-func (_m *CollectionService) CreateCollection(ctx context.Context, parent string, collectionID string) (collectionmodels.Collection, error) {
-	ret := _m.Called(ctx, parent, collectionID)
+// CreateCollection provides a mock function with given fields: ctx, parent, collectionID, description
+func (_m *CollectionService) CreateCollection(ctx context.Context, parent string, collectionID string, description string) (collectionmodels.Collection, error) {
+	ret := _m.Called(ctx, parent, collectionID, description)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateCollection")
@@ -90,17 +90,17 @@ func (_m *CollectionService) CreateCollection(ctx context.Context, parent string
 
 	var r0 collectionmodels.Collection
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) (collectionmodels.Collection, error)); ok {
-		return rf(ctx, parent, collectionID)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) (collectionmodels.Collection, error)); ok {
+		return rf(ctx, parent, collectionID, description)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) collectionmodels.Collection); ok {
-		r0 = rf(ctx, parent, collectionID)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) collectionmodels.Collection); ok {
+		r0 = rf(ctx, parent, collectionID, description)
 	} else {
 		r0 = ret.Get(0).(collectionmodels.Collection)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, parent, collectionID)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, parent, collectionID, description)
 	} else {
 		r1 = ret.Error(1)
 	}

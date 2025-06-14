@@ -9,11 +9,12 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 //go:generate mockery --name CollectionService --output ./mocks/
 type CollectionService interface {
-	CreateCollection(ctx context.Context, parent, collectionID string) (collectionmodels.Collection, error)
+	CreateCollection(ctx context.Context, parent, collectionID, description string) (collectionmodels.Collection, error)
 	DeleteCollection(ctx context.Context, name string) error
 	UpdateCollection(ctx context.Context, collection collectionmodels.Collection, paths []string) (collectionmodels.Collection, error)
 	Collection(ctx context.Context, name string) (collectionmodels.Collection, error)
@@ -44,8 +45,9 @@ func (s *ServerAPI) CreateCollection(ctx context.Context, req *dbv1.CreateCollec
 
 	parent := req.GetParent()
 	collectionID := req.GetCollectionId()
+	description := req.GetCollection().GetDescription()
 
-	created, err := s.service.CreateCollection(ctx, parent, collectionID)
+	created, err := s.service.CreateCollection(ctx, parent, collectionID, description)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -109,7 +111,17 @@ func (s *ServerAPI) UpdateCollection(ctx context.Context, req *dbv1.UpdateCollec
 		Name: req.GetCollection().GetName(),
 	}
 
-	updated, err := s.service.UpdateCollection(ctx, collection, req.GetUpdateMask().GetPaths())
+	paths := req.GetUpdateMask().GetPaths()
+	for _, path := range paths {
+		switch path {
+		case "description":
+			collection.Description = req.GetCollection().GetDescription()
+		default:
+			return nil, status.Errorf(codes.InvalidArgument, "unknown field: %s", path)
+		}
+	}
+
+	updated, err := s.service.UpdateCollection(ctx, collection, paths)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -119,6 +131,9 @@ func (s *ServerAPI) UpdateCollection(ctx context.Context, req *dbv1.UpdateCollec
 
 func convertCollectionToGRPC(src collectionmodels.Collection) *dbv1.Collection {
 	return &dbv1.Collection{
-		Name: src.Name,
+		Name:        src.Name,
+		Description: src.Description,
+		CreatedAt:   timestamppb.New(src.CreatedAt),
+		UpdatedAt:   timestamppb.New(src.UpdatedAt),
 	}
 }
