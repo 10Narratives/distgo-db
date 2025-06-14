@@ -15,27 +15,27 @@ type DocumentService struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: ctx, collection, documentID, value
-func (_m *DocumentService) Create(ctx context.Context, collection string, documentID string, value string) (documentmodels.Document, error) {
-	ret := _m.Called(ctx, collection, documentID, value)
+// CreateDocument provides a mock function with given fields: ctx, parent, documentID, value
+func (_m *DocumentService) CreateDocument(ctx context.Context, parent string, documentID string, value string) (documentmodels.Document, error) {
+	ret := _m.Called(ctx, parent, documentID, value)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Create")
+		panic("no return value specified for CreateDocument")
 	}
 
 	var r0 documentmodels.Document
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) (documentmodels.Document, error)); ok {
-		return rf(ctx, collection, documentID, value)
+		return rf(ctx, parent, documentID, value)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) documentmodels.Document); ok {
-		r0 = rf(ctx, collection, documentID, value)
+		r0 = rf(ctx, parent, documentID, value)
 	} else {
 		r0 = ret.Get(0).(documentmodels.Document)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
-		r1 = rf(ctx, collection, documentID, value)
+		r1 = rf(ctx, parent, documentID, value)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -43,17 +43,17 @@ func (_m *DocumentService) Create(ctx context.Context, collection string, docume
 	return r0, r1
 }
 
-// Delete provides a mock function with given fields: ctx, collection, documentID
-func (_m *DocumentService) Delete(ctx context.Context, collection string, documentID string) error {
-	ret := _m.Called(ctx, collection, documentID)
+// DeleteDocument provides a mock function with given fields: ctx, name
+func (_m *DocumentService) DeleteDocument(ctx context.Context, name string) error {
+	ret := _m.Called(ctx, name)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Delete")
+		panic("no return value specified for DeleteDocument")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
-		r0 = rf(ctx, collection, documentID)
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, name)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -61,9 +61,9 @@ func (_m *DocumentService) Delete(ctx context.Context, collection string, docume
 	return r0
 }
 
-// Document provides a mock function with given fields: ctx, collection, documentID
-func (_m *DocumentService) Document(ctx context.Context, collection string, documentID string) (documentmodels.Document, error) {
-	ret := _m.Called(ctx, collection, documentID)
+// Document provides a mock function with given fields: ctx, name
+func (_m *DocumentService) Document(ctx context.Context, name string) (documentmodels.Document, error) {
+	ret := _m.Called(ctx, name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Document")
@@ -71,17 +71,17 @@ func (_m *DocumentService) Document(ctx context.Context, collection string, docu
 
 	var r0 documentmodels.Document
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) (documentmodels.Document, error)); ok {
-		return rf(ctx, collection, documentID)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (documentmodels.Document, error)); ok {
+		return rf(ctx, name)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) documentmodels.Document); ok {
-		r0 = rf(ctx, collection, documentID)
+	if rf, ok := ret.Get(0).(func(context.Context, string) documentmodels.Document); ok {
+		r0 = rf(ctx, name)
 	} else {
 		r0 = ret.Get(0).(documentmodels.Document)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, collection, documentID)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -89,57 +89,64 @@ func (_m *DocumentService) Document(ctx context.Context, collection string, docu
 	return r0, r1
 }
 
-// Documents provides a mock function with given fields: ctx, collection, pageSize, pageToken
-func (_m *DocumentService) Documents(ctx context.Context, collection string, pageSize int32, pageToken string) ([]documentmodels.Document, error) {
-	ret := _m.Called(ctx, collection, pageSize, pageToken)
+// Documents provides a mock function with given fields: ctx, parent, size, token
+func (_m *DocumentService) Documents(ctx context.Context, parent string, size int32, token string) ([]documentmodels.Document, string, error) {
+	ret := _m.Called(ctx, parent, size, token)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Documents")
 	}
 
 	var r0 []documentmodels.Document
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, int32, string) ([]documentmodels.Document, error)); ok {
-		return rf(ctx, collection, pageSize, pageToken)
+	var r1 string
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, int32, string) ([]documentmodels.Document, string, error)); ok {
+		return rf(ctx, parent, size, token)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, string, int32, string) []documentmodels.Document); ok {
-		r0 = rf(ctx, collection, pageSize, pageToken)
+		r0 = rf(ctx, parent, size, token)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]documentmodels.Document)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, int32, string) error); ok {
-		r1 = rf(ctx, collection, pageSize, pageToken)
+	if rf, ok := ret.Get(1).(func(context.Context, string, int32, string) string); ok {
+		r1 = rf(ctx, parent, size, token)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(string)
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(context.Context, string, int32, string) error); ok {
+		r2 = rf(ctx, parent, size, token)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
-// Update provides a mock function with given fields: ctx, collection, documentID, value, paths
-func (_m *DocumentService) Update(ctx context.Context, collection string, documentID string, value string, paths []string) (documentmodels.Document, error) {
-	ret := _m.Called(ctx, collection, documentID, value, paths)
+// UpdateDocument provides a mock function with given fields: ctx, document, paths
+func (_m *DocumentService) UpdateDocument(ctx context.Context, document documentmodels.Document, paths []string) (documentmodels.Document, error) {
+	ret := _m.Called(ctx, document, paths)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Update")
+		panic("no return value specified for UpdateDocument")
 	}
 
 	var r0 documentmodels.Document
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, []string) (documentmodels.Document, error)); ok {
-		return rf(ctx, collection, documentID, value, paths)
+	if rf, ok := ret.Get(0).(func(context.Context, documentmodels.Document, []string) (documentmodels.Document, error)); ok {
+		return rf(ctx, document, paths)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, []string) documentmodels.Document); ok {
-		r0 = rf(ctx, collection, documentID, value, paths)
+	if rf, ok := ret.Get(0).(func(context.Context, documentmodels.Document, []string) documentmodels.Document); ok {
+		r0 = rf(ctx, document, paths)
 	} else {
 		r0 = ret.Get(0).(documentmodels.Document)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, []string) error); ok {
-		r1 = rf(ctx, collection, documentID, value, paths)
+	if rf, ok := ret.Get(1).(func(context.Context, documentmodels.Document, []string) error); ok {
+		r1 = rf(ctx, document, paths)
 	} else {
 		r1 = ret.Error(1)
 	}

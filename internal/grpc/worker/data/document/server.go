@@ -2,13 +2,10 @@ package documentgrpc
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 
-	"github.com/10Narratives/distgo-db/internal/lib/grpc/utils"
-	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
 	dbv1 "github.com/10Narratives/distgo-db/pkg/proto/worker/database/v1"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -18,58 +15,45 @@ import (
 
 //go:generate mockery --name DocumentService --output ./mocks/
 type DocumentService interface {
-	Create(ctx context.Context, collection, documentID, value string) (documentmodels.Document, error)
-	Delete(ctx context.Context, collection, documentID string) error
-	Document(ctx context.Context, collection, documentID string) (documentmodels.Document, error)
-	Documents(ctx context.Context, collection string, pageSize int32, pageToken string) ([]documentmodels.Document, error)
-	Update(ctx context.Context, collection, documentID, value string, paths []string) (documentmodels.Document, error)
-}
-
-//go:generate mockery --name CollectionService --output ./mocks/
-type CollectionService interface {
-	Collection(ctx context.Context, collection string) (collectionmodels.Collection, error)
+	CreateDocument(ctx context.Context, parent string, documentID string, value string) (documentmodels.Document, error)
+	DeleteDocument(ctx context.Context, name string) error
+	UpdateDocument(ctx context.Context, document documentmodels.Document, paths []string) (documentmodels.Document, error)
+	Document(ctx context.Context, name string) (documentmodels.Document, error)
+	Documents(ctx context.Context, parent string, size int32, token string) ([]documentmodels.Document, string, error)
 }
 
 type ServerAPI struct {
 	dbv1.UnimplementedDocumentServiceServer
-
-	documentSrv   DocumentService
-	collectionSrv CollectionService
+	service DocumentService
 }
 
-func New(documentSrv DocumentService, collectionSrv CollectionService) *ServerAPI {
+func New(service DocumentService) *ServerAPI {
 	return &ServerAPI{
-		documentSrv:   documentSrv,
-		collectionSrv: collectionSrv,
+		service: service,
 	}
 }
 
-func Register(server *grpc.Server, documentSrv DocumentService, collectionSrv CollectionService) {
-	dbv1.RegisterDocumentServiceServer(server, New(documentSrv, collectionSrv))
+func Register(server *grpc.Server, service DocumentService) {
+	dbv1.RegisterDocumentServiceServer(server, New(service))
 }
+
+var _ dbv1.DocumentServiceServer = &ServerAPI{}
 
 func (s *ServerAPI) CreateDocument(ctx context.Context, req *dbv1.CreateDocumentRequest) (*dbv1.Document, error) {
 	if err := req.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	_, err := s.collectionSrv.Collection(ctx, req.GetParent())
+	parent := req.GetParent()
+	documentID := req.GetDocumentId()
+	Value := req.GetDocument().GetValue()
+
+	doc, err := s.service.CreateDocument(ctx, parent, documentID, Value)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	document, err := s.documentSrv.Create(ctx, req.GetParent(), req.GetDocumentId(), req.GetDocument().GetValue())
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return &dbv1.Document{
-		Name:      document.Name,
-		Id:        document.ID,
-		Value:     string(document.Value),
-		CreatedAt: timestamppb.New(document.CreatedAt),
-		UpdatedAt: timestamppb.New(document.UpdatedAt),
-	}, nil
+	return convertDocumentToGRPC(doc), nil
 }
 
 func (s *ServerAPI) DeleteDocument(ctx context.Context, req *dbv1.DeleteDocumentRequest) (*emptypb.Empty, error) {
@@ -77,14 +61,7 @@ func (s *ServerAPI) DeleteDocument(ctx context.Context, req *dbv1.DeleteDocument
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	n := utils.ParseName(req.GetName())
-
-	_, err := s.collectionSrv.Collection(ctx, n.CollectionID)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	err = s.documentSrv.Delete(ctx, n.CollectionID, n.DocumentID)
+	err := s.service.DeleteDocument(ctx, req.GetName())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -96,58 +73,33 @@ func (s *ServerAPI) GetDocument(ctx context.Context, req *dbv1.GetDocumentReques
 	if err := req.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	parsed := utils.ParseName(req.GetName())
 
-	collection, err := s.collectionSrv.Collection(ctx, parsed.CollectionID)
+	doc, err := s.service.Document(ctx, req.GetName())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	document, err := s.documentSrv.Document(ctx, collection.Name, parsed.DocumentID)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return &dbv1.Document{
-		Name:      document.Name,
-		Id:        document.ID,
-		Value:     string(document.Value),
-		CreatedAt: timestamppb.New(document.CreatedAt),
-		UpdatedAt: timestamppb.New(document.UpdatedAt),
-	}, nil
+	return convertDocumentToGRPC(doc), nil
 }
 
 func (s *ServerAPI) ListDocuments(ctx context.Context, req *dbv1.ListDocumentsRequest) (*dbv1.ListDocumentsResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	parsed := utils.ParseName(req.GetParent())
-	fmt.Println(parsed)
 
-	collection, err := s.collectionSrv.Collection(ctx, parsed.CollectionID)
+	docs, nextToken, err := s.service.Documents(ctx, req.GetParent(), req.GetPageSize(), req.GetPageToken())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	docs, err := s.documentSrv.Documents(ctx, collection.Name, req.GetPageSize(), req.GetPageToken())
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	responseDocs := make([]*dbv1.Document, len(docs))
-	for i, doc := range docs {
-		responseDocs[i] = &dbv1.Document{
-			Name:      doc.Name,
-			Id:        doc.ID,
-			Value:     string(doc.Value),
-			CreatedAt: timestamppb.New(doc.CreatedAt),
-			UpdatedAt: timestamppb.New(doc.UpdatedAt),
-		}
+	listed := make([]*dbv1.Document, 0, len(docs))
+	for _, d := range docs {
+		listed = append(listed, convertDocumentToGRPC(d))
 	}
 
 	return &dbv1.ListDocumentsResponse{
-		Documents:     responseDocs,
-		NextPageToken: "",
+		Documents:     listed,
+		NextPageToken: nextToken,
 	}, nil
 }
 
@@ -155,23 +107,25 @@ func (s *ServerAPI) UpdateDocument(ctx context.Context, req *dbv1.UpdateDocument
 	if err := req.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	parsed := utils.ParseName(req.GetDocument().GetName())
 
-	collection, err := s.collectionSrv.Collection(ctx, parsed.CollectionID)
+	document := documentmodels.Document{
+		Name:  req.GetDocument().GetName(),
+		Value: json.RawMessage(req.GetDocument().GetValue()),
+	}
+
+	updated, err := s.service.UpdateDocument(ctx, document, req.GetUpdateMask().GetPaths())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	document, err := s.documentSrv.Update(ctx, collection.Name, parsed.DocumentID, req.Document.GetValue(), req.UpdateMask.Paths)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
+	return convertDocumentToGRPC(updated), nil
+}
 
+func convertDocumentToGRPC(src documentmodels.Document) *dbv1.Document {
 	return &dbv1.Document{
-		Name:      document.Name,
-		Id:        document.ID,
-		Value:     string(document.Value),
-		CreatedAt: timestamppb.New(document.CreatedAt),
-		UpdatedAt: timestamppb.New(document.UpdatedAt),
-	}, nil
+		Name:      src.Name,
+		CreatedAt: timestamppb.New(src.CreatedAt),
+		UpdatedAt: timestamppb.New(src.UpdatedAt),
+		Value:     string(src.Value),
+	}
 }
