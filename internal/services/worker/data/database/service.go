@@ -13,7 +13,8 @@ import (
 type DatabaseStorage interface {
 	Database(ctx context.Context, name string) (databasemodels.Database, error)
 	Databases(ctx context.Context) []databasemodels.Database
-	SetDatabase(ctx context.Context, name, displayName string) error
+	CreateDatabase(ctx context.Context, name, displayName string) (databasemodels.Database, error)
+	UpdateDatabase(ctx context.Context, name, displayName string) error
 	DeleteDatabase(ctx context.Context, name string) error
 }
 
@@ -30,11 +31,7 @@ func New(databaseStore DatabaseStorage) *Service {
 }
 
 func (s *Service) CreateDatabase(ctx context.Context, databaseID string, displayName string) (databasemodels.Database, error) {
-	err := s.databaseStore.SetDatabase(ctx, "databases/"+databaseID, displayName)
-	if err != nil {
-		return databasemodels.Database{}, err
-	}
-	return s.databaseStore.Database(ctx, "databases/"+databaseID)
+	return s.databaseStore.CreateDatabase(ctx, "databases/"+databaseID, displayName)
 }
 
 func (s *Service) Database(ctx context.Context, name string) (databasemodels.Database, error) {
@@ -85,15 +82,11 @@ func (s *Service) UpdateDatabase(ctx context.Context, database databasemodels.Da
 	for _, path := range paths {
 		switch path {
 		case "display_name":
+			s.databaseStore.UpdateDatabase(ctx, existingDB.Name, database.DisplayName)
 			existingDB.DisplayName = database.DisplayName
 		default:
 			return databasemodels.Database{}, status.Errorf(codes.InvalidArgument, "unknown field: %s", path)
 		}
-	}
-
-	err = s.databaseStore.SetDatabase(ctx, existingDB.Name, existingDB.DisplayName)
-	if err != nil {
-		return databasemodels.Database{}, err
 	}
 
 	return existingDB, nil
