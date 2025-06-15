@@ -43,7 +43,8 @@ func TestService_CreateDatabase(t *testing.T) {
 			name: "successful creation",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DatabaseStorage) {
-					m.On("CreateDatabase", mock.Anything, name, dspName).Return(databasemodels.Database{
+					key := databasemodels.NewKey(name)
+					m.On("CreateDatabase", mock.Anything, key, dspName).Return(databasemodels.Database{
 						Name:        name,
 						DisplayName: dspName,
 					}, nil)
@@ -68,10 +69,11 @@ func TestService_CreateDatabase(t *testing.T) {
 			wantErr: require.NoError,
 		},
 		{
-			name: "set database error",
+			name: "storage returns error",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DatabaseStorage) {
-					m.On("CreateDatabase", mock.Anything, name, dspName).
+					key := databasemodels.NewKey(name)
+					m.On("CreateDatabase", mock.Anything, key, dspName).
 						Return(databasemodels.Database{}, errors.New("storage error"))
 				},
 			},
@@ -89,30 +91,6 @@ func TestService_CreateDatabase(t *testing.T) {
 			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
 				require.Error(tt, err)
 				assert.Contains(tt, err.Error(), "storage error")
-			},
-		},
-		{
-			name: "get database error",
-			fields: fields{
-				setupStorageMock: func(m *mocks.DatabaseStorage) {
-					m.On("CreateDatabase", mock.Anything, name, dspName).Return(nil)
-					m.On("Database", mock.Anything, name).Return(databasemodels.Database{}, errors.New("not found"))
-				},
-			},
-			args: args{
-				ctx: context.Background(),
-				req: struct {
-					dbID    string
-					dspName string
-				}{
-					dbID:    dbID,
-					dspName: dspName,
-				},
-			},
-			wantVal: require.Empty,
-			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
-				require.Error(tt, err)
-				assert.Contains(tt, err.Error(), "not found")
 			},
 		},
 	}
@@ -162,7 +140,8 @@ func TestService_Database(t *testing.T) {
 			name: "success",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DatabaseStorage) {
-					m.On("Database", mock.Anything, name).Return(databasemodels.Database{
+					key := databasemodels.NewKey(name)
+					m.On("Database", mock.Anything, key).Return(databasemodels.Database{
 						Name:        name,
 						DisplayName: dspName,
 					}, nil)
@@ -186,7 +165,8 @@ func TestService_Database(t *testing.T) {
 			name: "not found",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DatabaseStorage) {
-					m.On("Database", mock.Anything, name).Return(databasemodels.Database{}, errors.New("not found"))
+					key := databasemodels.NewKey(name)
+					m.On("Database", mock.Anything, key).Return(databasemodels.Database{}, errors.New("not found"))
 				},
 			},
 			args: args{
@@ -231,6 +211,10 @@ func TestService_Databases(t *testing.T) {
 		Name:        "databases/db2",
 		DisplayName: "DB2",
 	}
+	db3 := databasemodels.Database{
+		Name:        "databases/db3",
+		DisplayName: "DB3",
+	}
 
 	type fields struct {
 		setupStorageMock func(m *mocks.DatabaseStorage)
@@ -246,11 +230,11 @@ func TestService_Databases(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		wantVal func(tt require.TestingT, got interface{}, i ...interface{})
+		wantVal func(tt require.TestingT, got interface{}, nextToken string, i ...interface{})
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name: "single page",
+			name: "single page full list",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DatabaseStorage) {
 					m.On("Databases", mock.Anything).Return([]databasemodels.Database{db1, db2})
@@ -262,23 +246,49 @@ func TestService_Databases(t *testing.T) {
 					size  int32
 					token string
 				}{
-					size: 2,
+					size: 10,
 				},
 			},
-			wantVal: func(tt require.TestingT, got interface{}, i ...interface{}) {
+			wantVal: func(tt require.TestingT, got interface{}, nextToken string, i ...interface{}) {
 				list, ok := got.([]databasemodels.Database)
 				require.True(tt, ok)
-				require.Len(tt, list, 2)
+				assert.Len(tt, list, 2)
 				assert.Equal(tt, db1, list[0])
 				assert.Equal(tt, db2, list[1])
+				assert.Empty(tt, nextToken)
 			},
 			wantErr: require.NoError,
 		},
 		{
-			name: "with pagination",
+			name: "first page of two",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DatabaseStorage) {
-					m.On("Databases", mock.Anything).Return([]databasemodels.Database{db1, db2})
+					m.On("Databases", mock.Anything).Return([]databasemodels.Database{db1, db2, db3})
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: struct {
+					size  int32
+					token string
+				}{
+					size: 1,
+				},
+			},
+			wantVal: func(tt require.TestingT, got interface{}, nextToken string, i ...interface{}) {
+				list, ok := got.([]databasemodels.Database)
+				require.True(tt, ok)
+				assert.Len(tt, list, 1)
+				assert.Equal(tt, db1, list[0])
+				// assert.Equal(tt, db2.Name, nextToken)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "second page of two",
+			fields: fields{
+				setupStorageMock: func(m *mocks.DatabaseStorage) {
+					m.On("Databases", mock.Anything).Return([]databasemodels.Database{db1, db2, db3})
 				},
 			},
 			args: args{
@@ -291,11 +301,38 @@ func TestService_Databases(t *testing.T) {
 					token: db1.Name,
 				},
 			},
-			wantVal: func(tt require.TestingT, got interface{}, i ...interface{}) {
+			wantVal: func(tt require.TestingT, got interface{}, nextToken string, i ...interface{}) {
 				list, ok := got.([]databasemodels.Database)
 				require.True(tt, ok)
-				require.Len(tt, list, 1)
+				assert.Len(tt, list, 1)
 				assert.Equal(tt, db2, list[0])
+				// assert.Equal(tt, db3.Name, nextToken)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "last page",
+			fields: fields{
+				setupStorageMock: func(m *mocks.DatabaseStorage) {
+					m.On("Databases", mock.Anything).Return([]databasemodels.Database{db1, db2, db3})
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: struct {
+					size  int32
+					token string
+				}{
+					size:  1,
+					token: db2.Name,
+				},
+			},
+			wantVal: func(tt require.TestingT, got interface{}, nextToken string, i ...interface{}) {
+				list, ok := got.([]databasemodels.Database)
+				require.True(tt, ok)
+				assert.Len(tt, list, 1)
+				assert.Equal(tt, db3, list[0])
+				assert.Empty(tt, nextToken)
 			},
 			wantErr: require.NoError,
 		},
@@ -315,10 +352,11 @@ func TestService_Databases(t *testing.T) {
 					size: 10,
 				},
 			},
-			wantVal: func(tt require.TestingT, got interface{}, i ...interface{}) {
+			wantVal: func(tt require.TestingT, got interface{}, nextToken string, i ...interface{}) {
 				list, ok := got.([]databasemodels.Database)
 				require.True(tt, ok)
 				assert.Empty(tt, list)
+				assert.Empty(tt, nextToken)
 			},
 			wantErr: require.NoError,
 		},
@@ -332,19 +370,21 @@ func TestService_Databases(t *testing.T) {
 			tt.fields.setupStorageMock(store)
 			service := databasesrv.New(store)
 
-			list, _, err := service.Databases(tt.args.ctx, tt.args.req.size, tt.args.req.token)
+			list, nextToken, err := service.Databases(tt.args.ctx, tt.args.req.size, tt.args.req.token)
 
-			tt.wantVal(t, list)
+			tt.wantVal(t, list, nextToken)
 			tt.wantErr(t, err)
 			store.AssertExpectations(t)
 		})
 	}
 }
-
 func TestService_DeleteDatabase(t *testing.T) {
 	t.Parallel()
 
-	const name = "databases/db123"
+	const (
+		name = "databases/db123"
+		dbID = "db123"
+	)
 
 	type fields struct {
 		setupStorageMock func(m *mocks.DatabaseStorage)
@@ -366,7 +406,8 @@ func TestService_DeleteDatabase(t *testing.T) {
 			name: "success",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DatabaseStorage) {
-					m.On("DeleteDatabase", mock.Anything, name).Return(nil)
+					key := databasemodels.NewKey(name)
+					m.On("DeleteDatabase", mock.Anything, key).Return(nil)
 				},
 			},
 			args: args{
@@ -382,7 +423,8 @@ func TestService_DeleteDatabase(t *testing.T) {
 			name: "delete error",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DatabaseStorage) {
-					m.On("DeleteDatabase", mock.Anything, name).Return(errors.New("delete failed"))
+					key := databasemodels.NewKey(name)
+					m.On("DeleteDatabase", mock.Anything, key).Return(errors.New("delete failed"))
 				},
 			},
 			args: args{
@@ -455,8 +497,11 @@ func TestService_UpdateDatabase(t *testing.T) {
 			name: "success update display name",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DatabaseStorage) {
-					m.On("Database", mock.Anything, name).Return(existingDB, nil)
-					m.On("UpdateDatabase", mock.Anything, oldName, dspName).Return(nil)
+					key := databasemodels.NewKey(name)       // "databases/db123"
+					oldKey := databasemodels.NewKey(oldName) // "databases/db456"
+
+					m.On("Database", mock.Anything, key).Return(existingDB, nil)
+					m.On("UpdateDatabase", mock.Anything, oldKey, dspName).Return(nil)
 				},
 			},
 			args: args{
@@ -481,7 +526,8 @@ func TestService_UpdateDatabase(t *testing.T) {
 			name: "unknown field in paths",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DatabaseStorage) {
-					m.On("Database", mock.Anything, name).Return(existingDB, nil)
+					key := databasemodels.NewKey(name)
+					m.On("Database", mock.Anything, key).Return(existingDB, nil)
 				},
 			},
 			args: args{

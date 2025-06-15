@@ -15,9 +15,9 @@ type DatabaseStorage struct {
 	mock.Mock
 }
 
-// CreateDatabase provides a mock function with given fields: ctx, name, displayName
-func (_m *DatabaseStorage) CreateDatabase(ctx context.Context, name string, displayName string) (databasemodels.Database, error) {
-	ret := _m.Called(ctx, name, displayName)
+// CreateDatabase provides a mock function with given fields: ctx, key, displayName
+func (_m *DatabaseStorage) CreateDatabase(ctx context.Context, key databasemodels.Key, displayName string) (databasemodels.Database, error) {
+	ret := _m.Called(ctx, key, displayName)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateDatabase")
@@ -25,17 +25,17 @@ func (_m *DatabaseStorage) CreateDatabase(ctx context.Context, name string, disp
 
 	var r0 databasemodels.Database
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) (databasemodels.Database, error)); ok {
-		return rf(ctx, name, displayName)
+	if rf, ok := ret.Get(0).(func(context.Context, databasemodels.Key, string) (databasemodels.Database, error)); ok {
+		return rf(ctx, key, displayName)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) databasemodels.Database); ok {
-		r0 = rf(ctx, name, displayName)
+	if rf, ok := ret.Get(0).(func(context.Context, databasemodels.Key, string) databasemodels.Database); ok {
+		r0 = rf(ctx, key, displayName)
 	} else {
 		r0 = ret.Get(0).(databasemodels.Database)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, name, displayName)
+	if rf, ok := ret.Get(1).(func(context.Context, databasemodels.Key, string) error); ok {
+		r1 = rf(ctx, key, displayName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -43,9 +43,9 @@ func (_m *DatabaseStorage) CreateDatabase(ctx context.Context, name string, disp
 	return r0, r1
 }
 
-// Database provides a mock function with given fields: ctx, name
-func (_m *DatabaseStorage) Database(ctx context.Context, name string) (databasemodels.Database, error) {
-	ret := _m.Called(ctx, name)
+// Database provides a mock function with given fields: ctx, key
+func (_m *DatabaseStorage) Database(ctx context.Context, key databasemodels.Key) (databasemodels.Database, error) {
+	ret := _m.Called(ctx, key)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Database")
@@ -53,17 +53,17 @@ func (_m *DatabaseStorage) Database(ctx context.Context, name string) (databasem
 
 	var r0 databasemodels.Database
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (databasemodels.Database, error)); ok {
-		return rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, databasemodels.Key) (databasemodels.Database, error)); ok {
+		return rf(ctx, key)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) databasemodels.Database); ok {
-		r0 = rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, databasemodels.Key) databasemodels.Database); ok {
+		r0 = rf(ctx, key)
 	} else {
 		r0 = ret.Get(0).(databasemodels.Database)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, name)
+	if rf, ok := ret.Get(1).(func(context.Context, databasemodels.Key) error); ok {
+		r1 = rf(ctx, key)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -91,17 +91,17 @@ func (_m *DatabaseStorage) Databases(ctx context.Context) []databasemodels.Datab
 	return r0
 }
 
-// DeleteDatabase provides a mock function with given fields: ctx, name
-func (_m *DatabaseStorage) DeleteDatabase(ctx context.Context, name string) error {
-	ret := _m.Called(ctx, name)
+// DeleteDatabase provides a mock function with given fields: ctx, key
+func (_m *DatabaseStorage) DeleteDatabase(ctx context.Context, key databasemodels.Key) error {
+	ret := _m.Called(ctx, key)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteDatabase")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, databasemodels.Key) error); ok {
+		r0 = rf(ctx, key)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -109,17 +109,17 @@ func (_m *DatabaseStorage) DeleteDatabase(ctx context.Context, name string) erro
 	return r0
 }
 
-// UpdateDatabase provides a mock function with given fields: ctx, name, displayName
-func (_m *DatabaseStorage) UpdateDatabase(ctx context.Context, name string, displayName string) error {
-	ret := _m.Called(ctx, name, displayName)
+// UpdateDatabase provides a mock function with given fields: ctx, key, displayName
+func (_m *DatabaseStorage) UpdateDatabase(ctx context.Context, key databasemodels.Key, displayName string) error {
+	ret := _m.Called(ctx, key, displayName)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateDatabase")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
-		r0 = rf(ctx, name, displayName)
+	if rf, ok := ret.Get(0).(func(context.Context, databasemodels.Key, string) error); ok {
+		r0 = rf(ctx, key, displayName)
 	} else {
 		r0 = ret.Error(0)
 	}
