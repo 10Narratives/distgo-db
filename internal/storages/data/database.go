@@ -2,26 +2,64 @@ package datastorage
 
 import (
 	"context"
+	"fmt"
 
 	databasemodels "github.com/10Narratives/distgo-db/internal/models/worker/data/database"
 )
 
-func (s *Storage) CreateDatabase(ctx context.Context, name string, displayName string) (databasemodels.Database, error) {
-	panic("unimplemented")
+func (s *Storage) CreateDatabase(ctx context.Context, key databasemodels.Key, displayName string) (databasemodels.Database, error) {
+	db := databasemodels.Database{
+		Name:        fmt.Sprintf("databases/%s", key.Database),
+		DisplayName: displayName,
+	}
+
+	_, exists := s.databases.Load(key)
+	if exists {
+		return databasemodels.Database{}, ErrDatabaseAlreadyExists
+	}
+
+	s.databases.Store(key, db)
+	return db, nil
 }
 
-func (s *Storage) Database(ctx context.Context, name string) (databasemodels.Database, error) {
-	panic("unimplemented")
+func (s *Storage) Database(ctx context.Context, key databasemodels.Key) (databasemodels.Database, error) {
+	val, ok := s.databases.Load(key)
+	if !ok {
+		return databasemodels.Database{}, ErrDatabaseNotFound
+	}
+
+	return val.(databasemodels.Database), nil
 }
 
 func (s *Storage) Databases(ctx context.Context) []databasemodels.Database {
-	panic("unimplemented")
+	var result []databasemodels.Database
+
+	s.databases.Range(func(_, value any) bool {
+		result = append(result, value.(databasemodels.Database))
+		return true
+	})
+
+	return result
 }
 
-func (s *Storage) DeleteDatabase(ctx context.Context, name string) error {
-	panic("unimplemented")
+func (s *Storage) DeleteDatabase(ctx context.Context, key databasemodels.Key) error {
+	_, exists := s.databases.Load(key)
+	if !exists {
+		return ErrDatabaseNotFound
+	}
+	s.databases.Delete(key)
+	return nil
 }
 
-func (s *Storage) UpdateDatabase(ctx context.Context, name string, displayName string) error {
-	panic("unimplemented")
+func (s *Storage) UpdateDatabase(ctx context.Context, key databasemodels.Key, displayName string) error {
+	val, ok := s.databases.Load(key)
+	if !ok {
+		return ErrDatabaseNotFound
+	}
+
+	db := val.(databasemodels.Database)
+	db.DisplayName = displayName
+
+	s.databases.Store(key, db)
+	return nil
 }
