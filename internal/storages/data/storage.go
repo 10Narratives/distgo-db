@@ -20,14 +20,13 @@ func New() *Storage {
 func NewOf(
 	initialDatabases map[databasemodels.Key]databasemodels.Database,
 ) *Storage {
-	var databases sync.Map
+	var storage *Storage = &Storage{}
+
 	for key, database := range initialDatabases {
-		databases.Store(key, database)
+		storage.databases.Store(key, database)
 	}
 
-	return &Storage{
-		databases: databases,
-	}
+	return storage
 }
 
 var (
