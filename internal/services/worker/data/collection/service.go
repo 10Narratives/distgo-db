@@ -6,17 +6,17 @@ import (
 
 	collectiongrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/collection"
 	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
+	databasemodels "github.com/10Narratives/distgo-db/internal/models/worker/data/database"
 )
 
 //go:generate mockery --name CollectionStorage --output ./mocks/
 type CollectionStorage interface {
-	Collection(ctx context.Context, name string) (collectionmodels.Collection, error)
-	Collections(ctx context.Context, parent string) []collectionmodels.Collection
-	CreateCollection(ctx context.Context, name, description string) (collectionmodels.Collection, error)
-	DeleteCollection(ctx context.Context, name string) error
-	UpdateCollection(ctx context.Context, collection collectionmodels.Collection) error
+	Collection(ctx context.Context, key collectionmodels.Key) (collectionmodels.Collection, error)
+	Collections(ctx context.Context, parentKey databasemodels.Key) []collectionmodels.Collection
+	CreateCollection(ctx context.Context, key collectionmodels.Key, description string) (collectionmodels.Collection, error)
+	UpdateCollection(ctx context.Context, key collectionmodels.Key, description string) error
+	DeleteCollection(ctx context.Context, key collectionmodels.Key) error
 }
-
 type Service struct {
 	collectionStore CollectionStorage
 }
@@ -30,11 +30,13 @@ func New(collectionStore CollectionStorage) *Service {
 }
 
 func (s *Service) Collection(ctx context.Context, name string) (collectionmodels.Collection, error) {
-	return s.collectionStore.Collection(ctx, name)
+	key := collectionmodels.NewKey(name)
+	return s.collectionStore.Collection(ctx, key)
 }
 
 func (s *Service) Collections(ctx context.Context, parent string, size int32, token string) ([]collectionmodels.Collection, string, error) {
-	all := s.collectionStore.Collections(ctx, parent)
+	parentKey := databasemodels.NewKey(parent)
+	all := s.collectionStore.Collections(ctx, parentKey)
 
 	if len(all) == 0 {
 		return []collectionmodels.Collection{}, "", nil
@@ -66,19 +68,21 @@ func (s *Service) Collections(ctx context.Context, parent string, size int32, to
 }
 
 func (s *Service) CreateCollection(ctx context.Context, parent string, collectionID string, description string) (collectionmodels.Collection, error) {
-	name := parent + "/collections/" + collectionID
-	return s.collectionStore.CreateCollection(ctx, name, description)
+	key := collectionmodels.NewKey(parent + "/collections/" + collectionID)
+	return s.collectionStore.CreateCollection(ctx, key, description)
 }
 
 func (s *Service) DeleteCollection(ctx context.Context, name string) error {
-	return s.collectionStore.DeleteCollection(ctx, name)
+	key := collectionmodels.NewKey(name)
+	return s.collectionStore.DeleteCollection(ctx, key)
 }
 
 func (s *Service) UpdateCollection(ctx context.Context, collection collectionmodels.Collection, paths []string) (collectionmodels.Collection, error) {
 	for _, path := range paths {
 		switch path {
 		case "description":
-			err := s.collectionStore.UpdateCollection(ctx, collection)
+			key := collectionmodels.NewKey(collection.Name)
+			err := s.collectionStore.UpdateCollection(ctx, key, collection.Description)
 			if err != nil {
 				return collectionmodels.Collection{}, err
 			}

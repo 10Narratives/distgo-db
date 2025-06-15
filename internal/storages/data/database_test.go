@@ -4,7 +4,9 @@ import (
 	"context"
 	"testing"
 
+	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
 	databasemodels "github.com/10Narratives/distgo-db/internal/models/worker/data/database"
+	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
 	datastorage "github.com/10Narratives/distgo-db/internal/storages/data"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -76,12 +78,14 @@ func TestStorage_CreateDatabase(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			storage := datastorage.NewOf(tt.fields.databases)
+			storage := datastorage.NewOf(
+				tt.fields.databases,
+				map[collectionmodels.Key]collectionmodels.Collection{},
+				map[documentmodels.Key]documentmodels.Document{},
+			)
 			created, err := storage.CreateDatabase(tt.args.ctx, tt.args.key, tt.args.displayName)
 
 			tt.wantVal(t, created)
@@ -160,7 +164,11 @@ func TestStorage_Database(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			storage := datastorage.NewOf(tt.fields.databases)
+			storage := datastorage.NewOf(
+				tt.fields.databases,
+				map[collectionmodels.Key]collectionmodels.Collection{},
+				map[documentmodels.Key]documentmodels.Document{},
+			)
 			database, err := storage.Database(tt.args.ctx, tt.args.key)
 
 			tt.wantVal(t, database)
@@ -239,13 +247,18 @@ func TestStorage_Databases(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			storage := datastorage.NewOf(tt.fields.databases)
+			storage := datastorage.NewOf(
+				tt.fields.databases,
+				map[collectionmodels.Key]collectionmodels.Collection{},
+				map[documentmodels.Key]documentmodels.Document{},
+			)
 			databases := storage.Databases(tt.args.ctx)
 
 			tt.wantVal(t, databases)
 		})
 	}
 }
+
 func TestStorage_DeleteDatabase(t *testing.T) {
 	t.Parallel()
 
@@ -304,13 +317,18 @@ func TestStorage_DeleteDatabase(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			storage := datastorage.NewOf(tt.fields.databases)
+			storage := datastorage.NewOf(
+				tt.fields.databases,
+				map[collectionmodels.Key]collectionmodels.Collection{},
+				map[documentmodels.Key]documentmodels.Document{},
+			)
 			err := storage.DeleteDatabase(tt.args.ctx, tt.args.key)
 
 			tt.wantErr(t, err)
 		})
 	}
 }
+
 func TestStorage_UpdateDatabase(t *testing.T) {
 	t.Parallel()
 
@@ -372,11 +390,14 @@ func TestStorage_UpdateDatabase(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			storage := datastorage.NewOf(tt.fields.databases)
+			storage := datastorage.NewOf(
+				tt.fields.databases,
+				map[collectionmodels.Key]collectionmodels.Collection{},
+				map[documentmodels.Key]documentmodels.Document{},
+			)
 			err := storage.UpdateDatabase(tt.args.ctx, tt.args.key, tt.args.displayName)
 
 			tt.wantErr(t, err)
-
 		})
 	}
 }

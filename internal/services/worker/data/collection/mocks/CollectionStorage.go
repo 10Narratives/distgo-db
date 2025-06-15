@@ -7,6 +7,8 @@ import (
 
 	context "context"
 
+	databasemodels "github.com/10Narratives/distgo-db/internal/models/worker/data/database"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -15,9 +17,9 @@ type CollectionStorage struct {
 	mock.Mock
 }
 
-// Collection provides a mock function with given fields: ctx, name
-func (_m *CollectionStorage) Collection(ctx context.Context, name string) (collectionmodels.Collection, error) {
-	ret := _m.Called(ctx, name)
+// Collection provides a mock function with given fields: ctx, key
+func (_m *CollectionStorage) Collection(ctx context.Context, key collectionmodels.Key) (collectionmodels.Collection, error) {
+	ret := _m.Called(ctx, key)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Collection")
@@ -25,17 +27,17 @@ func (_m *CollectionStorage) Collection(ctx context.Context, name string) (colle
 
 	var r0 collectionmodels.Collection
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (collectionmodels.Collection, error)); ok {
-		return rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, collectionmodels.Key) (collectionmodels.Collection, error)); ok {
+		return rf(ctx, key)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) collectionmodels.Collection); ok {
-		r0 = rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, collectionmodels.Key) collectionmodels.Collection); ok {
+		r0 = rf(ctx, key)
 	} else {
 		r0 = ret.Get(0).(collectionmodels.Collection)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, name)
+	if rf, ok := ret.Get(1).(func(context.Context, collectionmodels.Key) error); ok {
+		r1 = rf(ctx, key)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -43,17 +45,17 @@ func (_m *CollectionStorage) Collection(ctx context.Context, name string) (colle
 	return r0, r1
 }
 
-// Collections provides a mock function with given fields: ctx, parent
-func (_m *CollectionStorage) Collections(ctx context.Context, parent string) []collectionmodels.Collection {
-	ret := _m.Called(ctx, parent)
+// Collections provides a mock function with given fields: ctx, parentKey
+func (_m *CollectionStorage) Collections(ctx context.Context, parentKey databasemodels.Key) []collectionmodels.Collection {
+	ret := _m.Called(ctx, parentKey)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Collections")
 	}
 
 	var r0 []collectionmodels.Collection
-	if rf, ok := ret.Get(0).(func(context.Context, string) []collectionmodels.Collection); ok {
-		r0 = rf(ctx, parent)
+	if rf, ok := ret.Get(0).(func(context.Context, databasemodels.Key) []collectionmodels.Collection); ok {
+		r0 = rf(ctx, parentKey)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]collectionmodels.Collection)
@@ -63,9 +65,9 @@ func (_m *CollectionStorage) Collections(ctx context.Context, parent string) []c
 	return r0
 }
 
-// CreateCollection provides a mock function with given fields: ctx, name, description
-func (_m *CollectionStorage) CreateCollection(ctx context.Context, name string, description string) (collectionmodels.Collection, error) {
-	ret := _m.Called(ctx, name, description)
+// CreateCollection provides a mock function with given fields: ctx, key, description
+func (_m *CollectionStorage) CreateCollection(ctx context.Context, key collectionmodels.Key, description string) (collectionmodels.Collection, error) {
+	ret := _m.Called(ctx, key, description)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateCollection")
@@ -73,17 +75,17 @@ func (_m *CollectionStorage) CreateCollection(ctx context.Context, name string, 
 
 	var r0 collectionmodels.Collection
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) (collectionmodels.Collection, error)); ok {
-		return rf(ctx, name, description)
+	if rf, ok := ret.Get(0).(func(context.Context, collectionmodels.Key, string) (collectionmodels.Collection, error)); ok {
+		return rf(ctx, key, description)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) collectionmodels.Collection); ok {
-		r0 = rf(ctx, name, description)
+	if rf, ok := ret.Get(0).(func(context.Context, collectionmodels.Key, string) collectionmodels.Collection); ok {
+		r0 = rf(ctx, key, description)
 	} else {
 		r0 = ret.Get(0).(collectionmodels.Collection)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, name, description)
+	if rf, ok := ret.Get(1).(func(context.Context, collectionmodels.Key, string) error); ok {
+		r1 = rf(ctx, key, description)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -91,17 +93,17 @@ func (_m *CollectionStorage) CreateCollection(ctx context.Context, name string, 
 	return r0, r1
 }
 
-// DeleteCollection provides a mock function with given fields: ctx, name
-func (_m *CollectionStorage) DeleteCollection(ctx context.Context, name string) error {
-	ret := _m.Called(ctx, name)
+// DeleteCollection provides a mock function with given fields: ctx, key
+func (_m *CollectionStorage) DeleteCollection(ctx context.Context, key collectionmodels.Key) error {
+	ret := _m.Called(ctx, key)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteCollection")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, collectionmodels.Key) error); ok {
+		r0 = rf(ctx, key)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -109,17 +111,17 @@ func (_m *CollectionStorage) DeleteCollection(ctx context.Context, name string) 
 	return r0
 }
 
-// UpdateCollection provides a mock function with given fields: ctx, collection
-func (_m *CollectionStorage) UpdateCollection(ctx context.Context, collection collectionmodels.Collection) error {
-	ret := _m.Called(ctx, collection)
+// UpdateCollection provides a mock function with given fields: ctx, key, description
+func (_m *CollectionStorage) UpdateCollection(ctx context.Context, key collectionmodels.Key, description string) error {
+	ret := _m.Called(ctx, key, description)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateCollection")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, collectionmodels.Collection) error); ok {
-		r0 = rf(ctx, collection)
+	if rf, ok := ret.Get(0).(func(context.Context, collectionmodels.Key, string) error); ok {
+		r0 = rf(ctx, key, description)
 	} else {
 		r0 = ret.Error(0)
 	}

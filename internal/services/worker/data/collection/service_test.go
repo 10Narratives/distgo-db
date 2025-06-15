@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
+	databasemodels "github.com/10Narratives/distgo-db/internal/models/worker/data/database"
 	collectionsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/collection"
 	mocks "github.com/10Narratives/distgo-db/internal/services/worker/data/collection/mocks"
 	"github.com/stretchr/testify/assert"
@@ -45,7 +46,8 @@ func TestService_CreateCollection(t *testing.T) {
 			name: "successful creation",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
-					m.On("CreateCollection", mock.Anything, name, description).
+					key := collectionmodels.NewKey(name)
+					m.On("CreateCollection", mock.Anything, key, description).
 						Return(collectionmodels.Collection{
 							Name:        name,
 							Description: description,
@@ -76,7 +78,8 @@ func TestService_CreateCollection(t *testing.T) {
 			name: "storage returns error",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
-					m.On("CreateCollection", mock.Anything, name, description).
+					key := collectionmodels.NewKey(name)
+					m.On("CreateCollection", mock.Anything, key, description).
 						Return(collectionmodels.Collection{}, errors.New("internal error"))
 				},
 			},
@@ -147,7 +150,8 @@ func TestService_GetCollection(t *testing.T) {
 			name: "successful get",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
-					m.On("Collection", mock.Anything, name).
+					key := collectionmodels.NewKey(name)
+					m.On("Collection", mock.Anything, key).
 						Return(collectionmodels.Collection{
 							Name: name,
 						}, nil)
@@ -155,9 +159,7 @@ func TestService_GetCollection(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				req: struct {
-					name string
-				}{name: name},
+				req: struct{ name string }{name: name},
 			},
 			wantVal: func(tt require.TestingT, got interface{}, i ...interface{}) {
 				coll, ok := got.(collectionmodels.Collection)
@@ -170,15 +172,14 @@ func TestService_GetCollection(t *testing.T) {
 			name: "not found",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
-					m.On("Collection", mock.Anything, name).
+					key := collectionmodels.NewKey(name)
+					m.On("Collection", mock.Anything, key).
 						Return(collectionmodels.Collection{}, errors.New("not found"))
 				},
 			},
 			args: args{
 				ctx: context.Background(),
-				req: struct {
-					name string
-				}{name: name},
+				req: struct{ name string }{name: name},
 			},
 			wantVal: require.Empty,
 			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
@@ -236,7 +237,8 @@ func TestService_ListCollections(t *testing.T) {
 			name: "successful list",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
-					m.On("Collections", mock.Anything, parent).
+					parentKey := databasemodels.NewKey(parent)
+					m.On("Collections", mock.Anything, parentKey).
 						Return([]collectionmodels.Collection{
 							{Name: parent + "/collections/coll1"},
 							{Name: parent + "/collections/coll2"},
@@ -268,7 +270,8 @@ func TestService_ListCollections(t *testing.T) {
 			name: "with next page token",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
-					m.On("Collections", mock.Anything, parent).
+					parentKey := databasemodels.NewKey(parent)
+					m.On("Collections", mock.Anything, parentKey).
 						Return([]collectionmodels.Collection{
 							{Name: parent + "/collections/coll1"},
 							{Name: parent + "/collections/coll2"},
@@ -340,14 +343,13 @@ func TestService_DeleteCollection(t *testing.T) {
 			name: "successful delete",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
-					m.On("DeleteCollection", mock.Anything, name).Return(nil)
+					key := collectionmodels.NewKey(name)
+					m.On("DeleteCollection", mock.Anything, key).Return(nil)
 				},
 			},
 			args: args{
 				ctx: context.Background(),
-				req: struct {
-					name string
-				}{name: name},
+				req: struct{ name string }{name: name},
 			},
 			wantVal: require.Empty,
 			wantErr: require.NoError,
@@ -356,14 +358,13 @@ func TestService_DeleteCollection(t *testing.T) {
 			name: "not found",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
-					m.On("DeleteCollection", mock.Anything, name).Return(errors.New("not found"))
+					key := collectionmodels.NewKey(name)
+					m.On("DeleteCollection", mock.Anything, key).Return(errors.New("not found"))
 				},
 			},
 			args: args{
 				ctx: context.Background(),
-				req: struct {
-					name string
-				}{name: name},
+				req: struct{ name string }{name: name},
 			},
 			wantVal: require.Empty,
 			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
@@ -417,10 +418,8 @@ func TestService_UpdateCollection(t *testing.T) {
 			name: "update description",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
-					m.On("UpdateCollection", mock.Anything, collectionmodels.Collection{
-						Name:        name,
-						Description: newDescription,
-					}).Return(nil)
+					key := collectionmodels.NewKey(name)
+					m.On("UpdateCollection", mock.Anything, key, newDescription).Return(nil)
 				},
 			},
 			args: args{
@@ -436,7 +435,11 @@ func TestService_UpdateCollection(t *testing.T) {
 					paths: []string{"description"},
 				},
 			},
-			wantVal: require.NotEmpty,
+			wantVal: func(tt require.TestingT, got interface{}, i ...interface{}) {
+				updated, ok := got.(collectionmodels.Collection)
+				require.True(tt, ok)
+				assert.Equal(tt, newDescription, updated.Description)
+			},
 			wantErr: require.NoError,
 		},
 		{
