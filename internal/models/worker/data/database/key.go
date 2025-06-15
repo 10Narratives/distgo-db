@@ -1,6 +1,8 @@
 package databasemodels
 
-import "github.com/10Narratives/distgo-db/internal/lib/grpc/utils"
+import (
+	"github.com/10Narratives/distgo-db/internal/lib/grpc/utils"
+)
 
 type Key struct {
 	Database string

@@ -5,6 +5,8 @@ import (
 
 	workergrpc "github.com/10Narratives/distgo-db/internal/app/worker/grpc"
 	workercfg "github.com/10Narratives/distgo-db/internal/config/worker"
+	databasesrv "github.com/10Narratives/distgo-db/internal/services/worker/data/database"
+	datastorage "github.com/10Narratives/distgo-db/internal/storages/data"
 )
 
 type App struct {
@@ -12,6 +14,10 @@ type App struct {
 }
 
 func New(log *slog.Logger, cfg workercfg.Config) *App {
-	grpcApp := workergrpc.New(log, nil, cfg.GRPC.Port)
+	storage := datastorage.New()
+
+	databaseSrv := databasesrv.New(storage)
+
+	grpcApp := workergrpc.New(log, databaseSrv, cfg.GRPC.Port)
 	return &App{GRPC: grpcApp}
 }

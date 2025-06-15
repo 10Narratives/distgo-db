@@ -1,6 +1,8 @@
 package utils
 
-import "strings"
+import (
+	"strings"
+)
 
 type ParsedName struct {
 	DatabaseID   string

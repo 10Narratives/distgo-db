@@ -3,6 +3,7 @@ package datastorage
 import (
 	"context"
 	"fmt"
+	"time"
 
 	databasemodels "github.com/10Narratives/distgo-db/internal/models/worker/data/database"
 )
@@ -11,6 +12,8 @@ func (s *Storage) CreateDatabase(ctx context.Context, key databasemodels.Key, di
 	db := databasemodels.Database{
 		Name:        fmt.Sprintf("databases/%s", key.Database),
 		DisplayName: displayName,
+		CreatedAt:   time.Now().UTC(),
+		UpdatedAt:   time.Now().UTC(),
 	}
 
 	_, exists := s.databases.Load(key)
@@ -59,6 +62,7 @@ func (s *Storage) UpdateDatabase(ctx context.Context, key databasemodels.Key, di
 
 	db := val.(databasemodels.Database)
 	db.DisplayName = displayName
+	db.UpdatedAt = time.Now().UTC()
 
 	s.databases.Store(key, db)
 	return nil
