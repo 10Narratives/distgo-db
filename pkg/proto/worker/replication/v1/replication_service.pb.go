@@ -24,7 +24,8 @@ var File_worker_replication_v1_replication_service_proto protoreflect.FileDescri
 
 const file_worker_replication_v1_replication_service_proto_rawDesc = "" +
 	"\n" +
-	"/worker/replication/v1/replication_service.proto\x12\x15worker.replication.v1BHZFgithub.com/10Narratives/distgo-db/pkg/proto/worker/replication/v1;rpv1b\x06proto3"
+	"/worker/replication/v1/replication_service.proto\x12\x15worker.replication.v1Bl\n" +
+	" com.google.worker.replication.v1P\x01ZFgithub.com/10Narratives/distgo-db/pkg/proto/worker/replication/v1;rpv1b\x06proto3"
 
 var file_worker_replication_v1_replication_service_proto_goTypes = []any{}
 var file_worker_replication_v1_replication_service_proto_depIdxs = []int32{

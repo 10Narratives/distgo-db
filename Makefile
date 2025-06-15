@@ -29,7 +29,7 @@ generate:
 		$(PROTO_DIR)master/cluster/v1/*.proto \
 		--go_out=$(PROTO_OUT_DIR) --go_opt=paths=source_relative \
 		--go-grpc_out=$(PROTO_OUT_DIR) --go-grpc_opt=paths=source_relative \
-		--validate_out="lang=go:$(PROTO_OUT_DIR)"
+		--validate_out="lang=go,paths=source_relative:$(PROTO_OUT_DIR)"
 
 run:
 	@go run cmd/worker/main.go --config config/worker.yaml

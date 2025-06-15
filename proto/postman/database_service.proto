@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package worker.database.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/field_mask.proto";
+
+option java_multiple_files = true;
+option java_package = "com.google.worker.database.v1";
+option go_package = "github.com/10Narratives/distgo-db/pkg/proto/worker/database/v1;dbv1";
+
+service DatabaseService {
+  rpc ListDatabases(ListDatabasesRequest) returns (ListDatabasesResponse);
+  rpc GetDatabase(GetDatabaseRequest) returns (Database);
+  rpc CreateDatabase(CreateDatabaseRequest) returns (Database);
+  rpc UpdateDatabase(UpdateDatabaseRequest) returns (Database);
+  rpc DeleteDatabase(DeleteDatabaseRequest) returns (google.protobuf.Empty);
+}
+
+message Database {
+  string name = 1;
+  string display_name = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message ListDatabasesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListDatabasesResponse {
+  repeated Database databases = 1;
+  string next_page_token = 2;
+}
+
+message GetDatabaseRequest {
+  string name = 1;
+}
+
+message CreateDatabaseRequest {
+  string database_id = 1;
+  Database database = 2;
+}
+
+message UpdateDatabaseRequest {
+  Database database = 1;
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message DeleteDatabaseRequest {
+  string name = 1;
+}
