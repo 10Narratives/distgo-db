@@ -2,67 +2,49 @@
 
 Distributed document-oriented database written in Go
 
-## Protobuf Code Generation
+## 📦 What is it?
 
-This project uses Protocol Buffers (Protobuf) to define APIs and generate Go code. The `Makefile` automates the process of generating code from `.proto` files.
+distgo-db is a learning/experimental project implementing a simple document-oriented database with support for CRUD operations, collections and gRPC API.
 
-### Prerequisites
+Written entirely in Go. Perfect for learning about database structure, gRPC, testing and possible expansion into a full-fledged distributed solution.
 
-Before generating code, ensure the following tools and utilities are installed on your system:
+## ✅ Functionality
 
-1. Install `protoc` via package manager of download it for the [official releases](https://github.com/protocolbuffers/protobuf/releases?spm=a2ty_o01.29997173.0.0.176dc921maxc15).
+- Working with databases, collections, documents (in JSON format)
+- gRPC API support
+- In-memory storage with thread-safe access
 
-2. Ensure `Go` is installed and configured (`go version` should return a valid version). Download Go from the [official website](https://go.dev/dl/?spm=a2ty_o01.29997173.0.0.176dc921maxc15)
 
-3. `git` is required for cloning repositories
+## ✅ Architecture Overview
 
-### Protobuf Plugins
+The architecture of the distgo-db cluster is designed to provide a scalable, fault-tolerant, and highly available distributed database system. The system is composed of several key components that work together to handle data storage, replication, and client communication.
 
-These plugins are automatically installed by the Makefile, but they require Go to be installed:
+![distgo-db cluster architecture](./assets/arch.png)
 
-- protoc-gen-go : Generates Go code for Protobuf messages.
-- protoc-gen-go-grpc : Generates gRPC service stubs in Go.
-- protoc-gen-validate : Generates validation logic for Protobuf messages.
+## 🧾 Worker Node Configuration
 
-### Cloned Repositories
+This configuration defines settings for a worker node in a distributed system. It includes gRPC communication parameters and logging options.
 
-The following repositories are automatically cloned by the Makefile:
+### 📄 Example YAML Configuration
 
-- googleapis: Contains Google API definitions.
-- protoc-gen-validate: Contains validation rules for Protobuf messages.
-
-### Code generation
-
-#### Set Up the Project
-
-Run the setup target to install required tools and clone dependencies:
-
-```bash
-make setup
+```yaml
+name: worker_1
+grpc:
+  port: 55055
+  timeout: 4s
+logging:
+  level: info
+  format: pretty
+  output: stdout
 ```
 
-This will:
+### 📊 Configuration Fields Explained
 
-- Install protoc-gen-go, protoc-gen-go-grpc, and protoc-gen-validate into the bin directory.
-- Clone the googleapis and protoc-gen-validate repositories into the vendor directory.
-
-#### Generate Code
-
-Run the generate target to generate Go code:
-
-```bash
-make generate
-```
-
-This will:
-
-- Process all .proto files in the proto/distgodb/worker/document/v1/ directory.
-- Generate Protobuf message definitions (*.pb.go), gRPC service stubs (*_grpc.pb.go), and validation logic (*.validate.pb.go) in the pkg/proto/distgodb/worker/document/v1/ directory.
-
-#### Clean Up
-
-To remove all generated files, cloned repositories, and installed tools, run:
-
-```bash
-make clean
-```
+| Field              | Type     | Description                                                                 |
+|--------------------|----------|-----------------------------------------------------------------------------|
+| `name`             | string   | Unique identifier for the worker node (e.g., `worker_1`).                  |
+| `grpc.port`        | integer  | Port number on which the gRPC server will listen (e.g., `55055`).          |
+| `grpc.timeout`     | duration | Maximum time allowed for a gRPC request to complete (e.g., `4s`).           |
+| `logging.level`    | string   | Logging severity level: `debug`, `info`, `warn`, `error`, etc.              |
+| `logging.format`   | string   | Format style for log messages: `pretty` (human-readable), `json`, etc.      |
+| `logging.output`   | string   | Destination for logs: `stdout`, `stderr`, or a file path (e.g., `logs.log`).|
