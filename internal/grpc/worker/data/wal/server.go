@@ -16,7 +16,7 @@ import (
 
 //go:generate mockery --name WALService --output ./mocks/
 type WALService interface {
-	WALEntries(ctx context.Context, size int32, token string, from, to time.Time) []walmodels.WALEntry
+	WALEntries(ctx context.Context, size int32, token string, from, to time.Time) ([]walmodels.WALEntry, string, error)
 	TruncateWAL(ctx context.Context, before time.Time) error
 }
 
@@ -42,7 +42,10 @@ func (s ServerAPI) ListWALEntries(ctx context.Context, req *dbv1.ListWALEntriesR
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	entries := s.service.WALEntries(ctx, req.GetPageSize(), req.GetPageToken(), req.GetStartTime().AsTime(), req.GetEndTime().AsTime())
+	entries, token, err := s.service.WALEntries(ctx, req.GetPageSize(), req.GetPageToken(), req.GetStartTime().AsTime(), req.GetEndTime().AsTime())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	listed := make([]*dbv1.WALEntry, 0, len(entries))
 	for _, entry := range entries {
@@ -58,7 +61,7 @@ func (s ServerAPI) ListWALEntries(ctx context.Context, req *dbv1.ListWALEntriesR
 
 	return &dbv1.ListWALEntriesResponse{
 		Entries:       listed,
-		NextPageToken: "",
+		NextPageToken: token,
 	}, nil
 }
 

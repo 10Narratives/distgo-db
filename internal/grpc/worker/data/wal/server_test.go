@@ -54,7 +54,7 @@ func TestServerAPI_ListWALEntries(t *testing.T) {
 								OldValue:  "",
 								Timestamp: now,
 							},
-						})
+						}, "", nil) // Include empty token and nil error
 				},
 			},
 			args: args{
@@ -100,7 +100,7 @@ func TestServerAPI_ListWALEntries(t *testing.T) {
 			fields: fields{
 				setupMock: func(m *mocks.WALService) {
 					m.On("WALEntries", context.Background(), int32(10), "", now.Add(-time.Hour), now).
-						Return([]walmodels.WALEntry{})
+						Return([]walmodels.WALEntry{}, "", nil) // Include empty token and nil error
 				},
 			},
 			args: args{
