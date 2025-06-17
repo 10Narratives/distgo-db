@@ -8,6 +8,7 @@ import (
 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
 	collectionsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/collection"
 	databasesrv "github.com/10Narratives/distgo-db/internal/services/worker/data/database"
+	documentsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/document"
 )
 
 type Storage struct {
@@ -50,5 +51,5 @@ func NewOf(
 var (
 	_ databasesrv.DatabaseStorage     = &Storage{}
 	_ collectionsrv.CollectionStorage = &Storage{}
-	// _ documentsrv.DocumentStorage     = &Storage{}
+	_ documentsrv.DocumentStorage     = &Storage{}
 )

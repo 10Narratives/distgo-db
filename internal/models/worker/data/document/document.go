@@ -11,4 +11,5 @@ type Document struct {
 	Value     json.RawMessage
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Parent    string
 }
