@@ -20,14 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DocumentService_ListDocuments_FullMethodName       = "/worker.database.v1.DocumentService/ListDocuments"
-	DocumentService_GetDocument_FullMethodName         = "/worker.database.v1.DocumentService/GetDocument"
-	DocumentService_CreateDocument_FullMethodName      = "/worker.database.v1.DocumentService/CreateDocument"
-	DocumentService_UpdateDocument_FullMethodName      = "/worker.database.v1.DocumentService/UpdateDocument"
-	DocumentService_DeleteDocument_FullMethodName      = "/worker.database.v1.DocumentService/DeleteDocument"
-	DocumentService_BeginTransaction_FullMethodName    = "/worker.database.v1.DocumentService/BeginTransaction"
-	DocumentService_CommitTransaction_FullMethodName   = "/worker.database.v1.DocumentService/CommitTransaction"
-	DocumentService_RollbackTransaction_FullMethodName = "/worker.database.v1.DocumentService/RollbackTransaction"
+	DocumentService_ListDocuments_FullMethodName  = "/worker.database.v1.DocumentService/ListDocuments"
+	DocumentService_GetDocument_FullMethodName    = "/worker.database.v1.DocumentService/GetDocument"
+	DocumentService_CreateDocument_FullMethodName = "/worker.database.v1.DocumentService/CreateDocument"
+	DocumentService_UpdateDocument_FullMethodName = "/worker.database.v1.DocumentService/UpdateDocument"
+	DocumentService_DeleteDocument_FullMethodName = "/worker.database.v1.DocumentService/DeleteDocument"
 )
 
 // DocumentServiceClient is the client API for DocumentService service.
@@ -39,9 +36,6 @@ type DocumentServiceClient interface {
 	CreateDocument(ctx context.Context, in *CreateDocumentRequest, opts ...grpc.CallOption) (*Document, error)
 	UpdateDocument(ctx context.Context, in *UpdateDocumentRequest, opts ...grpc.CallOption) (*Document, error)
 	DeleteDocument(ctx context.Context, in *DeleteDocumentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	BeginTransaction(ctx context.Context, in *BeginTransactionRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
-	CommitTransaction(ctx context.Context, in *CommitTransactionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	RollbackTransaction(ctx context.Context, in *RollbackTransactionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type documentServiceClient struct {
@@ -102,36 +96,6 @@ func (c *documentServiceClient) DeleteDocument(ctx context.Context, in *DeleteDo
 	return out, nil
 }
 
-func (c *documentServiceClient) BeginTransaction(ctx context.Context, in *BeginTransactionRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(TransactionResponse)
-	err := c.cc.Invoke(ctx, DocumentService_BeginTransaction_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *documentServiceClient) CommitTransaction(ctx context.Context, in *CommitTransactionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, DocumentService_CommitTransaction_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *documentServiceClient) RollbackTransaction(ctx context.Context, in *RollbackTransactionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, DocumentService_RollbackTransaction_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // DocumentServiceServer is the server API for DocumentService service.
 // All implementations must embed UnimplementedDocumentServiceServer
 // for forward compatibility.
@@ -141,9 +105,6 @@ type DocumentServiceServer interface {
 	CreateDocument(context.Context, *CreateDocumentRequest) (*Document, error)
 	UpdateDocument(context.Context, *UpdateDocumentRequest) (*Document, error)
 	DeleteDocument(context.Context, *DeleteDocumentRequest) (*emptypb.Empty, error)
-	BeginTransaction(context.Context, *BeginTransactionRequest) (*TransactionResponse, error)
-	CommitTransaction(context.Context, *CommitTransactionRequest) (*emptypb.Empty, error)
-	RollbackTransaction(context.Context, *RollbackTransactionRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedDocumentServiceServer()
 }
 
@@ -168,15 +129,6 @@ func (UnimplementedDocumentServiceServer) UpdateDocument(context.Context, *Updat
 }
 func (UnimplementedDocumentServiceServer) DeleteDocument(context.Context, *DeleteDocumentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteDocument not implemented")
-}
-func (UnimplementedDocumentServiceServer) BeginTransaction(context.Context, *BeginTransactionRequest) (*TransactionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BeginTransaction not implemented")
-}
-func (UnimplementedDocumentServiceServer) CommitTransaction(context.Context, *CommitTransactionRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CommitTransaction not implemented")
-}
-func (UnimplementedDocumentServiceServer) RollbackTransaction(context.Context, *RollbackTransactionRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RollbackTransaction not implemented")
 }
 func (UnimplementedDocumentServiceServer) mustEmbedUnimplementedDocumentServiceServer() {}
 func (UnimplementedDocumentServiceServer) testEmbeddedByValue()                         {}
@@ -289,60 +241,6 @@ func _DocumentService_DeleteDocument_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DocumentService_BeginTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BeginTransactionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DocumentServiceServer).BeginTransaction(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: DocumentService_BeginTransaction_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DocumentServiceServer).BeginTransaction(ctx, req.(*BeginTransactionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _DocumentService_CommitTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CommitTransactionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DocumentServiceServer).CommitTransaction(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: DocumentService_CommitTransaction_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DocumentServiceServer).CommitTransaction(ctx, req.(*CommitTransactionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _DocumentService_RollbackTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RollbackTransactionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DocumentServiceServer).RollbackTransaction(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: DocumentService_RollbackTransaction_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DocumentServiceServer).RollbackTransaction(ctx, req.(*RollbackTransactionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // DocumentService_ServiceDesc is the grpc.ServiceDesc for DocumentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -369,18 +267,6 @@ var DocumentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteDocument",
 			Handler:    _DocumentService_DeleteDocument_Handler,
-		},
-		{
-			MethodName: "BeginTransaction",
-			Handler:    _DocumentService_BeginTransaction_Handler,
-		},
-		{
-			MethodName: "CommitTransaction",
-			Handler:    _DocumentService_CommitTransaction_Handler,
-		},
-		{
-			MethodName: "RollbackTransaction",
-			Handler:    _DocumentService_RollbackTransaction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

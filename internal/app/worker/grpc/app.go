@@ -6,7 +6,9 @@ import (
 	"log/slog"
 	"net"
 
-	documentgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/document"
+	collectiongrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/collection"
+	databasegrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/database"
+	documentgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/document"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
@@ -20,7 +22,13 @@ type App struct {
 	port       int
 }
 
-func New(log *slog.Logger, documentSrv documentgrpc.DocumentService, port int) *App {
+func New(
+	log *slog.Logger,
+	databaseSrv databasegrpc.DatabaseService,
+	collectionSrv collectiongrpc.CollectionService,
+	documentSrv documentgrpc.DocumentService,
+	port int,
+) *App {
 	loggingOpts := []logging.Option{
 		logging.WithLogOnEvents(
 			logging.PayloadReceived, logging.PayloadSent,
@@ -39,6 +47,8 @@ func New(log *slog.Logger, documentSrv documentgrpc.DocumentService, port int) *
 		logging.UnaryServerInterceptor(InterceptorLogger(log), loggingOpts...),
 	))
 
+	databasegrpc.Register(gRPCServer, databaseSrv)
+	collectiongrpc.Register(gRPCServer, collectionSrv)
 	documentgrpc.Register(gRPCServer, documentSrv)
 
 	return &App{

@@ -35,9 +35,6 @@ var (
 	_ = sort.Sort
 )
 
-// define the regex for a UUID once up-front
-var _document_service_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
-
 // Validate checks the field values on Document with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -60,56 +57,43 @@ func (m *Document) validate(all bool) error {
 
 	var errors []error
 
-	if err := m._validateUuid(m.GetName()); err != nil {
-		err = DocumentValidationError{
-			field:  "Name",
-			reason: "value must be a valid UUID",
-			cause:  err,
+	// no validation rules for Name
+
+	if m.GetId() != "" {
+
+		if l := utf8.RuneCountInString(m.GetId()); l < 1 || l > 64 {
+			err := DocumentValidationError{
+				field:  "Id",
+				reason: "value length must be between 1 and 64 runes, inclusive",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
 		}
-		if !all {
-			return err
+
+		if !_Document_Id_Pattern.MatchString(m.GetId()) {
+			err := DocumentValidationError{
+				field:  "Id",
+				reason: "value does not match regex pattern \"^[a-zA-Z0-9\\\\-_.]*$\"",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
 		}
-		errors = append(errors, err)
+
 	}
 
-	if m.GetContent() == nil {
+	if l := utf8.RuneCountInString(m.GetValue()); l < 1 || l > 4096 {
 		err := DocumentValidationError{
-			field:  "Content",
-			reason: "value is required",
+			field:  "Value",
+			reason: "value length must be between 1 and 4096 runes, inclusive",
 		}
 		if !all {
 			return err
 		}
 		errors = append(errors, err)
-	}
-
-	if all {
-		switch v := interface{}(m.GetContent()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, DocumentValidationError{
-					field:  "Content",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, DocumentValidationError{
-					field:  "Content",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetContent()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return DocumentValidationError{
-				field:  "Content",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
 	}
 
 	if all {
@@ -172,14 +156,6 @@ func (m *Document) validate(all bool) error {
 
 	if len(errors) > 0 {
 		return DocumentMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *Document) _validateUuid(uuid string) error {
-	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
 	}
 
 	return nil
@@ -255,6 +231,8 @@ var _ interface {
 	ErrorName() string
 } = DocumentValidationError{}
 
+var _Document_Id_Pattern = regexp.MustCompile("^[a-zA-Z0-9\\-_.]*$")
+
 // Validate checks the field values on ListDocumentsRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -280,7 +258,7 @@ func (m *ListDocumentsRequest) validate(all bool) error {
 	if !_ListDocumentsRequest_Parent_Pattern.MatchString(m.GetParent()) {
 		err := ListDocumentsRequestValidationError{
 			field:  "Parent",
-			reason: "value does not match regex pattern \"projects/.*/databases/.*\"",
+			reason: "value does not match regex pattern \"^databases\\\\/[^\\\\/]+\\\\/collections\\\\/[^\\\\/]+$\"",
 		}
 		if !all {
 			return err
@@ -288,10 +266,10 @@ func (m *ListDocumentsRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if val := m.GetPageSize(); val < 1 || val > 100 {
+	if val := m.GetPageSize(); val < 0 || val > 1000 {
 		err := ListDocumentsRequestValidationError{
 			field:  "PageSize",
-			reason: "value must be inside range [1, 100]",
+			reason: "value must be inside range [0, 1000]",
 		}
 		if !all {
 			return err
@@ -381,607 +359,7 @@ var _ interface {
 	ErrorName() string
 } = ListDocumentsRequestValidationError{}
 
-var _ListDocumentsRequest_Parent_Pattern = regexp.MustCompile("projects/.*/databases/.*")
-
-// Validate checks the field values on GetDocumentRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *GetDocumentRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on GetDocumentRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// GetDocumentRequestMultiError, or nil if none found.
-func (m *GetDocumentRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *GetDocumentRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if !_GetDocumentRequest_Collection_Pattern.MatchString(m.GetCollection()) {
-		err := GetDocumentRequestValidationError{
-			field:  "Collection",
-			reason: "value does not match regex pattern \"projects/.*/databases/.*\"",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if err := m._validateUuid(m.GetDocumentId()); err != nil {
-		err = GetDocumentRequestValidationError{
-			field:  "DocumentId",
-			reason: "value must be a valid UUID",
-			cause:  err,
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if len(errors) > 0 {
-		return GetDocumentRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *GetDocumentRequest) _validateUuid(uuid string) error {
-	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
-	}
-
-	return nil
-}
-
-// GetDocumentRequestMultiError is an error wrapping multiple validation errors
-// returned by GetDocumentRequest.ValidateAll() if the designated constraints
-// aren't met.
-type GetDocumentRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m GetDocumentRequestMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m GetDocumentRequestMultiError) AllErrors() []error { return m }
-
-// GetDocumentRequestValidationError is the validation error returned by
-// GetDocumentRequest.Validate if the designated constraints aren't met.
-type GetDocumentRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e GetDocumentRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e GetDocumentRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e GetDocumentRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e GetDocumentRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e GetDocumentRequestValidationError) ErrorName() string {
-	return "GetDocumentRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e GetDocumentRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sGetDocumentRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = GetDocumentRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = GetDocumentRequestValidationError{}
-
-var _GetDocumentRequest_Collection_Pattern = regexp.MustCompile("projects/.*/databases/.*")
-
-// Validate checks the field values on CreateDocumentRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *CreateDocumentRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on CreateDocumentRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// CreateDocumentRequestMultiError, or nil if none found.
-func (m *CreateDocumentRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *CreateDocumentRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if !_CreateDocumentRequest_Parent_Pattern.MatchString(m.GetParent()) {
-		err := CreateDocumentRequestValidationError{
-			field:  "Parent",
-			reason: "value does not match regex pattern \"projects/.*/databases/.*\"",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if m.GetContent() == nil {
-		err := CreateDocumentRequestValidationError{
-			field:  "Content",
-			reason: "value is required",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if all {
-		switch v := interface{}(m.GetContent()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CreateDocumentRequestValidationError{
-					field:  "Content",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CreateDocumentRequestValidationError{
-					field:  "Content",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetContent()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CreateDocumentRequestValidationError{
-				field:  "Content",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if len(errors) > 0 {
-		return CreateDocumentRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// CreateDocumentRequestMultiError is an error wrapping multiple validation
-// errors returned by CreateDocumentRequest.ValidateAll() if the designated
-// constraints aren't met.
-type CreateDocumentRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m CreateDocumentRequestMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m CreateDocumentRequestMultiError) AllErrors() []error { return m }
-
-// CreateDocumentRequestValidationError is the validation error returned by
-// CreateDocumentRequest.Validate if the designated constraints aren't met.
-type CreateDocumentRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e CreateDocumentRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e CreateDocumentRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e CreateDocumentRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e CreateDocumentRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e CreateDocumentRequestValidationError) ErrorName() string {
-	return "CreateDocumentRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e CreateDocumentRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sCreateDocumentRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = CreateDocumentRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = CreateDocumentRequestValidationError{}
-
-var _CreateDocumentRequest_Parent_Pattern = regexp.MustCompile("projects/.*/databases/.*")
-
-// Validate checks the field values on UpdateDocumentRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *UpdateDocumentRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on UpdateDocumentRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// UpdateDocumentRequestMultiError, or nil if none found.
-func (m *UpdateDocumentRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *UpdateDocumentRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if !_UpdateDocumentRequest_Collection_Pattern.MatchString(m.GetCollection()) {
-		err := UpdateDocumentRequestValidationError{
-			field:  "Collection",
-			reason: "value does not match regex pattern \"projects/.*/databases/.*\"",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if err := m._validateUuid(m.GetDocumentId()); err != nil {
-		err = UpdateDocumentRequestValidationError{
-			field:  "DocumentId",
-			reason: "value must be a valid UUID",
-			cause:  err,
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if m.GetContent() == nil {
-		err := UpdateDocumentRequestValidationError{
-			field:  "Content",
-			reason: "value is required",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if all {
-		switch v := interface{}(m.GetContent()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, UpdateDocumentRequestValidationError{
-					field:  "Content",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, UpdateDocumentRequestValidationError{
-					field:  "Content",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetContent()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdateDocumentRequestValidationError{
-				field:  "Content",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if len(errors) > 0 {
-		return UpdateDocumentRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *UpdateDocumentRequest) _validateUuid(uuid string) error {
-	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
-	}
-
-	return nil
-}
-
-// UpdateDocumentRequestMultiError is an error wrapping multiple validation
-// errors returned by UpdateDocumentRequest.ValidateAll() if the designated
-// constraints aren't met.
-type UpdateDocumentRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m UpdateDocumentRequestMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m UpdateDocumentRequestMultiError) AllErrors() []error { return m }
-
-// UpdateDocumentRequestValidationError is the validation error returned by
-// UpdateDocumentRequest.Validate if the designated constraints aren't met.
-type UpdateDocumentRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e UpdateDocumentRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e UpdateDocumentRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e UpdateDocumentRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e UpdateDocumentRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e UpdateDocumentRequestValidationError) ErrorName() string {
-	return "UpdateDocumentRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e UpdateDocumentRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sUpdateDocumentRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = UpdateDocumentRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = UpdateDocumentRequestValidationError{}
-
-var _UpdateDocumentRequest_Collection_Pattern = regexp.MustCompile("projects/.*/databases/.*")
-
-// Validate checks the field values on DeleteDocumentRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *DeleteDocumentRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on DeleteDocumentRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// DeleteDocumentRequestMultiError, or nil if none found.
-func (m *DeleteDocumentRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *DeleteDocumentRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if !_DeleteDocumentRequest_Collection_Pattern.MatchString(m.GetCollection()) {
-		err := DeleteDocumentRequestValidationError{
-			field:  "Collection",
-			reason: "value does not match regex pattern \"projects/.*/databases/.*\"",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if err := m._validateUuid(m.GetDocumentId()); err != nil {
-		err = DeleteDocumentRequestValidationError{
-			field:  "DocumentId",
-			reason: "value must be a valid UUID",
-			cause:  err,
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if len(errors) > 0 {
-		return DeleteDocumentRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *DeleteDocumentRequest) _validateUuid(uuid string) error {
-	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
-	}
-
-	return nil
-}
-
-// DeleteDocumentRequestMultiError is an error wrapping multiple validation
-// errors returned by DeleteDocumentRequest.ValidateAll() if the designated
-// constraints aren't met.
-type DeleteDocumentRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m DeleteDocumentRequestMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m DeleteDocumentRequestMultiError) AllErrors() []error { return m }
-
-// DeleteDocumentRequestValidationError is the validation error returned by
-// DeleteDocumentRequest.Validate if the designated constraints aren't met.
-type DeleteDocumentRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e DeleteDocumentRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e DeleteDocumentRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e DeleteDocumentRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e DeleteDocumentRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e DeleteDocumentRequestValidationError) ErrorName() string {
-	return "DeleteDocumentRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e DeleteDocumentRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sDeleteDocumentRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = DeleteDocumentRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = DeleteDocumentRequestValidationError{}
-
-var _DeleteDocumentRequest_Collection_Pattern = regexp.MustCompile("projects/.*/databases/.*")
+var _ListDocumentsRequest_Parent_Pattern = regexp.MustCompile("^databases\\/[^\\/]+\\/collections\\/[^\\/]+$")
 
 // Validate checks the field values on ListDocumentsResponse with the rules
 // defined in the proto definition for this message. If any rules are
@@ -1121,32 +499,32 @@ var _ interface {
 	ErrorName() string
 } = ListDocumentsResponseValidationError{}
 
-// Validate checks the field values on BeginTransactionRequest with the rules
+// Validate checks the field values on GetDocumentRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *BeginTransactionRequest) Validate() error {
+func (m *GetDocumentRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on BeginTransactionRequest with the
-// rules defined in the proto definition for this message. If any rules are
+// ValidateAll checks the field values on GetDocumentRequest with the rules
+// defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// BeginTransactionRequestMultiError, or nil if none found.
-func (m *BeginTransactionRequest) ValidateAll() error {
+// GetDocumentRequestMultiError, or nil if none found.
+func (m *GetDocumentRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *BeginTransactionRequest) validate(all bool) error {
+func (m *GetDocumentRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	if !_BeginTransactionRequest_Collection_Pattern.MatchString(m.GetCollection()) {
-		err := BeginTransactionRequestValidationError{
-			field:  "Collection",
-			reason: "value does not match regex pattern \"projects/.*/databases/.*\"",
+	if !_GetDocumentRequest_Name_Pattern.MatchString(m.GetName()) {
+		err := GetDocumentRequestValidationError{
+			field:  "Name",
+			reason: "value does not match regex pattern \"^databases\\\\/[^\\\\/]+\\\\/collections\\\\/[^\\\\/]+\\\\/documents\\\\/[^\\\\/]+$\"",
 		}
 		if !all {
 			return err
@@ -1155,19 +533,19 @@ func (m *BeginTransactionRequest) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return BeginTransactionRequestMultiError(errors)
+		return GetDocumentRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// BeginTransactionRequestMultiError is an error wrapping multiple validation
-// errors returned by BeginTransactionRequest.ValidateAll() if the designated
-// constraints aren't met.
-type BeginTransactionRequestMultiError []error
+// GetDocumentRequestMultiError is an error wrapping multiple validation errors
+// returned by GetDocumentRequest.ValidateAll() if the designated constraints
+// aren't met.
+type GetDocumentRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m BeginTransactionRequestMultiError) Error() string {
+func (m GetDocumentRequestMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1176,11 +554,11 @@ func (m BeginTransactionRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m BeginTransactionRequestMultiError) AllErrors() []error { return m }
+func (m GetDocumentRequestMultiError) AllErrors() []error { return m }
 
-// BeginTransactionRequestValidationError is the validation error returned by
-// BeginTransactionRequest.Validate if the designated constraints aren't met.
-type BeginTransactionRequestValidationError struct {
+// GetDocumentRequestValidationError is the validation error returned by
+// GetDocumentRequest.Validate if the designated constraints aren't met.
+type GetDocumentRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1188,24 +566,24 @@ type BeginTransactionRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e BeginTransactionRequestValidationError) Field() string { return e.field }
+func (e GetDocumentRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e BeginTransactionRequestValidationError) Reason() string { return e.reason }
+func (e GetDocumentRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e BeginTransactionRequestValidationError) Cause() error { return e.cause }
+func (e GetDocumentRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e BeginTransactionRequestValidationError) Key() bool { return e.key }
+func (e GetDocumentRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e BeginTransactionRequestValidationError) ErrorName() string {
-	return "BeginTransactionRequestValidationError"
+func (e GetDocumentRequestValidationError) ErrorName() string {
+	return "GetDocumentRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e BeginTransactionRequestValidationError) Error() string {
+func (e GetDocumentRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1217,14 +595,14 @@ func (e BeginTransactionRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sBeginTransactionRequest.%s: %s%s",
+		"invalid %sGetDocumentRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = BeginTransactionRequestValidationError{}
+var _ error = GetDocumentRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -1232,39 +610,36 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = BeginTransactionRequestValidationError{}
+} = GetDocumentRequestValidationError{}
 
-var _BeginTransactionRequest_Collection_Pattern = regexp.MustCompile("projects/.*/databases/.*")
+var _GetDocumentRequest_Name_Pattern = regexp.MustCompile("^databases\\/[^\\/]+\\/collections\\/[^\\/]+\\/documents\\/[^\\/]+$")
 
-// Validate checks the field values on CommitTransactionRequest with the rules
+// Validate checks the field values on CreateDocumentRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *CommitTransactionRequest) Validate() error {
+func (m *CreateDocumentRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on CommitTransactionRequest with the
-// rules defined in the proto definition for this message. If any rules are
+// ValidateAll checks the field values on CreateDocumentRequest with the rules
+// defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// CommitTransactionRequestMultiError, or nil if none found.
-func (m *CommitTransactionRequest) ValidateAll() error {
+// CreateDocumentRequestMultiError, or nil if none found.
+func (m *CreateDocumentRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *CommitTransactionRequest) validate(all bool) error {
+func (m *CreateDocumentRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	// no validation rules for Collection
-
-	if err := m._validateUuid(m.GetTransactionId()); err != nil {
-		err = CommitTransactionRequestValidationError{
-			field:  "TransactionId",
-			reason: "value must be a valid UUID",
-			cause:  err,
+	if !_CreateDocumentRequest_Parent_Pattern.MatchString(m.GetParent()) {
+		err := CreateDocumentRequestValidationError{
+			field:  "Parent",
+			reason: "value does not match regex pattern \"^databases\\\\/[^\\\\/]+\\\\/collections\\\\/[^\\\\/]+$\"",
 		}
 		if !all {
 			return err
@@ -1272,290 +647,12 @@ func (m *CommitTransactionRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if len(m.GetWrites()) < 1 {
-		err := CommitTransactionRequestValidationError{
-			field:  "Writes",
-			reason: "value must contain at least 1 item(s)",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	if m.GetDocumentId() != "" {
 
-	for idx, item := range m.GetWrites() {
-		_, _ = idx, item
-
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, CommitTransactionRequestValidationError{
-						field:  fmt.Sprintf("Writes[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, CommitTransactionRequestValidationError{
-						field:  fmt.Sprintf("Writes[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return CommitTransactionRequestValidationError{
-					field:  fmt.Sprintf("Writes[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	if len(errors) > 0 {
-		return CommitTransactionRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *CommitTransactionRequest) _validateUuid(uuid string) error {
-	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
-	}
-
-	return nil
-}
-
-// CommitTransactionRequestMultiError is an error wrapping multiple validation
-// errors returned by CommitTransactionRequest.ValidateAll() if the designated
-// constraints aren't met.
-type CommitTransactionRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m CommitTransactionRequestMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m CommitTransactionRequestMultiError) AllErrors() []error { return m }
-
-// CommitTransactionRequestValidationError is the validation error returned by
-// CommitTransactionRequest.Validate if the designated constraints aren't met.
-type CommitTransactionRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e CommitTransactionRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e CommitTransactionRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e CommitTransactionRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e CommitTransactionRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e CommitTransactionRequestValidationError) ErrorName() string {
-	return "CommitTransactionRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e CommitTransactionRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sCommitTransactionRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = CommitTransactionRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = CommitTransactionRequestValidationError{}
-
-// Validate checks the field values on RollbackTransactionRequest with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *RollbackTransactionRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on RollbackTransactionRequest with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// RollbackTransactionRequestMultiError, or nil if none found.
-func (m *RollbackTransactionRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *RollbackTransactionRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Collection
-
-	if err := m._validateUuid(m.GetTransactionId()); err != nil {
-		err = RollbackTransactionRequestValidationError{
-			field:  "TransactionId",
-			reason: "value must be a valid UUID",
-			cause:  err,
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if len(errors) > 0 {
-		return RollbackTransactionRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *RollbackTransactionRequest) _validateUuid(uuid string) error {
-	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
-	}
-
-	return nil
-}
-
-// RollbackTransactionRequestMultiError is an error wrapping multiple
-// validation errors returned by RollbackTransactionRequest.ValidateAll() if
-// the designated constraints aren't met.
-type RollbackTransactionRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m RollbackTransactionRequestMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m RollbackTransactionRequestMultiError) AllErrors() []error { return m }
-
-// RollbackTransactionRequestValidationError is the validation error returned
-// by RollbackTransactionRequest.Validate if the designated constraints aren't met.
-type RollbackTransactionRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e RollbackTransactionRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e RollbackTransactionRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e RollbackTransactionRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e RollbackTransactionRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e RollbackTransactionRequestValidationError) ErrorName() string {
-	return "RollbackTransactionRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e RollbackTransactionRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sRollbackTransactionRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = RollbackTransactionRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = RollbackTransactionRequestValidationError{}
-
-// Validate checks the field values on Write with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *Write) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Write with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in WriteMultiError, or nil if none found.
-func (m *Write) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Write) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	switch v := m.Operation.(type) {
-	case *Write_Create:
-		if v == nil {
-			err := WriteValidationError{
-				field:  "Operation",
-				reason: "oneof value cannot be a typed-nil",
+		if l := utf8.RuneCountInString(m.GetDocumentId()); l < 1 || l > 64 {
+			err := CreateDocumentRequestValidationError{
+				field:  "DocumentId",
+				reason: "value length must be between 1 and 64 runes, inclusive",
 			}
 			if !all {
 				return err
@@ -1563,40 +660,10 @@ func (m *Write) validate(all bool) error {
 			errors = append(errors, err)
 		}
 
-		if all {
-			switch v := interface{}(m.GetCreate()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, WriteValidationError{
-						field:  "Create",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, WriteValidationError{
-						field:  "Create",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetCreate()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return WriteValidationError{
-					field:  "Create",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *Write_Update:
-		if v == nil {
-			err := WriteValidationError{
-				field:  "Operation",
-				reason: "oneof value cannot be a typed-nil",
+		if !_CreateDocumentRequest_DocumentId_Pattern.MatchString(m.GetDocumentId()) {
+			err := CreateDocumentRequestValidationError{
+				field:  "DocumentId",
+				reason: "value does not match regex pattern \"^[a-zA-Z0-9\\\\-_.]*$\"",
 			}
 			if !all {
 				return err
@@ -1604,93 +671,62 @@ func (m *Write) validate(all bool) error {
 			errors = append(errors, err)
 		}
 
-		if all {
-			switch v := interface{}(m.GetUpdate()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, WriteValidationError{
-						field:  "Update",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, WriteValidationError{
-						field:  "Update",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetUpdate()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return WriteValidationError{
-					field:  "Update",
+	}
+
+	if m.GetDocument() == nil {
+		err := CreateDocumentRequestValidationError{
+			field:  "Document",
+			reason: "value is required",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if all {
+		switch v := interface{}(m.GetDocument()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CreateDocumentRequestValidationError{
+					field:  "Document",
 					reason: "embedded message failed validation",
 					cause:  err,
-				}
+				})
 			}
-		}
-
-	case *Write_Delete:
-		if v == nil {
-			err := WriteValidationError{
-				field:  "Operation",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetDelete()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, WriteValidationError{
-						field:  "Delete",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, WriteValidationError{
-						field:  "Delete",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetDelete()).(interface{ Validate() error }); ok {
+		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				return WriteValidationError{
-					field:  "Delete",
+				errors = append(errors, CreateDocumentRequestValidationError{
+					field:  "Document",
 					reason: "embedded message failed validation",
 					cause:  err,
-				}
+				})
 			}
 		}
-
-	default:
-		_ = v // ensures v is used
+	} else if v, ok := interface{}(m.GetDocument()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreateDocumentRequestValidationError{
+				field:  "Document",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
 	}
 
 	if len(errors) > 0 {
-		return WriteMultiError(errors)
+		return CreateDocumentRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// WriteMultiError is an error wrapping multiple validation errors returned by
-// Write.ValidateAll() if the designated constraints aren't met.
-type WriteMultiError []error
+// CreateDocumentRequestMultiError is an error wrapping multiple validation
+// errors returned by CreateDocumentRequest.ValidateAll() if the designated
+// constraints aren't met.
+type CreateDocumentRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m WriteMultiError) Error() string {
+func (m CreateDocumentRequestMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1699,11 +735,11 @@ func (m WriteMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m WriteMultiError) AllErrors() []error { return m }
+func (m CreateDocumentRequestMultiError) AllErrors() []error { return m }
 
-// WriteValidationError is the validation error returned by Write.Validate if
-// the designated constraints aren't met.
-type WriteValidationError struct {
+// CreateDocumentRequestValidationError is the validation error returned by
+// CreateDocumentRequest.Validate if the designated constraints aren't met.
+type CreateDocumentRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1711,22 +747,24 @@ type WriteValidationError struct {
 }
 
 // Field function returns field value.
-func (e WriteValidationError) Field() string { return e.field }
+func (e CreateDocumentRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e WriteValidationError) Reason() string { return e.reason }
+func (e CreateDocumentRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e WriteValidationError) Cause() error { return e.cause }
+func (e CreateDocumentRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e WriteValidationError) Key() bool { return e.key }
+func (e CreateDocumentRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e WriteValidationError) ErrorName() string { return "WriteValidationError" }
+func (e CreateDocumentRequestValidationError) ErrorName() string {
+	return "CreateDocumentRequestValidationError"
+}
 
 // Error satisfies the builtin error interface
-func (e WriteValidationError) Error() string {
+func (e CreateDocumentRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1738,14 +776,14 @@ func (e WriteValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sWrite.%s: %s%s",
+		"invalid %sCreateDocumentRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = WriteValidationError{}
+var _ error = CreateDocumentRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -1753,35 +791,209 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = WriteValidationError{}
+} = CreateDocumentRequestValidationError{}
 
-// Validate checks the field values on TransactionResponse with the rules
+var _CreateDocumentRequest_Parent_Pattern = regexp.MustCompile("^databases\\/[^\\/]+\\/collections\\/[^\\/]+$")
+
+var _CreateDocumentRequest_DocumentId_Pattern = regexp.MustCompile("^[a-zA-Z0-9\\-_.]*$")
+
+// Validate checks the field values on UpdateDocumentRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *TransactionResponse) Validate() error {
+func (m *UpdateDocumentRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on TransactionResponse with the rules
+// ValidateAll checks the field values on UpdateDocumentRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// TransactionResponseMultiError, or nil if none found.
-func (m *TransactionResponse) ValidateAll() error {
+// UpdateDocumentRequestMultiError, or nil if none found.
+func (m *UpdateDocumentRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *TransactionResponse) validate(all bool) error {
+func (m *UpdateDocumentRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	if err := m._validateUuid(m.GetTransactionId()); err != nil {
-		err = TransactionResponseValidationError{
-			field:  "TransactionId",
-			reason: "value must be a valid UUID",
-			cause:  err,
+	if m.GetDocument() == nil {
+		err := UpdateDocumentRequestValidationError{
+			field:  "Document",
+			reason: "value is required",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if all {
+		switch v := interface{}(m.GetDocument()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateDocumentRequestValidationError{
+					field:  "Document",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateDocumentRequestValidationError{
+					field:  "Document",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetDocument()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateDocumentRequestValidationError{
+				field:  "Document",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetUpdateMask()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateDocumentRequestValidationError{
+					field:  "UpdateMask",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateDocumentRequestValidationError{
+					field:  "UpdateMask",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetUpdateMask()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateDocumentRequestValidationError{
+				field:  "UpdateMask",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return UpdateDocumentRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateDocumentRequestMultiError is an error wrapping multiple validation
+// errors returned by UpdateDocumentRequest.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateDocumentRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateDocumentRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateDocumentRequestMultiError) AllErrors() []error { return m }
+
+// UpdateDocumentRequestValidationError is the validation error returned by
+// UpdateDocumentRequest.Validate if the designated constraints aren't met.
+type UpdateDocumentRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateDocumentRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateDocumentRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateDocumentRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateDocumentRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateDocumentRequestValidationError) ErrorName() string {
+	return "UpdateDocumentRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateDocumentRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateDocumentRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateDocumentRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateDocumentRequestValidationError{}
+
+// Validate checks the field values on DeleteDocumentRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DeleteDocumentRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DeleteDocumentRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DeleteDocumentRequestMultiError, or nil if none found.
+func (m *DeleteDocumentRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DeleteDocumentRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if !_DeleteDocumentRequest_Name_Pattern.MatchString(m.GetName()) {
+		err := DeleteDocumentRequestValidationError{
+			field:  "Name",
+			reason: "value does not match regex pattern \"^databases\\\\/[^\\\\/]+\\\\/collections\\\\/[^\\\\/]+\\\\/documents\\\\/[^\\\\/]+$\"",
 		}
 		if !all {
 			return err
@@ -1790,27 +1002,19 @@ func (m *TransactionResponse) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return TransactionResponseMultiError(errors)
+		return DeleteDocumentRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-func (m *TransactionResponse) _validateUuid(uuid string) error {
-	if matched := _document_service_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
-	}
-
-	return nil
-}
-
-// TransactionResponseMultiError is an error wrapping multiple validation
-// errors returned by TransactionResponse.ValidateAll() if the designated
+// DeleteDocumentRequestMultiError is an error wrapping multiple validation
+// errors returned by DeleteDocumentRequest.ValidateAll() if the designated
 // constraints aren't met.
-type TransactionResponseMultiError []error
+type DeleteDocumentRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m TransactionResponseMultiError) Error() string {
+func (m DeleteDocumentRequestMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1819,11 +1023,11 @@ func (m TransactionResponseMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m TransactionResponseMultiError) AllErrors() []error { return m }
+func (m DeleteDocumentRequestMultiError) AllErrors() []error { return m }
 
-// TransactionResponseValidationError is the validation error returned by
-// TransactionResponse.Validate if the designated constraints aren't met.
-type TransactionResponseValidationError struct {
+// DeleteDocumentRequestValidationError is the validation error returned by
+// DeleteDocumentRequest.Validate if the designated constraints aren't met.
+type DeleteDocumentRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1831,24 +1035,24 @@ type TransactionResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e TransactionResponseValidationError) Field() string { return e.field }
+func (e DeleteDocumentRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e TransactionResponseValidationError) Reason() string { return e.reason }
+func (e DeleteDocumentRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e TransactionResponseValidationError) Cause() error { return e.cause }
+func (e DeleteDocumentRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e TransactionResponseValidationError) Key() bool { return e.key }
+func (e DeleteDocumentRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e TransactionResponseValidationError) ErrorName() string {
-	return "TransactionResponseValidationError"
+func (e DeleteDocumentRequestValidationError) ErrorName() string {
+	return "DeleteDocumentRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e TransactionResponseValidationError) Error() string {
+func (e DeleteDocumentRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1860,14 +1064,14 @@ func (e TransactionResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sTransactionResponse.%s: %s%s",
+		"invalid %sDeleteDocumentRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = TransactionResponseValidationError{}
+var _ error = DeleteDocumentRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -1875,4 +1079,6 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = TransactionResponseValidationError{}
+} = DeleteDocumentRequestValidationError{}
+
+var _DeleteDocumentRequest_Name_Pattern = regexp.MustCompile("^databases\\/[^\\/]+\\/collections\\/[^\\/]+\\/documents\\/[^\\/]+$")

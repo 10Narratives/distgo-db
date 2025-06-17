@@ -5,10 +5,10 @@ import (
 
 	workergrpc "github.com/10Narratives/distgo-db/internal/app/worker/grpc"
 	workercfg "github.com/10Narratives/distgo-db/internal/config/worker"
-	documentstore "github.com/10Narratives/distgo-db/internal/storages/worker/document"
-	walstore "github.com/10Narratives/distgo-db/internal/storages/worker/wal"
-
-	documentsrv "github.com/10Narratives/distgo-db/internal/services/worker/document"
+	collectionsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/collection"
+	databasesrv "github.com/10Narratives/distgo-db/internal/services/worker/data/database"
+	documentsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/document"
+	datastorage "github.com/10Narratives/distgo-db/internal/storages/data"
 )
 
 type App struct {
@@ -16,14 +16,18 @@ type App struct {
 }
 
 func New(log *slog.Logger, cfg workercfg.Config) *App {
-	documentStorage := documentstore.NewStorage()
-	walStorage, err := walstore.New("logs/" + cfg.Name + ".log")
-	if err != nil {
-		panic(err.Error())
-	}
+	storage := datastorage.New()
 
-	documentService := documentsrv.New(documentStorage, walStorage)
+	databaseSrv := databasesrv.New(storage)
+	collectionSrv := collectionsrv.New(storage)
+	documentSrv := documentsrv.New(storage)
 
-	grpcApp := workergrpc.New(log, documentService, cfg.GRPC.Port)
+	grpcApp := workergrpc.New(
+		log,
+		databaseSrv,
+		collectionSrv,
+		documentSrv,
+		cfg.GRPC.Port,
+	)
 	return &App{GRPC: grpcApp}
 }
