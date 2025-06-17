@@ -8,6 +8,7 @@ import (
 
 	collectiongrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/collection"
 	databasegrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/database"
+	documentgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/document"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
@@ -24,7 +25,8 @@ type App struct {
 func New(
 	log *slog.Logger,
 	databaseSrv databasegrpc.DatabaseService,
-	collectioSrv collectiongrpc.CollectionService,
+	collectionSrv collectiongrpc.CollectionService,
+	documentSrv documentgrpc.DocumentService,
 	port int,
 ) *App {
 	loggingOpts := []logging.Option{
@@ -46,7 +48,8 @@ func New(
 	))
 
 	databasegrpc.Register(gRPCServer, databaseSrv)
-	collectiongrpc.Register(gRPCServer, collectioSrv)
+	collectiongrpc.Register(gRPCServer, collectionSrv)
+	documentgrpc.Register(gRPCServer, documentSrv)
 
 	return &App{
 		log:        log,
