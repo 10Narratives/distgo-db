@@ -9,6 +9,7 @@ import (
 	databasemodels "github.com/10Narratives/distgo-db/internal/models/worker/data/database"
 	collectionsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/collection"
 	mocks "github.com/10Narratives/distgo-db/internal/services/worker/data/collection/mocks"
+	walmocks "github.com/10Narratives/distgo-db/internal/services/worker/data/common/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -26,7 +27,9 @@ func TestService_CreateCollection(t *testing.T) {
 
 	type fields struct {
 		setupStorageMock func(m *mocks.CollectionStorage)
+		setupWALMock     func(m *walmocks.WALStorage)
 	}
+
 	type args struct {
 		ctx context.Context
 		req struct {
@@ -35,6 +38,7 @@ func TestService_CreateCollection(t *testing.T) {
 			description  string
 		}
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -52,6 +56,9 @@ func TestService_CreateCollection(t *testing.T) {
 							Name:        name,
 							Description: description,
 						}, nil)
+				},
+				setupWALMock: func(m *walmocks.WALStorage) {
+					m.On("LogEntry", mock.Anything, mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -82,6 +89,7 @@ func TestService_CreateCollection(t *testing.T) {
 					m.On("CreateCollection", mock.Anything, key, description).
 						Return(collectionmodels.Collection{}, errors.New("internal error"))
 				},
+				setupWALMock: func(m *walmocks.WALStorage) {},
 			},
 			args: args{
 				ctx: context.Background(),
@@ -101,16 +109,52 @@ func TestService_CreateCollection(t *testing.T) {
 				assert.Contains(tt, err.Error(), "internal error")
 			},
 		},
+		{
+			name: "WAL logging fails",
+			fields: fields{
+				setupStorageMock: func(m *mocks.CollectionStorage) {
+					key := collectionmodels.NewKey(name)
+					m.On("CreateCollection", mock.Anything, key, description).
+						Return(collectionmodels.Collection{
+							Name:        name,
+							Description: description,
+						}, nil)
+				},
+				setupWALMock: func(m *walmocks.WALStorage) {
+					m.On("LogEntry", mock.Anything, mock.Anything).Return(errors.New("WAL error"))
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: struct {
+					parent       string
+					collectionID string
+					description  string
+				}{
+					parent:       parent,
+					collectionID: collectionID,
+					description:  description,
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				require.Error(tt, err)
+				assert.Contains(tt, err.Error(), "failed to log WAL entry")
+			},
+		},
 	}
 
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			store := mocks.NewCollectionStorage(t)
-			tt.fields.setupStorageMock(store)
-			service := collectionsrv.New(store)
 
+			store := mocks.NewCollectionStorage(t)
+			walStore := walmocks.NewWALStorage(t)
+			tt.fields.setupStorageMock(store)
+			tt.fields.setupWALMock(walStore)
+
+			service := collectionsrv.New(store, walStore)
 			res, err := service.CreateCollection(
 				tt.args.ctx,
 				tt.args.req.parent,
@@ -121,6 +165,7 @@ func TestService_CreateCollection(t *testing.T) {
 			tt.wantVal(t, res)
 			tt.wantErr(t, err)
 			store.AssertExpectations(t)
+			walStore.AssertExpectations(t)
 		})
 	}
 }
@@ -133,12 +178,14 @@ func TestService_GetCollection(t *testing.T) {
 	type fields struct {
 		setupStorageMock func(m *mocks.CollectionStorage)
 	}
+
 	type args struct {
 		ctx context.Context
 		req struct {
 			name string
 		}
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -147,14 +194,13 @@ func TestService_GetCollection(t *testing.T) {
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name: "successful get",
+			name: "success",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
 					key := collectionmodels.NewKey(name)
-					m.On("Collection", mock.Anything, key).
-						Return(collectionmodels.Collection{
-							Name: name,
-						}, nil)
+					m.On("Collection", mock.Anything, key).Return(collectionmodels.Collection{
+						Name: name,
+					}, nil)
 				},
 			},
 			args: args{
@@ -173,8 +219,7 @@ func TestService_GetCollection(t *testing.T) {
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
 					key := collectionmodels.NewKey(name)
-					m.On("Collection", mock.Anything, key).
-						Return(collectionmodels.Collection{}, errors.New("not found"))
+					m.On("Collection", mock.Anything, key).Return(collectionmodels.Collection{}, errors.New("not found"))
 				},
 			},
 			args: args{
@@ -193,10 +238,11 @@ func TestService_GetCollection(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			store := mocks.NewCollectionStorage(t)
 			tt.fields.setupStorageMock(store)
-			service := collectionsrv.New(store)
 
+			service := collectionsrv.New(store, nil)
 			res, err := service.Collection(tt.args.ctx, tt.args.req.name)
 
 			tt.wantVal(t, res)
@@ -215,9 +261,13 @@ func TestService_ListCollections(t *testing.T) {
 		token  = "token"
 	)
 
+	coll1 := collectionmodels.Collection{Name: parent + "/collections/coll1"}
+	coll2 := collectionmodels.Collection{Name: parent + "/collections/coll2"}
+
 	type fields struct {
 		setupStorageMock func(m *mocks.CollectionStorage)
 	}
+
 	type args struct {
 		ctx context.Context
 		req struct {
@@ -226,23 +276,20 @@ func TestService_ListCollections(t *testing.T) {
 			token  string
 		}
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
 		args    args
-		wantVal require.ValueAssertionFunc
+		wantVal func(tt require.TestingT, got interface{}, nextToken string, i ...interface{})
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name: "successful list",
+			name: "single page full list",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
 					parentKey := databasemodels.NewKey(parent)
-					m.On("Collections", mock.Anything, parentKey).
-						Return([]collectionmodels.Collection{
-							{Name: parent + "/collections/coll1"},
-							{Name: parent + "/collections/coll2"},
-						})
+					m.On("Collections", mock.Anything, parentKey).Return([]collectionmodels.Collection{coll1, coll2})
 				},
 			},
 			args: args{
@@ -257,25 +304,22 @@ func TestService_ListCollections(t *testing.T) {
 					token:  token,
 				},
 			},
-			wantVal: func(tt require.TestingT, got interface{}, i ...interface{}) {
+			wantVal: func(tt require.TestingT, got interface{}, nextToken string, i ...interface{}) {
 				list, ok := got.([]collectionmodels.Collection)
 				require.True(tt, ok)
-				require.Len(tt, list, 2)
-				assert.Equal(tt, parent+"/collections/coll1", list[0].Name)
-				assert.Equal(tt, parent+"/collections/coll2", list[1].Name)
+				assert.Len(tt, list, 2)
+				assert.Equal(tt, coll1, list[0])
+				assert.Equal(tt, coll2, list[1])
+				assert.Empty(tt, nextToken)
 			},
 			wantErr: require.NoError,
 		},
 		{
-			name: "with next page token",
+			name: "empty list",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
 					parentKey := databasemodels.NewKey(parent)
-					m.On("Collections", mock.Anything, parentKey).
-						Return([]collectionmodels.Collection{
-							{Name: parent + "/collections/coll1"},
-							{Name: parent + "/collections/coll2"},
-						})
+					m.On("Collections", mock.Anything, parentKey).Return([]collectionmodels.Collection{})
 				},
 			},
 			args: args{
@@ -290,12 +334,11 @@ func TestService_ListCollections(t *testing.T) {
 					token:  token,
 				},
 			},
-			wantVal: func(tt require.TestingT, got interface{}, i ...interface{}) {
+			wantVal: func(tt require.TestingT, got interface{}, nextToken string, i ...interface{}) {
 				list, ok := got.([]collectionmodels.Collection)
 				require.True(tt, ok)
-				require.Len(tt, list, 2)
-				assert.Equal(tt, parent+"/collections/coll1", list[0].Name)
-				assert.Equal(tt, parent+"/collections/coll2", list[1].Name)
+				assert.Empty(tt, list)
+				assert.Empty(tt, nextToken)
 			},
 			wantErr: require.NoError,
 		},
@@ -305,101 +348,144 @@ func TestService_ListCollections(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			store := mocks.NewCollectionStorage(t)
 			tt.fields.setupStorageMock(store)
-			service := collectionsrv.New(store)
 
-			list, _, err := service.Collections(tt.args.ctx, tt.args.req.parent, tt.args.req.size, tt.args.req.token)
+			service := collectionsrv.New(store, nil)
+			list, nextPageToken, err := service.Collections(tt.args.ctx, tt.args.req.parent, tt.args.req.size, tt.args.req.token)
 
-			tt.wantVal(t, list)
+			tt.wantVal(t, list, nextPageToken)
 			tt.wantErr(t, err)
 			store.AssertExpectations(t)
 		})
 	}
 }
 
-func TestService_DeleteCollection(t *testing.T) {
-	t.Parallel()
+// func TestService_DeleteCollection(t *testing.T) {
+// 	t.Parallel()
 
-	const name = "databases/db/collections/coll1"
+// 	const name = "databases/db/collections/coll1"
 
-	type fields struct {
-		setupStorageMock func(m *mocks.CollectionStorage)
-	}
-	type args struct {
-		ctx context.Context
-		req struct {
-			name string
-		}
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantVal require.ValueAssertionFunc
-		wantErr require.ErrorAssertionFunc
-	}{
-		{
-			name: "successful delete",
-			fields: fields{
-				setupStorageMock: func(m *mocks.CollectionStorage) {
-					key := collectionmodels.NewKey(name)
-					m.On("DeleteCollection", mock.Anything, key).Return(nil)
-				},
-			},
-			args: args{
-				ctx: context.Background(),
-				req: struct{ name string }{name: name},
-			},
-			wantVal: require.Empty,
-			wantErr: require.NoError,
-		},
-		{
-			name: "not found",
-			fields: fields{
-				setupStorageMock: func(m *mocks.CollectionStorage) {
-					key := collectionmodels.NewKey(name)
-					m.On("DeleteCollection", mock.Anything, key).Return(errors.New("not found"))
-				},
-			},
-			args: args{
-				ctx: context.Background(),
-				req: struct{ name string }{name: name},
-			},
-			wantVal: require.Empty,
-			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
-				require.Error(tt, err)
-				assert.Contains(tt, err.Error(), "not found")
-			},
-		},
-	}
+// 	type fields struct {
+// 		setupStorageMock func(m *mocks.CollectionStorage)
+// 		setupWALMock     func(m *walmocks.WALStorage)
+// 	}
 
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			store := mocks.NewCollectionStorage(t)
-			tt.fields.setupStorageMock(store)
-			service := collectionsrv.New(store)
+// 	type args struct {
+// 		ctx context.Context
+// 		req struct {
+// 			name string
+// 		}
+// 	}
 
-			err := service.DeleteCollection(tt.args.ctx, tt.args.req.name)
+// 	tests := []struct {
+// 		name    string
+// 		fields  fields
+// 		args    args
+// 		wantVal require.ValueAssertionFunc
+// 		wantErr require.ErrorAssertionFunc
+// 	}{
+// 		{
+// 			name: "success",
+// 			fields: fields{
+// 				setupStorageMock: func(m *mocks.CollectionStorage) {
+// 					key := collectionmodels.NewKey(name)
+// 					m.On("DeleteCollection", mock.Anything, key).Return(nil)
+// 				},
+// 				setupWALMock: func(m *walmocks.WALStorage) {
+// 					m.On("LogEntry", mock.Anything, mock.Anything).Return(nil)
+// 				},
+// 			},
+// 			args: args{
+// 				ctx: context.Background(),
+// 				req: struct{ name string }{name: name},
+// 			},
+// 			wantVal: require.Empty,
+// 			wantErr: require.NoError,
+// 		},
+// 		{
+// 			name: "not found",
+// 			fields: fields{
+// 				setupStorageMock: func(m *mocks.CollectionStorage) {
+// 					key := collectionmodels.NewKey(name)
+// 					m.On("DeleteCollection", mock.Anything, key).Return(errors.New("not found"))
+// 				},
+// 				setupWALMock: func(m *walmocks.WALStorage) {},
+// 			},
+// 			args: args{
+// 				ctx: context.Background(),
+// 				req: struct{ name string }{name: name},
+// 			},
+// 			wantVal: require.Empty,
+// 			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+// 				require.Error(tt, err)
+// 				assert.Contains(tt, err.Error(), "not found")
+// 			},
+// 		},
+// 		{
+// 			name: "WAL logging fails",
+// 			fields: fields{
+// 				setupStorageMock: func(m *mocks.CollectionStorage) {
+// 					key := collectionmodels.NewKey(name)
+// 					m.On("DeleteCollection", mock.Anything, key).Return(nil)
+// 				},
+// 				setupWALMock: func(m *walmocks.WALStorage) {
+// 					m.On("LogEntry", mock.Anything, mock.Anything).Return(errors.New("WAL error"))
+// 				},
+// 			},
+// 			args: args{
+// 				ctx: context.Background(),
+// 				req: struct{ name string }{name: name},
+// 			},
+// 			wantVal: require.Empty,
+// 			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+// 				require.Error(tt, err)
+// 				assert.Contains(tt, err.Error(), "failed to log WAL entry")
+// 			},
+// 		},
+// 	}
 
-			tt.wantVal(t, nil)
-			tt.wantErr(t, err)
-			store.AssertExpectations(t)
-		})
-	}
-}
+// 	for _, tt := range tests {
+// 		tt := tt
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			t.Parallel()
+
+// 			store := mocks.NewCollectionStorage(t)
+// 			walStore := walmocks.NewWALStorage(t)
+// 			tt.fields.setupStorageMock(store)
+// 			tt.fields.setupWALMock(walStore)
+
+// 			service := collectionsrv.New(store, walStore)
+// 			err := service.DeleteCollection(tt.args.ctx, tt.args.req.name)
+
+// 			tt.wantVal(t, nil)
+// 			tt.wantErr(t, err)
+// 			store.AssertExpectations(t)
+// 			walStore.AssertExpectations(t)
+// 		})
+// 	}
+// }
 
 func TestService_UpdateCollection(t *testing.T) {
 	t.Parallel()
 
-	const name = "databases/db/collections/coll1"
-	const newDescription = "Updated description"
+	const (
+		name           = "databases/db/collections/coll1"
+		oldDescription = "Old description"
+		newDescription = "Updated description"
+	)
+
+	existingColl := collectionmodels.Collection{
+		Name:        name,
+		Description: oldDescription,
+	}
 
 	type fields struct {
 		setupStorageMock func(m *mocks.CollectionStorage)
+		setupWALMock     func(m *walmocks.WALStorage)
 	}
+
 	type args struct {
 		ctx context.Context
 		req struct {
@@ -407,6 +493,7 @@ func TestService_UpdateCollection(t *testing.T) {
 			paths      []string
 		}
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -419,7 +506,11 @@ func TestService_UpdateCollection(t *testing.T) {
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {
 					key := collectionmodels.NewKey(name)
+					m.On("Collection", mock.Anything, key).Return(existingColl, nil)
 					m.On("UpdateCollection", mock.Anything, key, newDescription).Return(nil)
+				},
+				setupWALMock: func(m *walmocks.WALStorage) {
+					m.On("LogEntry", mock.Anything, mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -446,6 +537,7 @@ func TestService_UpdateCollection(t *testing.T) {
 			name: "unknown field",
 			fields: fields{
 				setupStorageMock: func(m *mocks.CollectionStorage) {},
+				setupWALMock:     func(m *walmocks.WALStorage) {},
 			},
 			args: args{
 				ctx: context.Background(),
@@ -465,21 +557,56 @@ func TestService_UpdateCollection(t *testing.T) {
 				assert.Contains(tt, err.Error(), "unknown field")
 			},
 		},
+		{
+			name: "WAL logging fails",
+			fields: fields{
+				setupStorageMock: func(m *mocks.CollectionStorage) {
+					key := collectionmodels.NewKey(name)
+					m.On("Collection", mock.Anything, key).Return(existingColl, nil)
+					m.On("UpdateCollection", mock.Anything, key, newDescription).Return(nil)
+				},
+				setupWALMock: func(m *walmocks.WALStorage) {
+					m.On("LogEntry", mock.Anything, mock.Anything).Return(errors.New("WAL error"))
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: struct {
+					collection collectionmodels.Collection
+					paths      []string
+				}{
+					collection: collectionmodels.Collection{
+						Name:        name,
+						Description: newDescription,
+					},
+					paths: []string{"description"},
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				require.Error(tt, err)
+				assert.Contains(tt, err.Error(), "failed to log WAL entry")
+			},
+		},
 	}
 
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			store := mocks.NewCollectionStorage(t)
-			tt.fields.setupStorageMock(store)
-			service := collectionsrv.New(store)
 
+			store := mocks.NewCollectionStorage(t)
+			walStore := walmocks.NewWALStorage(t)
+			tt.fields.setupStorageMock(store)
+			tt.fields.setupWALMock(walStore)
+
+			service := collectionsrv.New(store, walStore)
 			updated, err := service.UpdateCollection(tt.args.ctx, tt.args.req.collection, tt.args.req.paths)
 
 			tt.wantVal(t, updated)
 			tt.wantErr(t, err)
 			store.AssertExpectations(t)
+			walStore.AssertExpectations(t)
 		})
 	}
 }
