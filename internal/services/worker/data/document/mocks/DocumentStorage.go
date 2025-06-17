@@ -5,6 +5,8 @@ package mocks
 import (
 	context "context"
 
+	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
+
 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
 
 	mock "github.com/stretchr/testify/mock"
@@ -15,9 +17,9 @@ type DocumentStorage struct {
 	mock.Mock
 }
 
-// CreateDocument provides a mock function with given fields: ctx, name, value
-func (_m *DocumentStorage) CreateDocument(ctx context.Context, name string, value string) (documentmodels.Document, error) {
-	ret := _m.Called(ctx, name, value)
+// CreateDocument provides a mock function with given fields: ctx, key, value
+func (_m *DocumentStorage) CreateDocument(ctx context.Context, key documentmodels.Key, value string) (documentmodels.Document, error) {
+	ret := _m.Called(ctx, key, value)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateDocument")
@@ -25,17 +27,17 @@ func (_m *DocumentStorage) CreateDocument(ctx context.Context, name string, valu
 
 	var r0 documentmodels.Document
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) (documentmodels.Document, error)); ok {
-		return rf(ctx, name, value)
+	if rf, ok := ret.Get(0).(func(context.Context, documentmodels.Key, string) (documentmodels.Document, error)); ok {
+		return rf(ctx, key, value)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) documentmodels.Document); ok {
-		r0 = rf(ctx, name, value)
+	if rf, ok := ret.Get(0).(func(context.Context, documentmodels.Key, string) documentmodels.Document); ok {
+		r0 = rf(ctx, key, value)
 	} else {
 		r0 = ret.Get(0).(documentmodels.Document)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, name, value)
+	if rf, ok := ret.Get(1).(func(context.Context, documentmodels.Key, string) error); ok {
+		r1 = rf(ctx, key, value)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -43,17 +45,17 @@ func (_m *DocumentStorage) CreateDocument(ctx context.Context, name string, valu
 	return r0, r1
 }
 
-// DeleteDocument provides a mock function with given fields: ctx, name
-func (_m *DocumentStorage) DeleteDocument(ctx context.Context, name string) error {
-	ret := _m.Called(ctx, name)
+// DeleteDocument provides a mock function with given fields: ctx, key
+func (_m *DocumentStorage) DeleteDocument(ctx context.Context, key documentmodels.Key) error {
+	ret := _m.Called(ctx, key)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteDocument")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, documentmodels.Key) error); ok {
+		r0 = rf(ctx, key)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -61,9 +63,9 @@ func (_m *DocumentStorage) DeleteDocument(ctx context.Context, name string) erro
 	return r0
 }
 
-// Document provides a mock function with given fields: ctx, name
-func (_m *DocumentStorage) Document(ctx context.Context, name string) (documentmodels.Document, error) {
-	ret := _m.Called(ctx, name)
+// Document provides a mock function with given fields: ctx, key
+func (_m *DocumentStorage) Document(ctx context.Context, key documentmodels.Key) (documentmodels.Document, error) {
+	ret := _m.Called(ctx, key)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Document")
@@ -71,17 +73,17 @@ func (_m *DocumentStorage) Document(ctx context.Context, name string) (documentm
 
 	var r0 documentmodels.Document
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (documentmodels.Document, error)); ok {
-		return rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, documentmodels.Key) (documentmodels.Document, error)); ok {
+		return rf(ctx, key)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) documentmodels.Document); ok {
-		r0 = rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, documentmodels.Key) documentmodels.Document); ok {
+		r0 = rf(ctx, key)
 	} else {
 		r0 = ret.Get(0).(documentmodels.Document)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, name)
+	if rf, ok := ret.Get(1).(func(context.Context, documentmodels.Key) error); ok {
+		r1 = rf(ctx, key)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -90,7 +92,7 @@ func (_m *DocumentStorage) Document(ctx context.Context, name string) (documentm
 }
 
 // Documents provides a mock function with given fields: ctx, parent
-func (_m *DocumentStorage) Documents(ctx context.Context, parent string) []documentmodels.Document {
+func (_m *DocumentStorage) Documents(ctx context.Context, parent collectionmodels.Key) []documentmodels.Document {
 	ret := _m.Called(ctx, parent)
 
 	if len(ret) == 0 {
@@ -98,7 +100,7 @@ func (_m *DocumentStorage) Documents(ctx context.Context, parent string) []docum
 	}
 
 	var r0 []documentmodels.Document
-	if rf, ok := ret.Get(0).(func(context.Context, string) []documentmodels.Document); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, collectionmodels.Key) []documentmodels.Document); ok {
 		r0 = rf(ctx, parent)
 	} else {
 		if ret.Get(0) != nil {

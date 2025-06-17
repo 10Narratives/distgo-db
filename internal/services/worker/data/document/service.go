@@ -5,15 +5,16 @@ import (
 	"errors"
 
 	documentgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/document"
+	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
 )
 
 //go:generate mockery --name DocumentStorage --output ./mocks/
 type DocumentStorage interface {
-	Document(ctx context.Context, name string) (documentmodels.Document, error)
-	Documents(ctx context.Context, parent string) []documentmodels.Document
-	CreateDocument(ctx context.Context, name, value string) (documentmodels.Document, error)
-	DeleteDocument(ctx context.Context, name string) error
+	Document(ctx context.Context, key documentmodels.Key) (documentmodels.Document, error)
+	Documents(ctx context.Context, parent collectionmodels.Key) []documentmodels.Document
+	CreateDocument(ctx context.Context, key documentmodels.Key, value string) (documentmodels.Document, error)
+	DeleteDocument(ctx context.Context, key documentmodels.Key) error
 	UpdateDocument(ctx context.Context, document documentmodels.Document) error
 }
 
@@ -30,11 +31,13 @@ func New(storage DocumentStorage) *Service {
 }
 
 func (s *Service) Document(ctx context.Context, name string) (documentmodels.Document, error) {
-	return s.documentStore.Document(ctx, name)
+	key := documentmodels.NewKey(name)
+	return s.documentStore.Document(ctx, key)
 }
 
 func (s *Service) Documents(ctx context.Context, parent string, size int32, token string) ([]documentmodels.Document, string, error) {
-	allDocs := s.documentStore.Documents(ctx, parent)
+	parentKey := collectionmodels.NewKey(parent)
+	allDocs := s.documentStore.Documents(ctx, parentKey)
 
 	if len(allDocs) == 0 {
 		return []documentmodels.Document{}, "", nil
@@ -66,12 +69,13 @@ func (s *Service) Documents(ctx context.Context, parent string, size int32, toke
 }
 
 func (s *Service) CreateDocument(ctx context.Context, parent string, documentID string, value string) (documentmodels.Document, error) {
-	name := parent + "/documents/" + documentID
-	return s.documentStore.CreateDocument(ctx, name, value)
+	key := documentmodels.NewKey(parent + "/documents/" + documentID)
+	return s.documentStore.CreateDocument(ctx, key, value)
 }
 
 func (s *Service) DeleteDocument(ctx context.Context, name string) error {
-	return s.documentStore.DeleteDocument(ctx, name)
+	key := documentmodels.NewKey(name)
+	return s.documentStore.DeleteDocument(ctx, key)
 }
 
 func (s *Service) UpdateDocument(ctx context.Context, document documentmodels.Document, paths []string) (documentmodels.Document, error) {

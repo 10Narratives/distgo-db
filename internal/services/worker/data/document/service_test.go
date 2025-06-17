@@ -6,6 +6,7 @@ import (
 	"errors"
 	"testing"
 
+	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
 	documentsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/document"
 	mocks "github.com/10Narratives/distgo-db/internal/services/worker/data/document/mocks"
@@ -16,7 +17,6 @@ import (
 
 func TestService_CreateDocument(t *testing.T) {
 	t.Parallel()
-
 	const (
 		parent     = "databases/db"
 		documentID = "doc1"
@@ -46,7 +46,8 @@ func TestService_CreateDocument(t *testing.T) {
 			name: "successful creation",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
-					m.On("CreateDocument", mock.Anything, name, value).
+					key := documentmodels.NewKey(name)
+					m.On("CreateDocument", mock.Anything, key, value).
 						Return(documentmodels.Document{
 							Name:  name,
 							Value: json.RawMessage(value),
@@ -77,7 +78,8 @@ func TestService_CreateDocument(t *testing.T) {
 			name: "storage returns error",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
-					m.On("CreateDocument", mock.Anything, name, value).
+					key := documentmodels.NewKey(name)
+					m.On("CreateDocument", mock.Anything, key, value).
 						Return(documentmodels.Document{}, errors.New("internal error"))
 				},
 			},
@@ -100,7 +102,6 @@ func TestService_CreateDocument(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
@@ -108,9 +109,7 @@ func TestService_CreateDocument(t *testing.T) {
 			store := mocks.NewDocumentStorage(t)
 			tt.fields.setupStorageMock(store)
 			service := documentsrv.New(store)
-
 			res, err := service.CreateDocument(tt.args.ctx, tt.args.req.parent, tt.args.req.id, tt.args.req.value)
-
 			tt.wantVal(t, res)
 			tt.wantErr(t, err)
 			store.AssertExpectations(t)
@@ -120,7 +119,6 @@ func TestService_CreateDocument(t *testing.T) {
 
 func TestService_GetDocument(t *testing.T) {
 	t.Parallel()
-
 	const name = "databases/db/documents/doc1"
 
 	type fields struct {
@@ -143,7 +141,8 @@ func TestService_GetDocument(t *testing.T) {
 			name: "successful get",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
-					m.On("Document", mock.Anything, name).
+					key := documentmodels.NewKey(name)
+					m.On("Document", mock.Anything, key).
 						Return(documentmodels.Document{
 							Name: name,
 						}, nil)
@@ -166,7 +165,8 @@ func TestService_GetDocument(t *testing.T) {
 			name: "not found",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
-					m.On("Document", mock.Anything, name).
+					key := documentmodels.NewKey(name)
+					m.On("Document", mock.Anything, key).
 						Return(documentmodels.Document{}, errors.New("not found"))
 				},
 			},
@@ -183,7 +183,6 @@ func TestService_GetDocument(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
@@ -191,9 +190,7 @@ func TestService_GetDocument(t *testing.T) {
 			store := mocks.NewDocumentStorage(t)
 			tt.fields.setupStorageMock(store)
 			service := documentsrv.New(store)
-
 			res, err := service.Document(tt.args.ctx, tt.args.req.name)
-
 			tt.wantVal(t, res)
 			tt.wantErr(t, err)
 			store.AssertExpectations(t)
@@ -203,7 +200,6 @@ func TestService_GetDocument(t *testing.T) {
 
 func TestService_ListDocuments(t *testing.T) {
 	t.Parallel()
-
 	const (
 		parent = "databases/db/collections/coll1"
 		size   = int32(2)
@@ -232,7 +228,8 @@ func TestService_ListDocuments(t *testing.T) {
 			name: "successful list",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
-					m.On("Documents", mock.Anything, parent).
+					key := collectionmodels.NewKey(parent)
+					m.On("Documents", mock.Anything, key).
 						Return([]documentmodels.Document{
 							{Name: parent + "/documents/doc1"},
 							{Name: parent + "/documents/doc2"},
@@ -264,7 +261,8 @@ func TestService_ListDocuments(t *testing.T) {
 			name: "with next page token",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
-					m.On("Documents", mock.Anything, parent).
+					key := collectionmodels.NewKey(parent)
+					m.On("Documents", mock.Anything, key).
 						Return([]documentmodels.Document{
 							{Name: parent + "/documents/doc1"},
 							{Name: parent + "/documents/doc2"},
@@ -297,7 +295,8 @@ func TestService_ListDocuments(t *testing.T) {
 			name: "empty list",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
-					m.On("Documents", mock.Anything, parent).Return([]documentmodels.Document{})
+					key := collectionmodels.NewKey(parent)
+					m.On("Documents", mock.Anything, key).Return([]documentmodels.Document{})
 				},
 			},
 			args: args{
@@ -320,7 +319,6 @@ func TestService_ListDocuments(t *testing.T) {
 			wantErr: require.NoError,
 		},
 	}
-
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
@@ -328,9 +326,7 @@ func TestService_ListDocuments(t *testing.T) {
 			store := mocks.NewDocumentStorage(t)
 			tt.fields.setupStorageMock(store)
 			service := documentsrv.New(store)
-
 			list, _, err := service.Documents(tt.args.ctx, tt.args.req.parent, tt.args.req.size, tt.args.req.token)
-
 			tt.wantVal(t, list)
 			tt.wantErr(t, err)
 			store.AssertExpectations(t)
@@ -340,7 +336,6 @@ func TestService_ListDocuments(t *testing.T) {
 
 func TestService_DeleteDocument(t *testing.T) {
 	t.Parallel()
-
 	const name = "databases/db/documents/doc1"
 
 	type fields struct {
@@ -363,7 +358,8 @@ func TestService_DeleteDocument(t *testing.T) {
 			name: "successful delete",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
-					m.On("DeleteDocument", mock.Anything, name).Return(nil)
+					key := documentmodels.NewKey(name)
+					m.On("DeleteDocument", mock.Anything, key).Return(nil)
 				},
 			},
 			args: args{
@@ -379,7 +375,8 @@ func TestService_DeleteDocument(t *testing.T) {
 			name: "not found",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
-					m.On("DeleteDocument", mock.Anything, name).Return(errors.New("not found"))
+					key := documentmodels.NewKey(name)
+					m.On("DeleteDocument", mock.Anything, key).Return(errors.New("not found"))
 				},
 			},
 			args: args{
@@ -395,7 +392,6 @@ func TestService_DeleteDocument(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
@@ -403,9 +399,7 @@ func TestService_DeleteDocument(t *testing.T) {
 			store := mocks.NewDocumentStorage(t)
 			tt.fields.setupStorageMock(store)
 			service := documentsrv.New(store)
-
 			err := service.DeleteDocument(tt.args.ctx, tt.args.req.name)
-
 			tt.wantVal(t, nil)
 			tt.wantErr(t, err)
 			store.AssertExpectations(t)
@@ -415,7 +409,6 @@ func TestService_DeleteDocument(t *testing.T) {
 
 func TestService_UpdateDocument(t *testing.T) {
 	t.Parallel()
-
 	const name = "databases/db/documents/doc1"
 	const newValue = `{"key": "updated_value"}`
 
@@ -440,10 +433,12 @@ func TestService_UpdateDocument(t *testing.T) {
 			name: "update value",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
-					m.On("UpdateDocument", mock.Anything, documentmodels.Document{
+					_ = documentmodels.NewKey(name)
+					doc := documentmodels.Document{
 						Name:  name,
 						Value: json.RawMessage(newValue),
-					}).Return(nil)
+					}
+					m.On("UpdateDocument", mock.Anything, doc).Return(nil)
 				},
 			},
 			args: args{
@@ -486,7 +481,6 @@ func TestService_UpdateDocument(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
@@ -494,9 +488,7 @@ func TestService_UpdateDocument(t *testing.T) {
 			store := mocks.NewDocumentStorage(t)
 			tt.fields.setupStorageMock(store)
 			service := documentsrv.New(store)
-
 			updated, err := service.UpdateDocument(tt.args.ctx, tt.args.req.document, tt.args.req.paths)
-
 			tt.wantVal(t, updated)
 			tt.wantErr(t, err)
 			store.AssertExpectations(t)
