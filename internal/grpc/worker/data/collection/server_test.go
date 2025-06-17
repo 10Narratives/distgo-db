@@ -443,7 +443,7 @@ func TestServerAPI_UpdateCollection(t *testing.T) {
 				setupCollectionServiceMock: func(m *mocks.CollectionService) {
 					m.On("UpdateCollection", mock.Anything, collectionmodels.Collection{
 						Name: name,
-					}, []string{"display_name"}).
+					}, []string{"description"}).
 						Return(collectionmodels.Collection{
 							Name: name,
 						}, nil)
@@ -456,7 +456,7 @@ func TestServerAPI_UpdateCollection(t *testing.T) {
 						Name: name,
 					},
 					UpdateMask: &fieldmaskpb.FieldMask{
-						Paths: []string{"display_name"},
+						Paths: []string{"description"},
 					},
 				},
 			},
@@ -485,7 +485,7 @@ func TestServerAPI_UpdateCollection(t *testing.T) {
 				setupCollectionServiceMock: func(m *mocks.CollectionService) {
 					m.On("UpdateCollection", mock.Anything, collectionmodels.Collection{
 						Name: name,
-					}, []string{"display_name"}).
+					}, []string{"description"}).
 						Return(collectionmodels.Collection{}, errors.New("internal error"))
 				},
 			},
@@ -496,7 +496,7 @@ func TestServerAPI_UpdateCollection(t *testing.T) {
 						Name: name,
 					},
 					UpdateMask: &fieldmaskpb.FieldMask{
-						Paths: []string{"display_name"},
+						Paths: []string{"description"},
 					},
 				},
 			},
