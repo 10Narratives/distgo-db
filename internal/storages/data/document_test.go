@@ -325,8 +325,8 @@ func TestStorage_Documents(t *testing.T) {
 			wantVal: func(tt require.TestingT, got interface{}, i ...interface{}) {
 				list := got.([]documentmodels.Document)
 				require.Len(tt, list, 2)
-				assert.Equal(tt, docs[0].document.Name, list[0].Name)
-				assert.Equal(tt, docs[1].document.Name, list[1].Name)
+				assert.Equal(tt, docs[0].document.Name, list[1].Name)
+				assert.Equal(tt, docs[1].document.Name, list[0].Name)
 			},
 		},
 		{
