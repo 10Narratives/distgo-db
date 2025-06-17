@@ -18,9 +18,9 @@ type App struct {
 func New(log *slog.Logger, cfg workercfg.Config) *App {
 	storage := datastorage.New()
 
-	databaseSrv := databasesrv.New(storage)
-	collectionSrv := collectionsrv.New(storage)
-	documentSrv := documentsrv.New(storage)
+	databaseSrv := databasesrv.New(storage, nil)
+	collectionSrv := collectionsrv.New(storage, nil)
+	documentSrv := documentsrv.New(storage, nil)
 
 	grpcApp := workergrpc.New(
 		log,

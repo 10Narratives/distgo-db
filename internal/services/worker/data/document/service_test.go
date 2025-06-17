@@ -8,6 +8,7 @@ import (
 
 	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
+	walmocks "github.com/10Narratives/distgo-db/internal/services/worker/data/common/mocks"
 	documentsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/document"
 	mocks "github.com/10Narratives/distgo-db/internal/services/worker/data/document/mocks"
 	"github.com/stretchr/testify/assert"
@@ -17,6 +18,7 @@ import (
 
 func TestService_CreateDocument(t *testing.T) {
 	t.Parallel()
+
 	const (
 		parent     = "databases/db"
 		documentID = "doc1"
@@ -26,7 +28,9 @@ func TestService_CreateDocument(t *testing.T) {
 
 	type fields struct {
 		setupStorageMock func(m *mocks.DocumentStorage)
+		setupWALMock     func(m *walmocks.WALStorage)
 	}
+
 	type args struct {
 		ctx context.Context
 		req struct {
@@ -35,6 +39,7 @@ func TestService_CreateDocument(t *testing.T) {
 			value  string
 		}
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -52,6 +57,9 @@ func TestService_CreateDocument(t *testing.T) {
 							Name:  name,
 							Value: json.RawMessage(value),
 						}, nil)
+				},
+				setupWALMock: func(m *walmocks.WALStorage) {
+					m.On("LogEntry", mock.Anything, mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -82,6 +90,7 @@ func TestService_CreateDocument(t *testing.T) {
 					m.On("CreateDocument", mock.Anything, key, value).
 						Return(documentmodels.Document{}, errors.New("internal error"))
 				},
+				setupWALMock: func(m *walmocks.WALStorage) {},
 			},
 			args: args{
 				ctx: context.Background(),
@@ -101,23 +110,67 @@ func TestService_CreateDocument(t *testing.T) {
 				assert.Contains(tt, err.Error(), "internal error")
 			},
 		},
+		{
+			name: "WAL logging fails",
+			fields: fields{
+				setupStorageMock: func(m *mocks.DocumentStorage) {
+					key := documentmodels.NewKey(name)
+					m.On("CreateDocument", mock.Anything, key, value).
+						Return(documentmodels.Document{
+							Name:  name,
+							Value: json.RawMessage(value),
+						}, nil)
+				},
+				setupWALMock: func(m *walmocks.WALStorage) {
+					m.On("LogEntry", mock.Anything, mock.Anything).Return(errors.New("WAL error"))
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: struct {
+					parent string
+					id     string
+					value  string
+				}{
+					parent: parent,
+					id:     documentID,
+					value:  value,
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				require.Error(tt, err)
+				assert.Contains(tt, err.Error(), "failed to log WAL entry")
+			},
+		},
 	}
+
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			store := mocks.NewDocumentStorage(t)
+			walStore := walmocks.NewWALStorage(t)
 			tt.fields.setupStorageMock(store)
-			service := documentsrv.New(store)
-			res, err := service.CreateDocument(tt.args.ctx, tt.args.req.parent, tt.args.req.id, tt.args.req.value)
+			tt.fields.setupWALMock(walStore)
+
+			service := documentsrv.New(store, walStore)
+			res, err := service.CreateDocument(
+				tt.args.ctx,
+				tt.args.req.parent,
+				tt.args.req.id,
+				tt.args.req.value,
+			)
+
 			tt.wantVal(t, res)
 			tt.wantErr(t, err)
 			store.AssertExpectations(t)
+			walStore.AssertExpectations(t)
 		})
 	}
 }
-
-func TestService_GetDocument(t *testing.T) {
+func TestService_Document(t *testing.T) {
 	t.Parallel()
 	const name = "databases/db/documents/doc1"
 
@@ -189,7 +242,7 @@ func TestService_GetDocument(t *testing.T) {
 			t.Parallel()
 			store := mocks.NewDocumentStorage(t)
 			tt.fields.setupStorageMock(store)
-			service := documentsrv.New(store)
+			service := documentsrv.New(store, nil)
 			res, err := service.Document(tt.args.ctx, tt.args.req.name)
 			tt.wantVal(t, res)
 			tt.wantErr(t, err)
@@ -198,7 +251,7 @@ func TestService_GetDocument(t *testing.T) {
 	}
 }
 
-func TestService_ListDocuments(t *testing.T) {
+func TestService_Documents(t *testing.T) {
 	t.Parallel()
 	const (
 		parent = "databases/db/collections/coll1"
@@ -325,7 +378,7 @@ func TestService_ListDocuments(t *testing.T) {
 			t.Parallel()
 			store := mocks.NewDocumentStorage(t)
 			tt.fields.setupStorageMock(store)
-			service := documentsrv.New(store)
+			service := documentsrv.New(store, nil)
 			list, _, err := service.Documents(tt.args.ctx, tt.args.req.parent, tt.args.req.size, tt.args.req.token)
 			tt.wantVal(t, list)
 			tt.wantErr(t, err)
@@ -336,17 +389,25 @@ func TestService_ListDocuments(t *testing.T) {
 
 func TestService_DeleteDocument(t *testing.T) {
 	t.Parallel()
+
 	const name = "databases/db/documents/doc1"
+	existingDoc := documentmodels.Document{
+		Name:  name,
+		Value: json.RawMessage(`{"key": "value"}`),
+	}
 
 	type fields struct {
 		setupStorageMock func(m *mocks.DocumentStorage)
+		setupWALMock     func(m *walmocks.WALStorage)
 	}
+
 	type args struct {
 		ctx context.Context
 		req struct {
 			name string
 		}
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -359,14 +420,16 @@ func TestService_DeleteDocument(t *testing.T) {
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
 					key := documentmodels.NewKey(name)
+					m.On("Document", mock.Anything, key).Return(existingDoc, nil)
 					m.On("DeleteDocument", mock.Anything, key).Return(nil)
+				},
+				setupWALMock: func(m *walmocks.WALStorage) {
+					m.On("LogEntry", mock.Anything, mock.Anything).Return(nil)
 				},
 			},
 			args: args{
 				ctx: context.Background(),
-				req: struct {
-					name string
-				}{name: name},
+				req: struct{ name string }{name: name},
 			},
 			wantVal: require.Empty,
 			wantErr: require.NoError,
@@ -376,14 +439,13 @@ func TestService_DeleteDocument(t *testing.T) {
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
 					key := documentmodels.NewKey(name)
-					m.On("DeleteDocument", mock.Anything, key).Return(errors.New("not found"))
+					m.On("Document", mock.Anything, key).Return(documentmodels.Document{}, errors.New("not found"))
 				},
+				setupWALMock: func(m *walmocks.WALStorage) {},
 			},
 			args: args{
 				ctx: context.Background(),
-				req: struct {
-					name string
-				}{name: name},
+				req: struct{ name string }{name: name},
 			},
 			wantVal: require.Empty,
 			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
@@ -391,30 +453,70 @@ func TestService_DeleteDocument(t *testing.T) {
 				assert.Contains(tt, err.Error(), "not found")
 			},
 		},
+		{
+			name: "WAL logging fails",
+			fields: fields{
+				setupStorageMock: func(m *mocks.DocumentStorage) {
+					key := documentmodels.NewKey(name)
+					m.On("Document", mock.Anything, key).Return(existingDoc, nil)
+					m.On("DeleteDocument", mock.Anything, key).Return(nil)
+				},
+				setupWALMock: func(m *walmocks.WALStorage) {
+					m.On("LogEntry", mock.Anything, mock.Anything).Return(errors.New("WAL error"))
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: struct{ name string }{name: name},
+			},
+			wantVal: require.Empty,
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				require.Error(tt, err)
+				assert.Contains(tt, err.Error(), "failed to log WAL entry")
+			},
+		},
 	}
+
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			store := mocks.NewDocumentStorage(t)
+			walStore := walmocks.NewWALStorage(t)
 			tt.fields.setupStorageMock(store)
-			service := documentsrv.New(store)
+			tt.fields.setupWALMock(walStore)
+
+			service := documentsrv.New(store, walStore)
 			err := service.DeleteDocument(tt.args.ctx, tt.args.req.name)
+
 			tt.wantVal(t, nil)
 			tt.wantErr(t, err)
 			store.AssertExpectations(t)
+			walStore.AssertExpectations(t)
 		})
 	}
 }
 
 func TestService_UpdateDocument(t *testing.T) {
 	t.Parallel()
-	const name = "databases/db/documents/doc1"
-	const newValue = `{"key": "updated_value"}`
+
+	const (
+		name     = "databases/db/documents/doc1"
+		oldValue = `{"key": "old_value"}`
+		newValue = `{"key": "updated_value"}`
+	)
+
+	existingDoc := documentmodels.Document{
+		Name:  name,
+		Value: json.RawMessage(oldValue),
+	}
 
 	type fields struct {
 		setupStorageMock func(m *mocks.DocumentStorage)
+		setupWALMock     func(m *walmocks.WALStorage)
 	}
+
 	type args struct {
 		ctx context.Context
 		req struct {
@@ -422,6 +524,7 @@ func TestService_UpdateDocument(t *testing.T) {
 			paths    []string
 		}
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -433,12 +536,12 @@ func TestService_UpdateDocument(t *testing.T) {
 			name: "update value",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {
-					_ = documentmodels.NewKey(name)
-					doc := documentmodels.Document{
-						Name:  name,
-						Value: json.RawMessage(newValue),
-					}
-					m.On("UpdateDocument", mock.Anything, doc).Return(nil)
+					key := documentmodels.NewKey(name)
+					m.On("Document", mock.Anything, key).Return(existingDoc, nil)
+					m.On("UpdateDocument", mock.Anything, mock.Anything).Return(nil)
+				},
+				setupWALMock: func(m *walmocks.WALStorage) {
+					m.On("LogEntry", mock.Anything, mock.Anything).Return(nil)
 				},
 			},
 			args: args{
@@ -454,13 +557,18 @@ func TestService_UpdateDocument(t *testing.T) {
 					paths: []string{"value"},
 				},
 			},
-			wantVal: require.NotEmpty,
+			wantVal: func(tt require.TestingT, got interface{}, i ...interface{}) {
+				updated, ok := got.(documentmodels.Document)
+				require.True(tt, ok)
+				assert.Equal(tt, newValue, string(updated.Value))
+			},
 			wantErr: require.NoError,
 		},
 		{
 			name: "unknown field",
 			fields: fields{
 				setupStorageMock: func(m *mocks.DocumentStorage) {},
+				setupWALMock:     func(m *walmocks.WALStorage) {},
 			},
 			args: args{
 				ctx: context.Background(),
@@ -480,18 +588,56 @@ func TestService_UpdateDocument(t *testing.T) {
 				assert.Contains(tt, err.Error(), "unknown field")
 			},
 		},
+		{
+			name: "WAL logging fails",
+			fields: fields{
+				setupStorageMock: func(m *mocks.DocumentStorage) {
+					key := documentmodels.NewKey(name)
+					m.On("Document", mock.Anything, key).Return(existingDoc, nil)
+					m.On("UpdateDocument", mock.Anything, mock.Anything).Return(nil)
+				},
+				setupWALMock: func(m *walmocks.WALStorage) {
+					m.On("LogEntry", mock.Anything, mock.Anything).Return(errors.New("WAL error"))
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				req: struct {
+					document documentmodels.Document
+					paths    []string
+				}{
+					document: documentmodels.Document{
+						Name:  name,
+						Value: json.RawMessage(newValue),
+					},
+					paths: []string{"value"},
+				},
+			},
+			wantVal: require.Empty,
+			wantErr: func(tt require.TestingT, err error, i ...interface{}) {
+				require.Error(tt, err)
+				assert.Contains(tt, err.Error(), "failed to log WAL entry")
+			},
+		},
 	}
+
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			store := mocks.NewDocumentStorage(t)
+			walStore := walmocks.NewWALStorage(t)
 			tt.fields.setupStorageMock(store)
-			service := documentsrv.New(store)
+			tt.fields.setupWALMock(walStore)
+
+			service := documentsrv.New(store, walStore)
 			updated, err := service.UpdateDocument(tt.args.ctx, tt.args.req.document, tt.args.req.paths)
+
 			tt.wantVal(t, updated)
 			tt.wantErr(t, err)
 			store.AssertExpectations(t)
+			walStore.AssertExpectations(t)
 		})
 	}
 }
