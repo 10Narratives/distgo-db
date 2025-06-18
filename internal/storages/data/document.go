@@ -26,6 +26,10 @@ func (s *Storage) CreateDocument(ctx context.Context, key documentmodels.Key, va
 		return documentmodels.Document{}, err
 	}
 
+	if _, err := s.Document(ctx, key); err == nil {
+		return documentmodels.Document{}, ErrDatabaseAlreadyExists
+	}
+
 	now := time.Now().UTC()
 	doc := documentmodels.Document{
 		Name:      "databases/" + key.Database + "/collections/" + key.Collection + "/documents/" + key.Document,

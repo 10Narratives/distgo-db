@@ -6,3 +6,5 @@ logging:
   level: info
   format: pretty
   output: stdout
+wal:
+  path: "logs/worker_1.log"

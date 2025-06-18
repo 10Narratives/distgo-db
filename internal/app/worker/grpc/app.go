@@ -6,9 +6,6 @@ import (
 	"log/slog"
 	"net"
 
-	collectiongrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/collection"
-	databasegrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/database"
-	documentgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/document"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
@@ -18,15 +15,12 @@ import (
 
 type App struct {
 	log        *slog.Logger
-	gRPCServer *grpc.Server
+	GRPCServer *grpc.Server
 	port       int
 }
 
 func New(
 	log *slog.Logger,
-	databaseSrv databasegrpc.DatabaseService,
-	collectionSrv collectiongrpc.CollectionService,
-	documentSrv documentgrpc.DocumentService,
 	port int,
 ) *App {
 	loggingOpts := []logging.Option{
@@ -47,13 +41,9 @@ func New(
 		logging.UnaryServerInterceptor(InterceptorLogger(log), loggingOpts...),
 	))
 
-	databasegrpc.Register(gRPCServer, databaseSrv)
-	collectiongrpc.Register(gRPCServer, collectionSrv)
-	documentgrpc.Register(gRPCServer, documentSrv)
-
 	return &App{
 		log:        log,
-		gRPCServer: gRPCServer,
+		GRPCServer: gRPCServer,
 		port:       port,
 	}
 }
@@ -80,7 +70,7 @@ func (g *App) Run() error {
 
 	g.log.Info("grpc server started", slog.String("addr", l.Addr().String()))
 
-	if err := g.gRPCServer.Serve(l); err != nil {
+	if err := g.GRPCServer.Serve(l); err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -93,5 +83,11 @@ func (a *App) Stop() {
 	a.log.With(slog.String("op", op)).
 		Info("stopping gRPC server", slog.Int("port", a.port))
 
-	a.gRPCServer.GracefulStop()
+	a.GRPCServer.GracefulStop()
+}
+
+type Registrar func(server *grpc.Server, service interface{})
+
+func (a *App) Register(reg Registrar, service interface{}) {
+	reg(a.GRPCServer, service)
 }

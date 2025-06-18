@@ -1,120 +1,116 @@
 package datastorage
 
-// import (
-// 	"context"
-// 	"encoding/json"
-// 	"fmt"
+import (
+	"bufio"
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
 
-// 	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
-// 	commonmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/common"
-// 	databasemodels "github.com/10Narratives/distgo-db/internal/models/worker/data/database"
-// 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
-// 	walmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/wal"
-// )
+	commonmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/common"
+	walmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/wal"
+)
 
-// // Recover applies WAL entries to reconstruct the storage state.
-// func (s *Storage) Recover(ctx context.Context, walEntries []walmodels.WALEntry) error {
-// 	for _, entry := range walEntries {
-// 		switch entry.Target {
-// 		case "database":
-// 			if err := s.applyDatabaseEntry(entry); err != nil {
-// 				return fmt.Errorf("failed to apply database WAL entry: %w", err)
-// 			}
-// 		case "collection":
-// 			if err := s.applyCollectionEntry(entry); err != nil {
-// 				return fmt.Errorf("failed to apply collection WAL entry: %w", err)
-// 			}
-// 		case "document":
-// 			if err := s.applyDocumentEntry(entry); err != nil {
-// 				return fmt.Errorf("failed to apply document WAL entry: %w", err)
-// 			}
-// 		default:
-// 			return fmt.Errorf("unknown target in WAL entry: %s", entry.Target)
-// 		}
-// 	}
-// 	return nil
-// }
+func (s *Storage) RecoverFromFile(ctx context.Context, filePath string) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
 
-// func (s *Storage) applyDatabaseEntry(entry walmodels.WALEntry) error {
-// 	key := databasemodels.NewKey(entry.ID)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Bytes()
 
-// 	switch entry.Type {
-// 	case commonmodels.MutationTypeCreate:
-// 		var db databasemodels.Database
-// 		if err := json.Unmarshal([]byte(entry.NewValue), &db); err != nil {
-// 			return fmt.Errorf("failed to unmarshal database: %w", err)
-// 		}
-// 		s.databases.Store(key, db)
-// 	case commonmodels.MutationTypeUpdate:
-// 		existing, ok := s.databases.Load(key)
-// 		if !ok {
-// 			return fmt.Errorf("database not found for update: %s", entry.ID)
-// 		}
-// 		db := existing.(databasemodels.Database)
-// 		if err := json.Unmarshal([]byte(entry.NewValue), &db); err != nil {
-// 			return fmt.Errorf("failed to unmarshal updated database: %w", err)
-// 		}
-// 		s.databases.Store(key, db)
-// 	case commonmodels.MutationTypeDelete:
-// 		s.databases.Delete(key)
-// 	default:
-// 		return fmt.Errorf("unknown mutation type for database: %d", entry.Type)
-// 	}
-// 	return nil
-// }
+		var entry walmodels.WALEntry
+		if err := json.Unmarshal(line, &entry); err != nil {
+			return fmt.Errorf("failed to unmarshal WAL entry: %w", err)
+		}
 
-// func (s *Storage) applyCollectionEntry(entry walmodels.WALEntry) error {
-// 	key := collectionmodels.NewKey(entry.ID)
+		switch entry.Entity {
+		case walmodels.EntityTypeDatabase:
+			if err := s.recoverDatabase(entry); err != nil {
+				return fmt.Errorf("failed to recover database: %w", err)
+			}
+		case walmodels.EntityTypeCollection:
+			if err := s.recoverCollection(entry); err != nil {
+				return fmt.Errorf("failed to recover collection: %w", err)
+			}
+		case walmodels.EntityTypeDocument:
+			if err := s.recoverDocument(entry); err != nil {
+				return fmt.Errorf("failed to recover document: %w", err)
+			}
+		default:
+			return fmt.Errorf("unknown entity type: %d", entry.Entity)
+		}
+	}
 
-// 	switch entry.Type {
-// 	case commonmodels.MutationTypeCreate:
-// 		var coll collectionmodels.Collection
-// 		if err := json.Unmarshal([]byte(entry.NewValue), &coll); err != nil {
-// 			return fmt.Errorf("failed to unmarshal collection: %w", err)
-// 		}
-// 		s.collections.Store(key, coll)
-// 	case commonmodels.MutationTypeUpdate:
-// 		existing, ok := s.collections.Load(key)
-// 		if !ok {
-// 			return fmt.Errorf("collection not found for update: %s", entry.ID)
-// 		}
-// 		coll := existing.(collectionmodels.Collection)
-// 		if err := json.Unmarshal([]byte(entry.NewValue), &coll); err != nil {
-// 			return fmt.Errorf("failed to unmarshal updated collection: %w", err)
-// 		}
-// 		s.collections.Store(key, coll)
-// 	case commonmodels.MutationTypeDelete:
-// 		s.collections.Delete(key)
-// 	default:
-// 		return fmt.Errorf("unknown mutation type for collection: %d", entry.Type)
-// 	}
-// 	return nil
-// }
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("error while reading file: %w", err)
+	}
 
-// func (s *Storage) applyDocumentEntry(entry walmodels.WALEntry) error {
-// 	key := documentmodels.NewKey(entry.ID)
+	return nil
+}
 
-// 	switch entry.Type {
-// 	case commonmodels.MutationTypeCreate:
-// 		var doc documentmodels.Document
-// 		if err := json.Unmarshal([]byte(entry.NewValue), &doc); err != nil {
-// 			return fmt.Errorf("failed to unmarshal document: %w", err)
-// 		}
-// 		s.documents.Store(key, doc)
-// 	case commonmodels.MutationTypeUpdate:
-// 		existing, ok := s.documents.Load(key)
-// 		if !ok {
-// 			return fmt.Errorf("document not found for update: %s", entry.ID)
-// 		}
-// 		doc := existing.(documentmodels.Document)
-// 		if err := json.Unmarshal([]byte(entry.NewValue), &doc); err != nil {
-// 			return fmt.Errorf("failed to unmarshal updated document: %w", err)
-// 		}
-// 		s.documents.Store(key, doc)
-// 	case commonmodels.MutationTypeDelete:
-// 		s.documents.Delete(key)
-// 	default:
-// 		return fmt.Errorf("unknown mutation type for document: %d", entry.Type)
-// 	}
-// 	return nil
-// }
+func (s *Storage) recoverDatabase(entry walmodels.WALEntry) error {
+	var payload walmodels.DatabasePayload
+	if err := json.Unmarshal(entry.Payload, &payload); err != nil {
+		return fmt.Errorf("failed to unmarshal database payload: %w", err)
+	}
+
+	switch entry.Mutation {
+	case commonmodels.MutationTypeCreate:
+		if payload.Database == nil {
+			return fmt.Errorf("database payload is nil for create mutation")
+		}
+		s.databases.Store(payload.Key, *payload.Database)
+	case commonmodels.MutationTypeDelete:
+		s.databases.Delete(payload.Key)
+	default:
+		return fmt.Errorf("unsupported mutation type for database: %d", entry.Mutation)
+	}
+
+	return nil
+}
+
+func (s *Storage) recoverCollection(entry walmodels.WALEntry) error {
+	var payload walmodels.CollectionPayload
+	if err := json.Unmarshal(entry.Payload, &payload); err != nil {
+		return fmt.Errorf("failed to unmarshal collection payload: %w", err)
+	}
+
+	switch entry.Mutation {
+	case commonmodels.MutationTypeCreate:
+		if payload.Collection == nil {
+			return fmt.Errorf("collection payload is nil for create mutation")
+		}
+		s.collections.Store(payload.Key, *payload.Collection)
+	case commonmodels.MutationTypeDelete:
+		s.collections.Delete(payload.Key)
+	default:
+		return fmt.Errorf("unsupported mutation type for collection: %d", entry.Mutation)
+	}
+
+	return nil
+}
+
+func (s *Storage) recoverDocument(entry walmodels.WALEntry) error {
+	var payload walmodels.DocumentPayload
+	if err := json.Unmarshal(entry.Payload, &payload); err != nil {
+		return fmt.Errorf("failed to unmarshal document payload: %w", err)
+	}
+
+	switch entry.Mutation {
+	case commonmodels.MutationTypeCreate, commonmodels.MutationTypeUpdate:
+		if payload.Document == nil {
+			return fmt.Errorf("document payload is nil for create/update mutation")
+		}
+		s.documents.Store(payload.Key, *payload.Document)
+	case commonmodels.MutationTypeDelete:
+		s.documents.Delete(payload.Key)
+	default:
+		return fmt.Errorf("unsupported mutation type for document: %d", entry.Mutation)
+	}
+
+	return nil
+}

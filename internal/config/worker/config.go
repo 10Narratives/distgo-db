@@ -8,10 +8,15 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
+type WALConfig struct {
+	Path string `yaml:"path" env-required:"true"`
+}
+
 type Config struct {
 	Name    string              `yaml:"name" env-required:"true"`
 	GRPC    config.GRPCConfig   `yaml:"grpc"`
 	Logging config.LoggerConfig `yaml:"logging"`
+	WAL     WALConfig           `yaml:"wal"`
 }
 
 func MustLoad() *Config {
