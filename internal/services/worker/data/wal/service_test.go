@@ -1,217 +1,302 @@
 package walsrv_test
 
-// import (
-// 	"context"
-// 	"errors"
-// 	"testing"
-// 	"time"
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"testing"
+	"time"
 
-// 	walsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/wal"
-// 	"github.com/10Narratives/distgo-db/internal/services/worker/data/wal/mocks"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
-// 	commonmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/common"
-// 	walmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/wal"
-// 	"github.com/stretchr/testify/require"
-// )
+	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
+	commonmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/common"
+	databasemodels "github.com/10Narratives/distgo-db/internal/models/worker/data/database"
+	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
+	walmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/wal"
+	walsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/wal"
+	"github.com/10Narratives/distgo-db/internal/services/worker/data/wal/mocks"
+)
 
-// func TestService_WALEntries(t *testing.T) {
-// 	t.Parallel()
+func TestService_Entries(t *testing.T) {
+	t.Parallel()
 
-// 	now := time.Now().UTC() // Use UTC to avoid timezone issues
+	now := time.Now().UTC()
+	testEntries := []walmodels.WALEntry{
+		{
+			ID:        uuid.New(),
+			Entity:    walmodels.EntityTypeDatabase,
+			Mutation:  commonmodels.MutationTypeCreate,
+			Timestamp: now,
+		},
+	}
 
-// 	type fields struct {
-// 		setupMock func(m *mocks.WALStorage)
-// 	}
+	tests := []struct {
+		name          string
+		size          int32
+		token         string
+		from          time.Time
+		to            time.Time
+		mockSetup     func(*mocks.WALStorage)
+		expectedError error
+	}{
+		{
+			name:  "success",
+			size:  10,
+			token: "token",
+			mockSetup: func(m *mocks.WALStorage) {
+				m.On("Entries", mock.Anything, int32(10), "token", mock.AnythingOfType("time.Time"), mock.AnythingOfType("time.Time")).
+					Return(testEntries, "next-token", nil)
+			},
+		},
+		{
+			name:  "invalid page size - zero",
+			size:  0,
+			token: "token",
+			mockSetup: func(m *mocks.WALStorage) {
+				// No expectations - should fail before calling storage
+			},
+			expectedError: walsrv.ErrInvalidPageSize,
+		},
+		{
+			name:  "invalid page size - too large",
+			size:  1001,
+			token: "token",
+			mockSetup: func(m *mocks.WALStorage) {
+				// No expectations - should fail before calling storage
+			},
+			expectedError: walsrv.ErrInvalidPageSize,
+		},
+		{
+			name:  "storage error",
+			size:  10,
+			token: "token",
+			mockSetup: func(m *mocks.WALStorage) {
+				m.On("Entries", mock.Anything, int32(10), "token", mock.AnythingOfType("time.Time"), mock.AnythingOfType("time.Time")).
+					Return(nil, "", errors.New("storage error"))
+			},
+			expectedError: walsrv.ErrStorageOperation,
+		},
+	}
 
-// 	type args struct {
-// 		ctx   context.Context
-// 		size  int32
-// 		token string
-// 		from  time.Time
-// 		to    time.Time
-// 	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-// 	tests := []struct {
-// 		name        string
-// 		fields      fields
-// 		args        args
-// 		wantEntries []walmodels.WALEntry
-// 		wantToken   string
-// 		wantErr     error
-// 	}{
-// 		{
-// 			name: "successful listing",
-// 			fields: fields{
-// 				setupMock: func(m *mocks.WALStorage) {
-// 					m.On("Entries", context.Background(), int32(10), "token", now.Add(-time.Hour), now).
-// 						Return([]walmodels.WALEntry{
-// 							{
-// 								ID:        "entry1",
-// 								Target:    "table1",
-// 								Type:      commonmodels.MutationTypeCreate,
-// 								NewValue:  "new value",
-// 								OldValue:  "",
-// 								Timestamp: now,
-// 							},
-// 						}, "next_token", nil)
-// 				},
-// 			},
-// 			args: args{
-// 				ctx:   context.Background(),
-// 				size:  10,
-// 				token: "token",
-// 				from:  now.Add(-time.Hour),
-// 				to:    now,
-// 			},
-// 			wantEntries: []walmodels.WALEntry{
-// 				{
-// 					ID:        "entry1",
-// 					Target:    "table1",
-// 					Type:      commonmodels.MutationTypeCreate,
-// 					NewValue:  "new value",
-// 					OldValue:  "",
-// 					Timestamp: now,
-// 				},
-// 			},
-// 			wantToken: "next_token",
-// 			wantErr:   nil,
-// 		},
-// 		{
-// 			name: "empty result",
-// 			fields: fields{
-// 				setupMock: func(m *mocks.WALStorage) {
-// 					m.On("Entries", context.Background(), int32(10), "", now.Add(-time.Hour), now).
-// 						Return([]walmodels.WALEntry{}, "", nil)
-// 				},
-// 			},
-// 			args: args{
-// 				ctx:   context.Background(),
-// 				size:  10,
-// 				token: "",
-// 				from:  now.Add(-time.Hour),
-// 				to:    now,
-// 			},
-// 			wantEntries: []walmodels.WALEntry{},
-// 			wantToken:   "",
-// 			wantErr:     nil,
-// 		},
-// 		{
-// 			name: "storage error",
-// 			fields: fields{
-// 				setupMock: func(m *mocks.WALStorage) {
-// 					m.On("Entries", context.Background(), int32(10), "token", now.Add(-time.Hour), now).
-// 						Return(nil, "", errors.New("storage error"))
-// 				},
-// 			},
-// 			args: args{
-// 				ctx:   context.Background(),
-// 				size:  10,
-// 				token: "token",
-// 				from:  now.Add(-time.Hour),
-// 				to:    now,
-// 			},
-// 			wantEntries: nil,
-// 			wantToken:   "",
-// 			wantErr:     errors.New("storage error"),
-// 		},
-// 	}
+			storageMock := mocks.NewWALStorage(t)
+			if tt.mockSetup != nil {
+				tt.mockSetup(storageMock)
+			}
 
-// 	for _, tt := range tests {
-// 		tt := tt
+			service := walsrv.New(storageMock)
+			entries, nextToken, err := service.Entries(context.Background(), tt.size, tt.token, tt.from, tt.to)
 
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			t.Parallel()
+			if tt.expectedError != nil {
+				require.ErrorIs(t, err, tt.expectedError)
+				return
+			}
 
-// 			mock := mocks.NewWALStorage(t)
-// 			tt.fields.setupMock(mock)
+			require.NoError(t, err)
+			require.Equal(t, testEntries, entries)
+			require.Equal(t, "next-token", nextToken)
+			storageMock.AssertExpectations(t)
+		})
+	}
+}
 
-// 			service := walsrv.New(mock)
-// 			respEntries, respToken, err := service.WALEntries(tt.args.ctx, tt.args.size, tt.args.token, tt.args.from, tt.args.to)
+func TestService_Truncate(t *testing.T) {
+	t.Parallel()
 
-// 			if tt.wantErr != nil {
-// 				require.Error(t, err)
-// 				require.Equal(t, tt.wantErr.Error(), err.Error())
-// 				require.Nil(t, respEntries)
-// 				require.Empty(t, respToken)
-// 			} else {
-// 				require.NoError(t, err)
-// 				require.Equal(t, tt.wantEntries, respEntries)
-// 				require.Equal(t, tt.wantToken, respToken)
-// 			}
+	tests := []struct {
+		name          string
+		before        time.Time
+		mockSetup     func(*mocks.WALStorage)
+		expectedError error
+	}{
+		{
+			name:   "success",
+			before: time.Now(),
+			mockSetup: func(m *mocks.WALStorage) {
+				m.On("Truncate", mock.Anything, mock.AnythingOfType("time.Time")).
+					Return(nil)
+			},
+		},
+		{
+			name:          "invalid before time - zero",
+			before:        time.Time{},
+			mockSetup:     func(m *mocks.WALStorage) {},
+			expectedError: walsrv.ErrInvalidBeforeTime,
+		},
+		{
+			name:   "storage error",
+			before: time.Now(),
+			mockSetup: func(m *mocks.WALStorage) {
+				m.On("Truncate", mock.Anything, mock.AnythingOfType("time.Time")).
+					Return(errors.New("storage error"))
+			},
+			expectedError: walsrv.ErrStorageOperation,
+		},
+	}
 
-// 			mock.AssertExpectations(t)
-// 		})
-// 	}
-// }
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-// func TestService_TruncateWAL(t *testing.T) {
-// 	t.Parallel()
+			storageMock := mocks.NewWALStorage(t)
+			if tt.mockSetup != nil {
+				tt.mockSetup(storageMock)
+			}
 
-// 	now := time.Now().UTC() // Use UTC to avoid timezone issues
+			service := walsrv.New(storageMock)
+			err := service.Truncate(context.Background(), tt.before)
 
-// 	type fields struct {
-// 		setupMock func(m *mocks.WALStorage)
-// 	}
+			if tt.expectedError != nil {
+				require.ErrorIs(t, err, tt.expectedError)
+				return
+			}
 
-// 	type args struct {
-// 		ctx    context.Context
-// 		before time.Time
-// 	}
+			require.NoError(t, err)
+			storageMock.AssertExpectations(t)
+		})
+	}
+}
 
-// 	tests := []struct {
-// 		name    string
-// 		fields  fields
-// 		args    args
-// 		wantErr error
-// 	}{
-// 		{
-// 			name: "successful truncation",
-// 			fields: fields{
-// 				setupMock: func(m *mocks.WALStorage) {
-// 					m.On("Truncate", context.Background(), now).Return(nil)
-// 				},
-// 			},
-// 			args: args{
-// 				ctx:    context.Background(),
-// 				before: now,
-// 			},
-// 			wantErr: nil,
-// 		},
-// 		{
-// 			name: "truncation error",
-// 			fields: fields{
-// 				setupMock: func(m *mocks.WALStorage) {
-// 					m.On("Truncate", context.Background(), now).Return(errors.New("truncate error"))
-// 				},
-// 			},
-// 			args: args{
-// 				ctx:    context.Background(),
-// 				before: now,
-// 			},
-// 			wantErr: errors.New("truncate error"),
-// 		},
-// 	}
+func TestService_Append(t *testing.T) {
+	t.Parallel()
 
-// 	for _, tt := range tests {
-// 		tt := tt
+	testPayload := walmodels.DatabasePayload{
+		Key: databasemodels.Key{Database: "test-db"},
+	}
 
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			t.Parallel()
+	tests := []struct {
+		name          string
+		entityType    walmodels.EntityType
+		mutation      commonmodels.MutationType
+		payload       interface{}
+		mockSetup     func(*mocks.WALStorage)
+		expectedError error
+	}{
+		{
+			name:       "success",
+			entityType: walmodels.EntityTypeDatabase,
+			mutation:   commonmodels.MutationTypeCreate,
+			payload:    testPayload,
+			mockSetup: func(m *mocks.WALStorage) {
+				m.On("Append", mock.Anything, mock.AnythingOfType("walmodels.WALEntry")).
+					Return(nil)
+			},
+		},
+		{
+			name:          "payload marshal error",
+			entityType:    walmodels.EntityTypeDatabase,
+			mutation:      commonmodels.MutationTypeCreate,
+			payload:       make(chan int), // Unmarshalable type
+			mockSetup:     func(m *mocks.WALStorage) {},
+			expectedError: walsrv.ErrPayloadMarshal,
+		},
+		{
+			name:       "storage error",
+			entityType: walmodels.EntityTypeDatabase,
+			mutation:   commonmodels.MutationTypeCreate,
+			payload:    testPayload,
+			mockSetup: func(m *mocks.WALStorage) {
+				m.On("Append", mock.Anything, mock.AnythingOfType("walmodels.WALEntry")).
+					Return(errors.New("storage error"))
+			},
+			expectedError: walsrv.ErrStorageOperation,
+		},
+	}
 
-// 			mock := mocks.NewWALStorage(t)
-// 			tt.fields.setupMock(mock)
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-// 			service := walsrv.New(mock)
-// 			err := service.TruncateWAL(tt.args.ctx, tt.args.before)
+			storageMock := mocks.NewWALStorage(t)
+			if tt.mockSetup != nil {
+				tt.mockSetup(storageMock)
+			}
 
-// 			if tt.wantErr != nil {
-// 				require.Error(t, err)
-// 				require.Equal(t, tt.wantErr.Error(), err.Error())
-// 			} else {
-// 				require.NoError(t, err)
-// 			}
+			service := walsrv.New(storageMock)
+			err := service.Append(context.Background(), tt.entityType, tt.mutation, tt.payload)
 
-// 			mock.AssertExpectations(t)
-// 		})
-// 	}
-// }
+			if tt.expectedError != nil {
+				require.ErrorIs(t, err, tt.expectedError)
+				return
+			}
+
+			require.NoError(t, err)
+			storageMock.AssertExpectations(t)
+		})
+	}
+}
+
+func TestCreateDatabaseEntry(t *testing.T) {
+	t.Parallel()
+
+	storageMock := mocks.NewWALStorage(t)
+	service := walsrv.New(storageMock)
+
+	key := databasemodels.Key{Database: "test-db"}
+	db := &databasemodels.Database{Name: "test-db"}
+
+	storageMock.On("Append", mock.Anything, mock.MatchedBy(func(entry walmodels.WALEntry) bool {
+		var payload walmodels.DatabasePayload
+		err := json.Unmarshal(entry.Payload, &payload)
+		return err == nil &&
+			payload.Key.Database == key.Database &&
+			payload.Database.Name == db.Name
+	})).Return(nil)
+
+	err := service.CreateDatabaseEntry(context.Background(), commonmodels.MutationTypeCreate, key, db)
+	require.NoError(t, err)
+	storageMock.AssertExpectations(t)
+}
+
+func TestCreateCollectionEntry(t *testing.T) {
+	t.Parallel()
+
+	storageMock := mocks.NewWALStorage(t)
+	service := walsrv.New(storageMock)
+
+	key := collectionmodels.Key{Database: "test-db", Collection: "test-collection"}
+	coll := &collectionmodels.Collection{Name: "test-collection"}
+
+	storageMock.On("Append", mock.Anything, mock.MatchedBy(func(entry walmodels.WALEntry) bool {
+		var payload walmodels.CollectionPayload
+		err := json.Unmarshal(entry.Payload, &payload)
+		return err == nil &&
+			payload.Key.Collection == key.Collection &&
+			payload.Collection.Name == coll.Name
+	})).Return(nil)
+
+	err := service.CreateCollectionEntry(context.Background(), commonmodels.MutationTypeCreate, key, coll)
+	require.NoError(t, err)
+	storageMock.AssertExpectations(t)
+}
+
+func TestCreateDocumentEntry(t *testing.T) {
+	t.Parallel()
+
+	storageMock := mocks.NewWALStorage(t)
+	service := walsrv.New(storageMock)
+
+	key := documentmodels.Key{Database: "test-db", Collection: "test-collection", Document: "test-doc"}
+	doc := &documentmodels.Document{ID: "test-doc"}
+
+	storageMock.On("Append", mock.Anything, mock.MatchedBy(func(entry walmodels.WALEntry) bool {
+		var payload walmodels.DocumentPayload
+		err := json.Unmarshal(entry.Payload, &payload)
+		return err == nil &&
+			payload.Key.Document == key.Document &&
+			payload.Document.ID == doc.ID
+	})).Return(nil)
+
+	err := service.CreateDocumentEntry(context.Background(), commonmodels.MutationTypeCreate, key, doc)
+	require.NoError(t, err)
+	storageMock.AssertExpectations(t)
+}

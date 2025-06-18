@@ -16,6 +16,24 @@ type WALStorage struct {
 	mock.Mock
 }
 
+// Append provides a mock function with given fields: ctx, entry
+func (_m *WALStorage) Append(ctx context.Context, entry walmodels.WALEntry) error {
+	ret := _m.Called(ctx, entry)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Append")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, walmodels.WALEntry) error); ok {
+		r0 = rf(ctx, entry)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Entries provides a mock function with given fields: ctx, size, token, from, to
 func (_m *WALStorage) Entries(ctx context.Context, size int32, token string, from time.Time, to time.Time) ([]walmodels.WALEntry, string, error) {
 	ret := _m.Called(ctx, size, token, from, to)
