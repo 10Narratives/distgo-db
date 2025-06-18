@@ -3,13 +3,10 @@ package collectionsrv
 import (
 	"context"
 	"errors"
-	"time"
 
 	collectiongrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/collection"
 	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
-	commonmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/common"
 	databasemodels "github.com/10Narratives/distgo-db/internal/models/worker/data/database"
-	walmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/wal"
 	commonsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/common"
 )
 
@@ -82,16 +79,16 @@ func (s *Service) CreateCollection(ctx context.Context, parent string, collectio
 		return collectionmodels.Collection{}, err
 	}
 
-	entry := walmodels.WALEntry{
-		ID:        coll.Name,
-		Target:    "collection",
-		Type:      commonmodels.MutationTypeCreate,
-		NewValue:  coll.Description,
-		Timestamp: time.Now(),
-	}
-	if err := s.walStorage.LogEntry(ctx, entry); err != nil {
-		return collectionmodels.Collection{}, errors.New("failed to log WAL entry: " + err.Error())
-	}
+	// entry := walmodels.WALEntry{
+	// 	ID:        coll.Name,
+	// 	Target:    "collection",
+	// 	Type:      commonmodels.MutationTypeCreate,
+	// 	NewValue:  coll.Description,
+	// 	Timestamp: time.Now(),
+	// }
+	// if err := s.walStorage.LogEntry(ctx, entry); err != nil {
+	// 	return collectionmodels.Collection{}, errors.New("failed to log WAL entry: " + err.Error())
+	// }
 
 	return coll, nil
 }
@@ -99,25 +96,25 @@ func (s *Service) CreateCollection(ctx context.Context, parent string, collectio
 func (s *Service) DeleteCollection(ctx context.Context, name string) error {
 	key := collectionmodels.NewKey(name)
 
-	coll, err := s.collectionStore.Collection(ctx, key)
-	if err != nil {
-		return err
-	}
+	// coll, err := s.collectionStore.Collection(ctx, key)
+	// if err != nil {
+	// 	return err
+	// }
 
 	if err := s.collectionStore.DeleteCollection(ctx, key); err != nil {
 		return err
 	}
 
-	entry := walmodels.WALEntry{
-		ID:        coll.Name,
-		Target:    "collection",
-		Type:      commonmodels.MutationTypeDelete,
-		OldValue:  coll.Description,
-		Timestamp: time.Now(),
-	}
-	if err := s.walStorage.LogEntry(ctx, entry); err != nil {
-		return errors.New("failed to log WAL entry: " + err.Error())
-	}
+	// entry := walmodels.WALEntry{
+	// 	ID:        coll.Name,
+	// 	Target:    "collection",
+	// 	Type:      commonmodels.MutationTypeDelete,
+	// 	OldValue:  coll.Description,
+	// 	Timestamp: time.Now(),
+	// }
+	// if err := s.walStorage.LogEntry(ctx, entry); err != nil {
+	// 	return errors.New("failed to log WAL entry: " + err.Error())
+	// }
 
 	return nil
 }
@@ -137,17 +134,17 @@ func (s *Service) UpdateCollection(ctx context.Context, collection collectionmod
 				return collectionmodels.Collection{}, err
 			}
 
-			entry := walmodels.WALEntry{
-				ID:        collection.Name,
-				Target:    "collection",
-				Type:      commonmodels.MutationTypeUpdate,
-				OldValue:  existingColl.Description,
-				NewValue:  collection.Description,
-				Timestamp: time.Now(),
-			}
-			if err := s.walStorage.LogEntry(ctx, entry); err != nil {
-				return collectionmodels.Collection{}, errors.New("failed to log WAL entry: " + err.Error())
-			}
+			// entry := walmodels.WALEntry{
+			// 	ID:        collection.Name,
+			// 	Target:    "collection",
+			// 	Type:      commonmodels.MutationTypeUpdate,
+			// 	OldValue:  existingColl.Description,
+			// 	NewValue:  collection.Description,
+			// 	Timestamp: time.Now(),
+			// }
+			// if err := s.walStorage.LogEntry(ctx, entry); err != nil {
+			// 	return collectionmodels.Collection{}, errors.New("failed to log WAL entry: " + err.Error())
+			// }
 
 			existingColl.Description = collection.Description
 			return existingColl, nil

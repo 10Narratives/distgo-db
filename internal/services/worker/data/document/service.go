@@ -3,13 +3,10 @@ package documentsrv
 import (
 	"context"
 	"errors"
-	"time"
 
 	documentgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/document"
 	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
-	commonmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/common"
 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
-	walmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/wal"
 	commonsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/common"
 )
 
@@ -82,16 +79,16 @@ func (s *Service) CreateDocument(ctx context.Context, parent string, documentID 
 		return documentmodels.Document{}, err
 	}
 
-	entry := walmodels.WALEntry{
-		ID:        doc.Name,
-		Target:    "document",
-		Type:      commonmodels.MutationTypeCreate,
-		NewValue:  string(doc.Value),
-		Timestamp: time.Now(),
-	}
-	if err := s.walStorage.LogEntry(ctx, entry); err != nil {
-		return documentmodels.Document{}, errors.New("failed to log WAL entry: " + err.Error())
-	}
+	// entry := walmodels.WALEntry{
+	// 	ID:        doc.Name,
+	// 	Target:    "document",
+	// 	Type:      commonmodels.MutationTypeCreate,
+	// 	NewValue:  string(doc.Value),
+	// 	Timestamp: time.Now(),
+	// }
+	// if err := s.walStorage.LogEntry(ctx, entry); err != nil {
+	// 	return documentmodels.Document{}, errors.New("failed to log WAL entry: " + err.Error())
+	// }
 
 	return doc, nil
 }
@@ -99,25 +96,25 @@ func (s *Service) CreateDocument(ctx context.Context, parent string, documentID 
 func (s *Service) DeleteDocument(ctx context.Context, name string) error {
 	key := documentmodels.NewKey(name)
 
-	doc, err := s.documentStore.Document(ctx, key)
-	if err != nil {
-		return err
-	}
+	// doc, err := s.documentStore.Document(ctx, key)
+	// if err != nil {
+	// 	return err
+	// }
 
 	if err := s.documentStore.DeleteDocument(ctx, key); err != nil {
 		return err
 	}
 
-	entry := walmodels.WALEntry{
-		ID:        doc.Name,
-		Target:    "document",
-		Type:      commonmodels.MutationTypeDelete,
-		OldValue:  string(doc.Value),
-		Timestamp: time.Now(),
-	}
-	if err := s.walStorage.LogEntry(ctx, entry); err != nil {
-		return errors.New("failed to log WAL entry: " + err.Error())
-	}
+	// entry := walmodels.WALEntry{
+	// 	ID:        doc.Name,
+	// 	Target:    "document",
+	// 	Type:      commonmodels.MutationTypeDelete,
+	// 	OldValue:  string(doc.Value),
+	// 	Timestamp: time.Now(),
+	// }
+	// if err := s.walStorage.LogEntry(ctx, entry); err != nil {
+	// 	return errors.New("failed to log WAL entry: " + err.Error())
+	// }
 
 	return nil
 }
@@ -126,26 +123,26 @@ func (s *Service) UpdateDocument(ctx context.Context, document documentmodels.Do
 	for _, path := range paths {
 		switch path {
 		case "value":
-			existingDoc, err := s.documentStore.Document(ctx, documentmodels.NewKey(document.Name))
-			if err != nil {
-				return documentmodels.Document{}, err
-			}
+			// existingDoc, err := s.documentStore.Document(ctx, documentmodels.NewKey(document.Name))
+			// if err != nil {
+			// 	return documentmodels.Document{}, err
+			// }
 
 			if err := s.documentStore.UpdateDocument(ctx, document); err != nil {
 				return documentmodels.Document{}, err
 			}
 
-			entry := walmodels.WALEntry{
-				ID:        document.Name,
-				Target:    "document",
-				Type:      commonmodels.MutationTypeUpdate,
-				OldValue:  string(existingDoc.Value),
-				NewValue:  string(document.Value),
-				Timestamp: time.Now(),
-			}
-			if err := s.walStorage.LogEntry(ctx, entry); err != nil {
-				return documentmodels.Document{}, errors.New("failed to log WAL entry: " + err.Error())
-			}
+			// entry := walmodels.WALEntry{
+			// 	ID:        document.Name,
+			// 	Target:    "document",
+			// 	Type:      commonmodels.MutationTypeUpdate,
+			// 	OldValue:  string(existingDoc.Value),
+			// 	NewValue:  string(document.Value),
+			// 	Timestamp: time.Now(),
+			// }
+			// if err := s.walStorage.LogEntry(ctx, entry); err != nil {
+			// 	return documentmodels.Document{}, errors.New("failed to log WAL entry: " + err.Error())
+			// }
 
 			return document, nil
 		default:
