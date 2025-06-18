@@ -56,7 +56,12 @@ func (s *Storage) Document(ctx context.Context, key documentmodels.Key) (documen
 	return val.(documentmodels.Document), nil
 }
 
-func (s *Storage) Documents(ctx context.Context, parent collectionmodels.Key) []documentmodels.Document {
+func (s *Storage) Documents(ctx context.Context, parent collectionmodels.Key) ([]documentmodels.Document, error) {
+	_, err := s.Collection(ctx, parent)
+	if err != nil {
+		return []documentmodels.Document{}, err
+	}
+
 	var result []documentmodels.Document
 
 	s.documents.Range(func(key, value any) bool {
@@ -67,7 +72,7 @@ func (s *Storage) Documents(ctx context.Context, parent collectionmodels.Key) []
 		return true
 	})
 
-	return result
+	return result, nil
 }
 
 func (s *Storage) UpdateDocument(ctx context.Context, document documentmodels.Document) error {
