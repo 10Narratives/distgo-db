@@ -412,9 +412,9 @@ const file_worker_database_v1_database_service_proto_rawDesc = "" +
 	"\tdatabases\x18\x01 \x03(\v2\x1c.worker.database.v1.DatabaseR\tdatabases\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"G\n" +
 	"\x12GetDatabaseRequest\x121\n" +
-	"\x04name\x18\x01 \x01(\tB\x1d\xe0A\x02\xfaB\x17r\x152\x13^databases\\/[^\\/]+$R\x04name\"\xa4\x01\n" +
-	"\x15CreateDatabaseRequest\x12D\n" +
-	"\vdatabase_id\x18\x01 \x01(\tB#\xe0A\x01\xfaB\x1dr\x1b\x10\x01\x18@2\x12^[a-zA-Z0-9\\-_.]*$\xd0\x01\x01R\n" +
+	"\x04name\x18\x01 \x01(\tB\x1d\xe0A\x02\xfaB\x17r\x152\x13^databases\\/[^\\/]+$R\x04name\"\xa1\x01\n" +
+	"\x15CreateDatabaseRequest\x12A\n" +
+	"\vdatabase_id\x18\x01 \x01(\tB \xe0A\x01\xfaB\x1ar\x18\x10\x01\x18@2\x0f^[a-z0-9\\-_.]*$\xd0\x01\x01R\n" +
 	"databaseId\x12E\n" +
 	"\bdatabase\x18\x02 \x01(\v2\x1c.worker.database.v1.DatabaseB\v\xe0A\x02\xfaB\x05\x8a\x01\x02\x10\x01R\bdatabase\"\x9b\x01\n" +
 	"\x15UpdateDatabaseRequest\x12E\n" +

@@ -8,6 +8,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "validate/validate.proto";
 import "worker/database/v1/operation_type.proto";
+import "worker/database/v1/entity_type.proto";
 
 option java_multiple_files = true;
 option java_package = "com.google.worker.database.v1";
@@ -29,18 +30,60 @@ service WALService {
 }
 
 message WALEntry {
-  string id = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
-  string target = 2 [
-    (validate.rules).string.min_len = 1,
+  string id = 1 [
+    (validate.rules).string.uuid = true,
+    (google.api.field_behavior) = OUTPUT_ONLY
+  ];
+  EntityType entity_type = 2 [
+    (validate.rules).enum.defined_only = true,
     (google.api.field_behavior) = REQUIRED
   ];
   MutationType operation_type = 3 [
     (validate.rules).enum.defined_only = true,
     (google.api.field_behavior) = REQUIRED
   ];
-  bytes old_value = 4;
-  bytes new_value = 5;
-  google.protobuf.Timestamp timestamp = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
+  oneof payload {
+    DatabasePayload database_payload = 4;
+    CollectionPayload collection_payload = 5;
+    DocumentPayload document_payload = 6;
+  }
+  google.protobuf.Timestamp timestamp = 7 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+message DatabasePayload {
+  string database_id = 1 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+  bytes data = 2;
+}
+
+message CollectionPayload {
+  string database_id = 1 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+  string collection_id = 2 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+  bytes data = 3;
+}
+
+message DocumentPayload {
+  string database_id = 1 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+  string collection_id = 2 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+  string document_id = 3 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+  bytes data = 4;
 }
 
 message ListWALEntriesRequest {
@@ -50,7 +93,8 @@ message ListWALEntriesRequest {
   string page_token = 2;
   google.protobuf.Timestamp start_time = 3;
   google.protobuf.Timestamp end_time = 4;
-  string target_filter = 5;
+  EntityType entity_type_filter = 5;
+  MutationType operation_type_filter = 6;
 }
 
 message ListWALEntriesResponse {

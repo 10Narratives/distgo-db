@@ -1,96 +1,145 @@
 package walgrpc
 
-// import (
-// 	"context"
-// 	"time"
+import (
+	"context"
+	"encoding/json"
+	"time"
 
-// 	commonmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/common"
-// 	walmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/wal"
-// 	dbv1 "github.com/10Narratives/distgo-db/pkg/proto/worker/database/v1"
-// 	"google.golang.org/grpc"
-// 	"google.golang.org/grpc/codes"
-// 	"google.golang.org/grpc/status"
-// 	"google.golang.org/protobuf/types/known/emptypb"
-// 	"google.golang.org/protobuf/types/known/timestamppb"
-// )
+	commonmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/common"
+	walmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/wal"
+	dbv1 "github.com/10Narratives/distgo-db/pkg/proto/worker/database/v1"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
 
-// //go:generate mockery --name WALService --output ./mocks/
-// type WALService interface {
-// 	WALEntries(ctx context.Context, size int32, token string, from, to time.Time) ([]walmodels.WALEntry, string, error)
-// 	TruncateWAL(ctx context.Context, before time.Time) error
-// }
+//go:generate mockery --name WALService --output ./mocks/
+type WALService interface {
+	Entries(ctx context.Context, size int32, token string, from, to time.Time) ([]walmodels.WALEntry, string, error)
+	Truncate(ctx context.Context, before time.Time) error
+}
 
-// type ServerAPI struct {
-// 	dbv1.UnimplementedWALServiceServer
-// 	service WALService
-// }
+type ServerAPI struct {
+	dbv1.UnimplementedWALServiceServer
+	walService WALService
+}
 
-// var _ dbv1.WALServiceServer = ServerAPI{}
+func New(walService WALService) *ServerAPI {
+	return &ServerAPI{
+		walService: walService,
+	}
+}
 
-// func New(service WALService) *ServerAPI {
-// 	return &ServerAPI{
-// 		service: service,
-// 	}
-// }
+func Register(server *grpc.Server, walService WALService) {
+	dbv1.RegisterWALServiceServer(server, New(walService))
+}
 
-// func Register(server *grpc.Server, service WALService) {
-// 	dbv1.RegisterWALServiceServer(server, New(service))
-// }
+func (s *ServerAPI) ListWALEntries(ctx context.Context, req *dbv1.ListWALEntriesRequest) (*dbv1.ListWALEntriesResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 
-// func (s ServerAPI) ListWALEntries(ctx context.Context, req *dbv1.ListWALEntriesRequest) (*dbv1.ListWALEntriesResponse, error) {
-// 	if err := req.Validate(); err != nil {
-// 		return nil, status.Error(codes.InvalidArgument, err.Error())
-// 	}
+	entries, token, err := s.walService.Entries(ctx, req.GetPageSize(), req.GetPageToken(), req.GetStartTime().AsTime(), req.GetEndTime().AsTime())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list wal entries: %s", err.Error())
+	}
 
-// 	entries, token, err := s.service.WALEntries(ctx, req.GetPageSize(), req.GetPageToken(), req.GetStartTime().AsTime(), req.GetEndTime().AsTime())
-// 	if err != nil {
-// 		return nil, status.Error(codes.Internal, err.Error())
-// 	}
+	listed := make([]*dbv1.WALEntry, 0, len(entries))
+	for _, entry := range entries {
+		pbEntry := &dbv1.WALEntry{
+			Id:            entry.ID.String(),
+			EntityType:    entityTypeToGRPC(entry.Entity),
+			OperationType: mutationTypeToGRPC(entry.Mutation),
+			Timestamp:     timestamppb.New(entry.Timestamp),
+		}
 
-// 	listed := make([]*dbv1.WALEntry, 0, len(entries))
-// 	for _, entry := range entries {
-// 		listed = append(listed, &dbv1.WALEntry{
-// 			Id:            entry.ID,
-// 			Target:        entry.Target,
-// 			OperationType: mutationTypeToGRPC(entry.Type),
-// 			NewValue:      []byte(entry.NewValue),
-// 			OldValue:      []byte(entry.OldValue),
-// 			Timestamp:     timestamppb.New(entry.Timestamp),
-// 		})
-// 	}
+		switch entry.Entity {
+		case walmodels.EntityTypeDatabase:
+			var payload walmodels.DatabasePayload
+			if err := json.Unmarshal(entry.Payload, &payload); err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to unmarshal database payload: %s", err.Error())
+			}
+			pbEntry.Payload = &dbv1.WALEntry_DatabasePayload{
+				DatabasePayload: &dbv1.DatabasePayload{
+					DatabaseId: payload.Key.Database,
+					Data:       entry.Payload,
+				},
+			}
 
-// 	return &dbv1.ListWALEntriesResponse{
-// 		Entries:       listed,
-// 		NextPageToken: token,
-// 	}, nil
-// }
+		case walmodels.EntityTypeCollection:
+			var payload walmodels.CollectionPayload
+			if err := json.Unmarshal(entry.Payload, &payload); err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to unmarshal collection payload: %s", err.Error())
+			}
+			pbEntry.Payload = &dbv1.WALEntry_CollectionPayload{
+				CollectionPayload: &dbv1.CollectionPayload{
+					DatabaseId:   payload.Key.Database,
+					CollectionId: payload.Key.Collection,
+					Data:         entry.Payload,
+				},
+			}
 
-// func (s ServerAPI) TruncateWAL(ctx context.Context, req *dbv1.TruncateWALRequest) (*emptypb.Empty, error) {
-// 	if req.GetBefore() == nil {
-// 		return nil, status.Error(codes.InvalidArgument, "missing 'before' timestamp")
-// 	}
+		case walmodels.EntityTypeDocument:
+			var payload walmodels.DocumentPayload
+			if err := json.Unmarshal(entry.Payload, &payload); err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to unmarshal document payload: %s", err.Error())
+			}
+			pbEntry.Payload = &dbv1.WALEntry_DocumentPayload{
+				DocumentPayload: &dbv1.DocumentPayload{
+					DatabaseId:   payload.Key.Database,
+					CollectionId: payload.Key.Collection,
+					DocumentId:   payload.Key.Document,
+					Data:         entry.Payload,
+				},
+			}
+		}
 
-// 	before := req.GetBefore().AsTime()
-// 	if before.IsZero() {
-// 		return nil, status.Error(codes.InvalidArgument, "invalid 'before' timestamp")
-// 	}
+		listed = append(listed, pbEntry)
+	}
 
-// 	err := s.service.TruncateWAL(ctx, before)
-// 	if err != nil {
-// 		return nil, status.Error(codes.Internal, err.Error())
-// 	}
+	return &dbv1.ListWALEntriesResponse{
+		Entries:       listed,
+		NextPageToken: token,
+	}, nil
+}
 
-// 	return &emptypb.Empty{}, nil
-// }
-// func mutationTypeToGRPC(typ commonmodels.MutationType) dbv1.MutationType {
-// 	switch typ {
-// 	case commonmodels.MutationTypeCreate:
-// 		return dbv1.MutationType_MUTATION_TYPE_CREATE
-// 	case commonmodels.MutationTypeUpdate:
-// 		return dbv1.MutationType_MUTATION_TYPE_UPDATE
-// 	case commonmodels.MutationTypeDelete:
-// 		return dbv1.MutationType_MUTATION_TYPE_DELETE
-// 	default:
-// 		return dbv1.MutationType_MUTATION_TYPE_UNSPECIFIED
-// 	}
-// }
+func (s *ServerAPI) TruncateWAL(ctx context.Context, req *dbv1.TruncateWALRequest) (*emptypb.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	err := s.walService.Truncate(ctx, req.GetBefore().AsTime())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to truncate WAL: %s", err.Error())
+	}
+
+	return nil, nil
+}
+
+func mutationTypeToGRPC(typ commonmodels.MutationType) dbv1.MutationType {
+	switch typ {
+	case commonmodels.MutationTypeCreate:
+		return dbv1.MutationType_MUTATION_TYPE_CREATE
+	case commonmodels.MutationTypeUpdate:
+		return dbv1.MutationType_MUTATION_TYPE_UPDATE
+	case commonmodels.MutationTypeDelete:
+		return dbv1.MutationType_MUTATION_TYPE_DELETE
+	default:
+		return dbv1.MutationType_MUTATION_TYPE_UNSPECIFIED
+	}
+}
+
+func entityTypeToGRPC(typ walmodels.EntityType) dbv1.EntityType {
+	switch typ {
+	case walmodels.EntityTypeDatabase:
+		return dbv1.EntityType_ENTITY_TYPE_DATABASE
+	case walmodels.EntityTypeCollection:
+		return dbv1.EntityType_ENTITY_TYPE_COLLECTION
+	case walmodels.EntityTypeDocument:
+		return dbv1.EntityType_ENTITY_TYPE_DOCUMENT
+	default:
+		return dbv1.EntityType_ENTITY_TYPE_UNSPECIFIED
+	}
+}

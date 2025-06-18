@@ -611,7 +611,7 @@ func (m *CreateDatabaseRequest) validate(all bool) error {
 		if !_CreateDatabaseRequest_DatabaseId_Pattern.MatchString(m.GetDatabaseId()) {
 			err := CreateDatabaseRequestValidationError{
 				field:  "DatabaseId",
-				reason: "value does not match regex pattern \"^[a-zA-Z0-9\\\\-_.]*$\"",
+				reason: "value does not match regex pattern \"^[a-z0-9\\\\-_.]*$\"",
 			}
 			if !all {
 				return err
@@ -741,7 +741,7 @@ var _ interface {
 	ErrorName() string
 } = CreateDatabaseRequestValidationError{}
 
-var _CreateDatabaseRequest_DatabaseId_Pattern = regexp.MustCompile("^[a-zA-Z0-9\\-_.]*$")
+var _CreateDatabaseRequest_DatabaseId_Pattern = regexp.MustCompile("^[a-z0-9\\-_.]*$")
 
 // Validate checks the field values on UpdateDatabaseRequest with the rules
 // defined in the proto definition for this message. If any rules are

@@ -35,6 +35,9 @@ var (
 	_ = sort.Sort
 )
 
+// define the regex for a UUID once up-front
+var _wal_service_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+
 // Validate checks the field values on WALEntry with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -57,12 +60,22 @@ func (m *WALEntry) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Id
+	if err := m._validateUuid(m.GetId()); err != nil {
+		err = WALEntryValidationError{
+			field:  "Id",
+			reason: "value must be a valid UUID",
+			cause:  err,
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	if utf8.RuneCountInString(m.GetTarget()) < 1 {
+	if _, ok := EntityType_name[int32(m.GetEntityType())]; !ok {
 		err := WALEntryValidationError{
-			field:  "Target",
-			reason: "value length must be at least 1 runes",
+			field:  "EntityType",
+			reason: "value must be one of the defined enum values",
 		}
 		if !all {
 			return err
@@ -80,10 +93,6 @@ func (m *WALEntry) validate(all bool) error {
 		}
 		errors = append(errors, err)
 	}
-
-	// no validation rules for OldValue
-
-	// no validation rules for NewValue
 
 	if all {
 		switch v := interface{}(m.GetTimestamp()).(type) {
@@ -114,8 +123,144 @@ func (m *WALEntry) validate(all bool) error {
 		}
 	}
 
+	switch v := m.Payload.(type) {
+	case *WALEntry_DatabasePayload:
+		if v == nil {
+			err := WALEntryValidationError{
+				field:  "Payload",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetDatabasePayload()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, WALEntryValidationError{
+						field:  "DatabasePayload",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, WALEntryValidationError{
+						field:  "DatabasePayload",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetDatabasePayload()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return WALEntryValidationError{
+					field:  "DatabasePayload",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *WALEntry_CollectionPayload:
+		if v == nil {
+			err := WALEntryValidationError{
+				field:  "Payload",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetCollectionPayload()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, WALEntryValidationError{
+						field:  "CollectionPayload",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, WALEntryValidationError{
+						field:  "CollectionPayload",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetCollectionPayload()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return WALEntryValidationError{
+					field:  "CollectionPayload",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *WALEntry_DocumentPayload:
+		if v == nil {
+			err := WALEntryValidationError{
+				field:  "Payload",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetDocumentPayload()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, WALEntryValidationError{
+						field:  "DocumentPayload",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, WALEntryValidationError{
+						field:  "DocumentPayload",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetDocumentPayload()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return WALEntryValidationError{
+					field:  "DocumentPayload",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	default:
+		_ = v // ensures v is used
+	}
+
 	if len(errors) > 0 {
 		return WALEntryMultiError(errors)
+	}
+
+	return nil
+}
+
+func (m *WALEntry) _validateUuid(uuid string) error {
+	if matched := _wal_service_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
 	}
 
 	return nil
@@ -190,6 +335,380 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = WALEntryValidationError{}
+
+// Validate checks the field values on DatabasePayload with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *DatabasePayload) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DatabasePayload with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DatabasePayloadMultiError, or nil if none found.
+func (m *DatabasePayload) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DatabasePayload) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if utf8.RuneCountInString(m.GetDatabaseId()) < 1 {
+		err := DatabasePayloadValidationError{
+			field:  "DatabaseId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for Data
+
+	if len(errors) > 0 {
+		return DatabasePayloadMultiError(errors)
+	}
+
+	return nil
+}
+
+// DatabasePayloadMultiError is an error wrapping multiple validation errors
+// returned by DatabasePayload.ValidateAll() if the designated constraints
+// aren't met.
+type DatabasePayloadMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DatabasePayloadMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DatabasePayloadMultiError) AllErrors() []error { return m }
+
+// DatabasePayloadValidationError is the validation error returned by
+// DatabasePayload.Validate if the designated constraints aren't met.
+type DatabasePayloadValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DatabasePayloadValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DatabasePayloadValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DatabasePayloadValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DatabasePayloadValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DatabasePayloadValidationError) ErrorName() string { return "DatabasePayloadValidationError" }
+
+// Error satisfies the builtin error interface
+func (e DatabasePayloadValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDatabasePayload.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DatabasePayloadValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DatabasePayloadValidationError{}
+
+// Validate checks the field values on CollectionPayload with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *CollectionPayload) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CollectionPayload with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CollectionPayloadMultiError, or nil if none found.
+func (m *CollectionPayload) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CollectionPayload) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if utf8.RuneCountInString(m.GetDatabaseId()) < 1 {
+		err := CollectionPayloadValidationError{
+			field:  "DatabaseId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetCollectionId()) < 1 {
+		err := CollectionPayloadValidationError{
+			field:  "CollectionId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for Data
+
+	if len(errors) > 0 {
+		return CollectionPayloadMultiError(errors)
+	}
+
+	return nil
+}
+
+// CollectionPayloadMultiError is an error wrapping multiple validation errors
+// returned by CollectionPayload.ValidateAll() if the designated constraints
+// aren't met.
+type CollectionPayloadMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CollectionPayloadMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CollectionPayloadMultiError) AllErrors() []error { return m }
+
+// CollectionPayloadValidationError is the validation error returned by
+// CollectionPayload.Validate if the designated constraints aren't met.
+type CollectionPayloadValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CollectionPayloadValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CollectionPayloadValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CollectionPayloadValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CollectionPayloadValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CollectionPayloadValidationError) ErrorName() string {
+	return "CollectionPayloadValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CollectionPayloadValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCollectionPayload.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CollectionPayloadValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CollectionPayloadValidationError{}
+
+// Validate checks the field values on DocumentPayload with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *DocumentPayload) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DocumentPayload with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DocumentPayloadMultiError, or nil if none found.
+func (m *DocumentPayload) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DocumentPayload) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if utf8.RuneCountInString(m.GetDatabaseId()) < 1 {
+		err := DocumentPayloadValidationError{
+			field:  "DatabaseId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetCollectionId()) < 1 {
+		err := DocumentPayloadValidationError{
+			field:  "CollectionId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetDocumentId()) < 1 {
+		err := DocumentPayloadValidationError{
+			field:  "DocumentId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for Data
+
+	if len(errors) > 0 {
+		return DocumentPayloadMultiError(errors)
+	}
+
+	return nil
+}
+
+// DocumentPayloadMultiError is an error wrapping multiple validation errors
+// returned by DocumentPayload.ValidateAll() if the designated constraints
+// aren't met.
+type DocumentPayloadMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DocumentPayloadMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DocumentPayloadMultiError) AllErrors() []error { return m }
+
+// DocumentPayloadValidationError is the validation error returned by
+// DocumentPayload.Validate if the designated constraints aren't met.
+type DocumentPayloadValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DocumentPayloadValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DocumentPayloadValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DocumentPayloadValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DocumentPayloadValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DocumentPayloadValidationError) ErrorName() string { return "DocumentPayloadValidationError" }
+
+// Error satisfies the builtin error interface
+func (e DocumentPayloadValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDocumentPayload.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DocumentPayloadValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DocumentPayloadValidationError{}
 
 // Validate checks the field values on ListWALEntriesRequest with the rules
 // defined in the proto definition for this message. If any rules are
@@ -284,7 +803,9 @@ func (m *ListWALEntriesRequest) validate(all bool) error {
 		}
 	}
 
-	// no validation rules for TargetFilter
+	// no validation rules for EntityTypeFilter
+
+	// no validation rules for OperationTypeFilter
 
 	if len(errors) > 0 {
 		return ListWALEntriesRequestMultiError(errors)

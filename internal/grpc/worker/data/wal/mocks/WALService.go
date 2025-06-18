@@ -16,30 +16,12 @@ type WALService struct {
 	mock.Mock
 }
 
-// TruncateWAL provides a mock function with given fields: ctx, before
-func (_m *WALService) TruncateWAL(ctx context.Context, before time.Time) error {
-	ret := _m.Called(ctx, before)
-
-	if len(ret) == 0 {
-		panic("no return value specified for TruncateWAL")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, time.Time) error); ok {
-		r0 = rf(ctx, before)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// WALEntries provides a mock function with given fields: ctx, size, token, from, to
-func (_m *WALService) WALEntries(ctx context.Context, size int32, token string, from time.Time, to time.Time) ([]walmodels.WALEntry, string, error) {
+// Entries provides a mock function with given fields: ctx, size, token, from, to
+func (_m *WALService) Entries(ctx context.Context, size int32, token string, from time.Time, to time.Time) ([]walmodels.WALEntry, string, error) {
 	ret := _m.Called(ctx, size, token, from, to)
 
 	if len(ret) == 0 {
-		panic("no return value specified for WALEntries")
+		panic("no return value specified for Entries")
 	}
 
 	var r0 []walmodels.WALEntry
@@ -69,6 +51,24 @@ func (_m *WALService) WALEntries(ctx context.Context, size int32, token string, 
 	}
 
 	return r0, r1, r2
+}
+
+// Truncate provides a mock function with given fields: ctx, before
+func (_m *WALService) Truncate(ctx context.Context, before time.Time) error {
+	ret := _m.Called(ctx, before)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Truncate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, time.Time) error); ok {
+		r0 = rf(ctx, before)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // NewWALService creates a new instance of WALService. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
