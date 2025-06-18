@@ -252,7 +252,7 @@ func TestStorage_Databases(t *testing.T) {
 				map[collectionmodels.Key]collectionmodels.Collection{},
 				map[documentmodels.Key]documentmodels.Document{},
 			)
-			databases := storage.Databases(tt.args.ctx)
+			databases, _ := storage.Databases(tt.args.ctx)
 
 			tt.wantVal(t, databases)
 		})

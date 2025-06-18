@@ -2,10 +2,12 @@ package databasesrv
 
 import (
 	"context"
+	"errors"
+	"time"
 
 	databasegrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/database"
+	commonmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/common"
 	databasemodels "github.com/10Narratives/distgo-db/internal/models/worker/data/database"
-	commonsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/common"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -13,60 +15,109 @@ import (
 //go:generate mockery --name DatabaseStorage --output ./mocks/
 type DatabaseStorage interface {
 	Database(ctx context.Context, key databasemodels.Key) (databasemodels.Database, error)
-	Databases(ctx context.Context) []databasemodels.Database
+	Databases(ctx context.Context) ([]databasemodels.Database, error)
 	CreateDatabase(ctx context.Context, key databasemodels.Key, displayName string) (databasemodels.Database, error)
 	UpdateDatabase(ctx context.Context, key databasemodels.Key, displayName string) error
 	DeleteDatabase(ctx context.Context, key databasemodels.Key) error
 }
 
+//go:generate mockery --name WAlService --output ./mocks/
+type WAlService interface {
+	CreateDatabaseEntry(ctx context.Context, mutation commonmodels.MutationType, key databasemodels.Key, db *databasemodels.Database) error
+}
+
 type Service struct {
-	databaseStore DatabaseStorage
-	walStorage    commonsrv.WALStorage
+	databaseStorage DatabaseStorage
+	walService      WAlService
 }
 
 var _ databasegrpc.DatabaseService = &Service{}
 
 func New(
 	databaseStore DatabaseStorage,
-	walStorage commonsrv.WALStorage,
+	walService WAlService,
 ) *Service {
 	return &Service{
-		databaseStore: databaseStore,
-		walStorage:    walStorage,
+		databaseStorage: databaseStore,
+		walService:      walService,
 	}
 }
 
 func (s *Service) CreateDatabase(ctx context.Context, databaseID string, displayName string) (databasemodels.Database, error) {
 	key := databasemodels.NewKey("databases/" + databaseID)
 
-	// Create the database in the storage
-	db, err := s.databaseStore.CreateDatabase(ctx, key, displayName)
+	newDB := databasemodels.Database{
+		Name:        "databases/" + databaseID,
+		DisplayName: displayName,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	if err := s.walService.CreateDatabaseEntry(ctx, commonmodels.MutationTypeCreate, key, &newDB); err != nil {
+		return databasemodels.Database{}, errors.New("failed to create WAL entry: " + err.Error())
+	}
+
+	db, err := s.databaseStorage.CreateDatabase(ctx, key, displayName)
 	if err != nil {
 		return databasemodels.Database{}, err
 	}
 
-	// // Log the creation in WAL
-	// entry := walmodels.WALEntry{
-	// 	ID:        db.Name,
-	// 	Target:    "database",
-	// 	Type:      commonmodels.MutationTypeCreate,
-	// 	NewValue:  db.DisplayName,
-	// 	Timestamp: time.Now(),
-	// }
-	// if err := s.walStorage.LogEntry(ctx, entry); err != nil {
-	// 	return databasemodels.Database{}, status.Errorf(codes.Internal, "failed to log WAL entry: %v", err)
-	// }
-
 	return db, nil
+}
+
+func (s *Service) UpdateDatabase(ctx context.Context, database databasemodels.Database, paths []string) (databasemodels.Database, error) {
+	key := databasemodels.NewKey(database.Name)
+	existingDB, err := s.databaseStorage.Database(ctx, key)
+	if err != nil {
+		return databasemodels.Database{}, err
+	}
+
+	for _, path := range paths {
+		switch path {
+		case "display_name":
+			updatedDB := existingDB
+			updatedDB.DisplayName = database.DisplayName
+			updatedDB.UpdatedAt = time.Now()
+			if err := s.walService.CreateDatabaseEntry(ctx, commonmodels.MutationTypeUpdate, key, &updatedDB); err != nil {
+				return databasemodels.Database{}, errors.New("failed to create WAL entry: " + err.Error())
+			}
+
+			if err := s.databaseStorage.UpdateDatabase(ctx, key, database.DisplayName); err != nil {
+				return databasemodels.Database{}, err
+			}
+
+			existingDB.DisplayName = database.DisplayName
+		default:
+			return databasemodels.Database{}, status.Errorf(codes.InvalidArgument, "unknown field: %s", path)
+		}
+	}
+
+	return existingDB, nil
+}
+
+func (s *Service) DeleteDatabase(ctx context.Context, name string) error {
+	key := databasemodels.NewKey(name)
+
+	if err := s.walService.CreateDatabaseEntry(ctx, commonmodels.MutationTypeDelete, key, nil); err != nil {
+		return errors.New("failed to create WAL entry: " + err.Error())
+	}
+
+	if err := s.databaseStorage.DeleteDatabase(ctx, key); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Service) Database(ctx context.Context, name string) (databasemodels.Database, error) {
 	key := databasemodels.NewKey(name)
-	return s.databaseStore.Database(ctx, key)
+	return s.databaseStorage.Database(ctx, key)
 }
 
 func (s *Service) Databases(ctx context.Context, size int32, token string) ([]databasemodels.Database, string, error) {
-	allDbs := s.databaseStore.Databases(ctx)
+	allDbs, err := s.databaseStorage.Databases(ctx)
+	if err != nil {
+		return []databasemodels.Database{}, "", err
+	}
 
 	if len(allDbs) == 0 {
 		return []databasemodels.Database{}, "", nil
@@ -94,67 +145,4 @@ func (s *Service) Databases(ctx context.Context, size int32, token string) ([]da
 	}
 
 	return page, nextPageToken, nil
-}
-
-func (s *Service) DeleteDatabase(ctx context.Context, name string) error {
-	key := databasemodels.NewKey(name)
-
-	// db, err := s.databaseStore.Database(ctx, key)
-	// if err != nil {
-	// 	return err
-	// }
-
-	if err := s.databaseStore.DeleteDatabase(ctx, key); err != nil {
-		return err
-	}
-
-	// entry := walmodels.WALEntry{
-	// 	ID:        db.Name,
-	// 	Target:    "database",
-	// 	Type:      commonmodels.MutationTypeDelete,
-	// 	OldValue:  db.DisplayName,
-	// 	Timestamp: time.Now(),
-	// }
-	// if err := s.walStorage.LogEntry(ctx, entry); err != nil {
-	// 	return status.Errorf(codes.Internal, "failed to log WAL entry: %v", err)
-	// }
-
-	return nil
-}
-
-func (s *Service) UpdateDatabase(ctx context.Context, database databasemodels.Database, paths []string) (databasemodels.Database, error) {
-	key := databasemodels.NewKey(database.Name)
-	existingDB, err := s.databaseStore.Database(ctx, key)
-	if err != nil {
-		return databasemodels.Database{}, err
-	}
-
-	for _, path := range paths {
-		switch path {
-		case "display_name":
-			// Update the database in storage
-			if err := s.databaseStore.UpdateDatabase(ctx, key, database.DisplayName); err != nil {
-				return databasemodels.Database{}, err
-			}
-
-			// // Log the update in WAL
-			// entry := walmodels.WALEntry{
-			// 	ID:        existingDB.Name,
-			// 	Target:    "database",
-			// 	Type:      commonmodels.MutationTypeUpdate,
-			// 	OldValue:  existingDB.DisplayName,
-			// 	NewValue:  database.DisplayName,
-			// 	Timestamp: time.Now(),
-			// }
-			// if err := s.walStorage.LogEntry(ctx, entry); err != nil {
-			// 	return databasemodels.Database{}, status.Errorf(codes.Internal, "failed to log WAL entry: %v", err)
-			// }
-
-			existingDB.DisplayName = database.DisplayName
-		default:
-			return databasemodels.Database{}, status.Errorf(codes.InvalidArgument, "unknown field: %s", path)
-		}
-	}
-
-	return existingDB, nil
 }
