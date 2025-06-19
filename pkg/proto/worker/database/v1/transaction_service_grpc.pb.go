@@ -23,6 +23,7 @@ const (
 	TransactionService_Begin_FullMethodName    = "/worker.database.v1.TransactionService/Begin"
 	TransactionService_Commit_FullMethodName   = "/worker.database.v1.TransactionService/Commit"
 	TransactionService_Rollback_FullMethodName = "/worker.database.v1.TransactionService/Rollback"
+	TransactionService_Execute_FullMethodName  = "/worker.database.v1.TransactionService/Execute"
 )
 
 // TransactionServiceClient is the client API for TransactionService service.
@@ -32,6 +33,7 @@ type TransactionServiceClient interface {
 	Begin(ctx context.Context, in *BeginRequest, opts ...grpc.CallOption) (*BeginResponse, error)
 	Commit(ctx context.Context, in *CommitRequest, opts ...grpc.CallOption) (*CommitResponse, error)
 	Rollback(ctx context.Context, in *RollbackRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Execute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (*ExecuteResponse, error)
 }
 
 type transactionServiceClient struct {
@@ -72,6 +74,16 @@ func (c *transactionServiceClient) Rollback(ctx context.Context, in *RollbackReq
 	return out, nil
 }
 
+func (c *transactionServiceClient) Execute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (*ExecuteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExecuteResponse)
+	err := c.cc.Invoke(ctx, TransactionService_Execute_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TransactionServiceServer is the server API for TransactionService service.
 // All implementations must embed UnimplementedTransactionServiceServer
 // for forward compatibility.
@@ -79,6 +91,7 @@ type TransactionServiceServer interface {
 	Begin(context.Context, *BeginRequest) (*BeginResponse, error)
 	Commit(context.Context, *CommitRequest) (*CommitResponse, error)
 	Rollback(context.Context, *RollbackRequest) (*emptypb.Empty, error)
+	Execute(context.Context, *ExecuteRequest) (*ExecuteResponse, error)
 	mustEmbedUnimplementedTransactionServiceServer()
 }
 
@@ -97,6 +110,9 @@ func (UnimplementedTransactionServiceServer) Commit(context.Context, *CommitRequ
 }
 func (UnimplementedTransactionServiceServer) Rollback(context.Context, *RollbackRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Rollback not implemented")
+}
+func (UnimplementedTransactionServiceServer) Execute(context.Context, *ExecuteRequest) (*ExecuteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Execute not implemented")
 }
 func (UnimplementedTransactionServiceServer) mustEmbedUnimplementedTransactionServiceServer() {}
 func (UnimplementedTransactionServiceServer) testEmbeddedByValue()                            {}
@@ -173,6 +189,24 @@ func _TransactionService_Rollback_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TransactionService_Execute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExecuteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactionServiceServer).Execute(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TransactionService_Execute_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactionServiceServer).Execute(ctx, req.(*ExecuteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TransactionService_ServiceDesc is the grpc.ServiceDesc for TransactionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -191,6 +225,10 @@ var TransactionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Rollback",
 			Handler:    _TransactionService_Rollback_Handler,
+		},
+		{
+			MethodName: "Execute",
+			Handler:    _TransactionService_Execute_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

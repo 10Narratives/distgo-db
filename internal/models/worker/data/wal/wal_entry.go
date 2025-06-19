@@ -12,11 +12,12 @@ import (
 )
 
 type WALEntry struct {
-	ID        uuid.UUID                 `json:"id"`
-	Timestamp time.Time                 `json:"timestamp"`
-	Mutation  commonmodels.MutationType `json:"mutation"`
-	Payload   json.RawMessage           `json:"payload"`
-	Entity    EntityType                `json:"entity"`
+	ID          uuid.UUID                 `json:"id"`
+	Timestamp   time.Time                 `json:"timestamp"`
+	Mutation    commonmodels.MutationType `json:"mutation"`
+	Payload     json.RawMessage           `json:"payload"`
+	Entity      EntityType                `json:"entity"`
+	Transaction string                    `json:"transaction"`
 }
 
 type EntityType int

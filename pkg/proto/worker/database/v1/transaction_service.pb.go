@@ -253,11 +253,415 @@ func (x *RollbackRequest) GetTransactionId() string {
 	return ""
 }
 
+type ExecuteRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Operations    []*Operation           `protobuf:"bytes,10,rep,name=operations,proto3" json:"operations,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExecuteRequest) Reset() {
+	*x = ExecuteRequest{}
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecuteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecuteRequest) ProtoMessage() {}
+
+func (x *ExecuteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExecuteRequest.ProtoReflect.Descriptor instead.
+func (*ExecuteRequest) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ExecuteRequest) GetOperations() []*Operation {
+	if x != nil {
+		return x.Operations
+	}
+	return nil
+}
+
+type Operation struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Operation:
+	//
+	//	*Operation_CreateDatabase
+	//	*Operation_UpdateDatabase
+	//	*Operation_DeleteDatabase
+	//	*Operation_CreateCollection
+	//	*Operation_UpdateCollection
+	//	*Operation_DeleteCollection
+	//	*Operation_CreateDocument
+	//	*Operation_UpdateDocument
+	//	*Operation_DeleteDocument
+	Operation     isOperation_Operation `protobuf_oneof:"operation"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Operation) Reset() {
+	*x = Operation{}
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Operation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Operation) ProtoMessage() {}
+
+func (x *Operation) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Operation.ProtoReflect.Descriptor instead.
+func (*Operation) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *Operation) GetOperation() isOperation_Operation {
+	if x != nil {
+		return x.Operation
+	}
+	return nil
+}
+
+func (x *Operation) GetCreateDatabase() *CreateDatabaseRequest {
+	if x != nil {
+		if x, ok := x.Operation.(*Operation_CreateDatabase); ok {
+			return x.CreateDatabase
+		}
+	}
+	return nil
+}
+
+func (x *Operation) GetUpdateDatabase() *UpdateDatabaseRequest {
+	if x != nil {
+		if x, ok := x.Operation.(*Operation_UpdateDatabase); ok {
+			return x.UpdateDatabase
+		}
+	}
+	return nil
+}
+
+func (x *Operation) GetDeleteDatabase() *DeleteDatabaseRequest {
+	if x != nil {
+		if x, ok := x.Operation.(*Operation_DeleteDatabase); ok {
+			return x.DeleteDatabase
+		}
+	}
+	return nil
+}
+
+func (x *Operation) GetCreateCollection() *CreateCollectionRequest {
+	if x != nil {
+		if x, ok := x.Operation.(*Operation_CreateCollection); ok {
+			return x.CreateCollection
+		}
+	}
+	return nil
+}
+
+func (x *Operation) GetUpdateCollection() *UpdateCollectionRequest {
+	if x != nil {
+		if x, ok := x.Operation.(*Operation_UpdateCollection); ok {
+			return x.UpdateCollection
+		}
+	}
+	return nil
+}
+
+func (x *Operation) GetDeleteCollection() *DeleteCollectionRequest {
+	if x != nil {
+		if x, ok := x.Operation.(*Operation_DeleteCollection); ok {
+			return x.DeleteCollection
+		}
+	}
+	return nil
+}
+
+func (x *Operation) GetCreateDocument() *CreateDocumentRequest {
+	if x != nil {
+		if x, ok := x.Operation.(*Operation_CreateDocument); ok {
+			return x.CreateDocument
+		}
+	}
+	return nil
+}
+
+func (x *Operation) GetUpdateDocument() *UpdateDocumentRequest {
+	if x != nil {
+		if x, ok := x.Operation.(*Operation_UpdateDocument); ok {
+			return x.UpdateDocument
+		}
+	}
+	return nil
+}
+
+func (x *Operation) GetDeleteDocument() *DeleteDocumentRequest {
+	if x != nil {
+		if x, ok := x.Operation.(*Operation_DeleteDocument); ok {
+			return x.DeleteDocument
+		}
+	}
+	return nil
+}
+
+type isOperation_Operation interface {
+	isOperation_Operation()
+}
+
+type Operation_CreateDatabase struct {
+	CreateDatabase *CreateDatabaseRequest `protobuf:"bytes,1,opt,name=create_database,json=createDatabase,proto3,oneof"`
+}
+
+type Operation_UpdateDatabase struct {
+	UpdateDatabase *UpdateDatabaseRequest `protobuf:"bytes,2,opt,name=update_database,json=updateDatabase,proto3,oneof"`
+}
+
+type Operation_DeleteDatabase struct {
+	DeleteDatabase *DeleteDatabaseRequest `protobuf:"bytes,3,opt,name=delete_database,json=deleteDatabase,proto3,oneof"`
+}
+
+type Operation_CreateCollection struct {
+	CreateCollection *CreateCollectionRequest `protobuf:"bytes,4,opt,name=create_collection,json=createCollection,proto3,oneof"`
+}
+
+type Operation_UpdateCollection struct {
+	UpdateCollection *UpdateCollectionRequest `protobuf:"bytes,5,opt,name=update_collection,json=updateCollection,proto3,oneof"`
+}
+
+type Operation_DeleteCollection struct {
+	DeleteCollection *DeleteCollectionRequest `protobuf:"bytes,6,opt,name=delete_collection,json=deleteCollection,proto3,oneof"`
+}
+
+type Operation_CreateDocument struct {
+	CreateDocument *CreateDocumentRequest `protobuf:"bytes,7,opt,name=create_document,json=createDocument,proto3,oneof"`
+}
+
+type Operation_UpdateDocument struct {
+	UpdateDocument *UpdateDocumentRequest `protobuf:"bytes,8,opt,name=update_document,json=updateDocument,proto3,oneof"`
+}
+
+type Operation_DeleteDocument struct {
+	DeleteDocument *DeleteDocumentRequest `protobuf:"bytes,9,opt,name=delete_document,json=deleteDocument,proto3,oneof"`
+}
+
+func (*Operation_CreateDatabase) isOperation_Operation() {}
+
+func (*Operation_UpdateDatabase) isOperation_Operation() {}
+
+func (*Operation_DeleteDatabase) isOperation_Operation() {}
+
+func (*Operation_CreateCollection) isOperation_Operation() {}
+
+func (*Operation_UpdateCollection) isOperation_Operation() {}
+
+func (*Operation_DeleteCollection) isOperation_Operation() {}
+
+func (*Operation_CreateDocument) isOperation_Operation() {}
+
+func (*Operation_UpdateDocument) isOperation_Operation() {}
+
+func (*Operation_DeleteDocument) isOperation_Operation() {}
+
+type OperationResult struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Result:
+	//
+	//	*OperationResult_DatabaseResult
+	//	*OperationResult_CollectionResult
+	//	*OperationResult_DocumentResult
+	//	*OperationResult_DeleteResult
+	Result        isOperationResult_Result `protobuf_oneof:"result"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OperationResult) Reset() {
+	*x = OperationResult{}
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OperationResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OperationResult) ProtoMessage() {}
+
+func (x *OperationResult) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OperationResult.ProtoReflect.Descriptor instead.
+func (*OperationResult) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *OperationResult) GetResult() isOperationResult_Result {
+	if x != nil {
+		return x.Result
+	}
+	return nil
+}
+
+func (x *OperationResult) GetDatabaseResult() *Database {
+	if x != nil {
+		if x, ok := x.Result.(*OperationResult_DatabaseResult); ok {
+			return x.DatabaseResult
+		}
+	}
+	return nil
+}
+
+func (x *OperationResult) GetCollectionResult() *Collection {
+	if x != nil {
+		if x, ok := x.Result.(*OperationResult_CollectionResult); ok {
+			return x.CollectionResult
+		}
+	}
+	return nil
+}
+
+func (x *OperationResult) GetDocumentResult() *Document {
+	if x != nil {
+		if x, ok := x.Result.(*OperationResult_DocumentResult); ok {
+			return x.DocumentResult
+		}
+	}
+	return nil
+}
+
+func (x *OperationResult) GetDeleteResult() *emptypb.Empty {
+	if x != nil {
+		if x, ok := x.Result.(*OperationResult_DeleteResult); ok {
+			return x.DeleteResult
+		}
+	}
+	return nil
+}
+
+type isOperationResult_Result interface {
+	isOperationResult_Result()
+}
+
+type OperationResult_DatabaseResult struct {
+	DatabaseResult *Database `protobuf:"bytes,1,opt,name=database_result,json=databaseResult,proto3,oneof"`
+}
+
+type OperationResult_CollectionResult struct {
+	CollectionResult *Collection `protobuf:"bytes,2,opt,name=collection_result,json=collectionResult,proto3,oneof"`
+}
+
+type OperationResult_DocumentResult struct {
+	DocumentResult *Document `protobuf:"bytes,3,opt,name=document_result,json=documentResult,proto3,oneof"`
+}
+
+type OperationResult_DeleteResult struct {
+	DeleteResult *emptypb.Empty `protobuf:"bytes,4,opt,name=delete_result,json=deleteResult,proto3,oneof"`
+}
+
+func (*OperationResult_DatabaseResult) isOperationResult_Result() {}
+
+func (*OperationResult_CollectionResult) isOperationResult_Result() {}
+
+func (*OperationResult_DocumentResult) isOperationResult_Result() {}
+
+func (*OperationResult_DeleteResult) isOperationResult_Result() {}
+
+type ExecuteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Results       []*OperationResult     `protobuf:"bytes,1,rep,name=results,proto3" json:"results,omitempty"`
+	ExecutedAt    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=executed_at,json=executedAt,proto3" json:"executed_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExecuteResponse) Reset() {
+	*x = ExecuteResponse{}
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecuteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecuteResponse) ProtoMessage() {}
+
+func (x *ExecuteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExecuteResponse.ProtoReflect.Descriptor instead.
+func (*ExecuteResponse) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ExecuteResponse) GetResults() []*OperationResult {
+	if x != nil {
+		return x.Results
+	}
+	return nil
+}
+
+func (x *ExecuteResponse) GetExecutedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExecutedAt
+	}
+	return nil
+}
+
 var File_worker_database_v1_transaction_service_proto protoreflect.FileDescriptor
 
 const file_worker_database_v1_transaction_service_proto_rawDesc = "" +
 	"\n" +
-	",worker/database/v1/transaction_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\":\n" +
+	",worker/database/v1/transaction_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\x1a)worker/database/v1/database_service.proto\x1a+worker/database/v1/collection_service.proto\x1a)worker/database/v1/document_service.proto\":\n" +
 	"\fBeginRequest\x12*\n" +
 	"\vdescription\x18\x01 \x01(\tB\b\xfaB\x05r\x03\x18\x80\x04R\vdescription\"}\n" +
 	"\rBeginResponse\x121\n" +
@@ -272,11 +676,38 @@ const file_worker_database_v1_transaction_service_proto_rawDesc = "" +
 	"\fcommitted_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\vcommittedAt\"D\n" +
 	"\x0fRollbackRequest\x121\n" +
 	"\x0etransaction_id\x18\x01 \x01(\tB\n" +
-	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId2\x97\x03\n" +
+	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId\"\\\n" +
+	"\x0eExecuteRequest\x12J\n" +
+	"\n" +
+	"operations\x18\n" +
+	" \x03(\v2\x1d.worker.database.v1.OperationB\v\xfaB\b\x92\x01\x05\b\x01\x10\xe8\aR\n" +
+	"operations\"\xb0\x06\n" +
+	"\tOperation\x12T\n" +
+	"\x0fcreate_database\x18\x01 \x01(\v2).worker.database.v1.CreateDatabaseRequestH\x00R\x0ecreateDatabase\x12T\n" +
+	"\x0fupdate_database\x18\x02 \x01(\v2).worker.database.v1.UpdateDatabaseRequestH\x00R\x0eupdateDatabase\x12T\n" +
+	"\x0fdelete_database\x18\x03 \x01(\v2).worker.database.v1.DeleteDatabaseRequestH\x00R\x0edeleteDatabase\x12Z\n" +
+	"\x11create_collection\x18\x04 \x01(\v2+.worker.database.v1.CreateCollectionRequestH\x00R\x10createCollection\x12Z\n" +
+	"\x11update_collection\x18\x05 \x01(\v2+.worker.database.v1.UpdateCollectionRequestH\x00R\x10updateCollection\x12Z\n" +
+	"\x11delete_collection\x18\x06 \x01(\v2+.worker.database.v1.DeleteCollectionRequestH\x00R\x10deleteCollection\x12T\n" +
+	"\x0fcreate_document\x18\a \x01(\v2).worker.database.v1.CreateDocumentRequestH\x00R\x0ecreateDocument\x12T\n" +
+	"\x0fupdate_document\x18\b \x01(\v2).worker.database.v1.UpdateDocumentRequestH\x00R\x0eupdateDocument\x12T\n" +
+	"\x0fdelete_document\x18\t \x01(\v2).worker.database.v1.DeleteDocumentRequestH\x00R\x0edeleteDocumentB\v\n" +
+	"\toperation\"\xbb\x02\n" +
+	"\x0fOperationResult\x12G\n" +
+	"\x0fdatabase_result\x18\x01 \x01(\v2\x1c.worker.database.v1.DatabaseH\x00R\x0edatabaseResult\x12M\n" +
+	"\x11collection_result\x18\x02 \x01(\v2\x1e.worker.database.v1.CollectionH\x00R\x10collectionResult\x12G\n" +
+	"\x0fdocument_result\x18\x03 \x01(\v2\x1c.worker.database.v1.DocumentH\x00R\x0edocumentResult\x12=\n" +
+	"\rdelete_result\x18\x04 \x01(\v2\x16.google.protobuf.EmptyH\x00R\fdeleteResultB\b\n" +
+	"\x06result\"\x8d\x01\n" +
+	"\x0fExecuteResponse\x12=\n" +
+	"\aresults\x18\x01 \x03(\v2#.worker.database.v1.OperationResultR\aresults\x12;\n" +
+	"\vexecuted_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"executedAt2\x96\x04\n" +
 	"\x12TransactionService\x12u\n" +
 	"\x05Begin\x12 .worker.database.v1.BeginRequest\x1a!.worker.database.v1.BeginResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/v1alpha1/transactions:begin\x12\x86\x01\n" +
 	"\x06Commit\x12!.worker.database.v1.CommitRequest\x1a\".worker.database.v1.CommitResponse\"5\x82\xd3\xe4\x93\x02/:\x0etransaction_id\"\x1d/v1alpha1/transactions:commit\x12\x80\x01\n" +
-	"\bRollback\x12#.worker.database.v1.RollbackRequest\x1a\x16.google.protobuf.Empty\"7\x82\xd3\xe4\x93\x021:\x0etransaction_id\"\x1f/v1alpha1/transactions:rollbackBf\n" +
+	"\bRollback\x12#.worker.database.v1.RollbackRequest\x1a\x16.google.protobuf.Empty\"7\x82\xd3\xe4\x93\x021:\x0etransaction_id\"\x1f/v1alpha1/transactions:rollback\x12}\n" +
+	"\aExecute\x12\".worker.database.v1.ExecuteRequest\x1a#.worker.database.v1.ExecuteResponse\")\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1alpha1/transactions:executeBf\n" +
 	"\x1dcom.google.worker.database.v1P\x01ZCgithub.com/10Narratives/distgo-db/pkg/proto/worker/database/v1;dbv1b\x06proto3"
 
 var (
@@ -291,30 +722,64 @@ func file_worker_database_v1_transaction_service_proto_rawDescGZIP() []byte {
 	return file_worker_database_v1_transaction_service_proto_rawDescData
 }
 
-var file_worker_database_v1_transaction_service_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_worker_database_v1_transaction_service_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_worker_database_v1_transaction_service_proto_goTypes = []any{
-	(*BeginRequest)(nil),          // 0: worker.database.v1.BeginRequest
-	(*BeginResponse)(nil),         // 1: worker.database.v1.BeginResponse
-	(*CommitRequest)(nil),         // 2: worker.database.v1.CommitRequest
-	(*CommitResponse)(nil),        // 3: worker.database.v1.CommitResponse
-	(*RollbackRequest)(nil),       // 4: worker.database.v1.RollbackRequest
-	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),         // 6: google.protobuf.Empty
+	(*BeginRequest)(nil),            // 0: worker.database.v1.BeginRequest
+	(*BeginResponse)(nil),           // 1: worker.database.v1.BeginResponse
+	(*CommitRequest)(nil),           // 2: worker.database.v1.CommitRequest
+	(*CommitResponse)(nil),          // 3: worker.database.v1.CommitResponse
+	(*RollbackRequest)(nil),         // 4: worker.database.v1.RollbackRequest
+	(*ExecuteRequest)(nil),          // 5: worker.database.v1.ExecuteRequest
+	(*Operation)(nil),               // 6: worker.database.v1.Operation
+	(*OperationResult)(nil),         // 7: worker.database.v1.OperationResult
+	(*ExecuteResponse)(nil),         // 8: worker.database.v1.ExecuteResponse
+	(*timestamppb.Timestamp)(nil),   // 9: google.protobuf.Timestamp
+	(*CreateDatabaseRequest)(nil),   // 10: worker.database.v1.CreateDatabaseRequest
+	(*UpdateDatabaseRequest)(nil),   // 11: worker.database.v1.UpdateDatabaseRequest
+	(*DeleteDatabaseRequest)(nil),   // 12: worker.database.v1.DeleteDatabaseRequest
+	(*CreateCollectionRequest)(nil), // 13: worker.database.v1.CreateCollectionRequest
+	(*UpdateCollectionRequest)(nil), // 14: worker.database.v1.UpdateCollectionRequest
+	(*DeleteCollectionRequest)(nil), // 15: worker.database.v1.DeleteCollectionRequest
+	(*CreateDocumentRequest)(nil),   // 16: worker.database.v1.CreateDocumentRequest
+	(*UpdateDocumentRequest)(nil),   // 17: worker.database.v1.UpdateDocumentRequest
+	(*DeleteDocumentRequest)(nil),   // 18: worker.database.v1.DeleteDocumentRequest
+	(*Database)(nil),                // 19: worker.database.v1.Database
+	(*Collection)(nil),              // 20: worker.database.v1.Collection
+	(*Document)(nil),                // 21: worker.database.v1.Document
+	(*emptypb.Empty)(nil),           // 22: google.protobuf.Empty
 }
 var file_worker_database_v1_transaction_service_proto_depIdxs = []int32{
-	5, // 0: worker.database.v1.BeginResponse.started_at:type_name -> google.protobuf.Timestamp
-	5, // 1: worker.database.v1.CommitResponse.committed_at:type_name -> google.protobuf.Timestamp
-	0, // 2: worker.database.v1.TransactionService.Begin:input_type -> worker.database.v1.BeginRequest
-	2, // 3: worker.database.v1.TransactionService.Commit:input_type -> worker.database.v1.CommitRequest
-	4, // 4: worker.database.v1.TransactionService.Rollback:input_type -> worker.database.v1.RollbackRequest
-	1, // 5: worker.database.v1.TransactionService.Begin:output_type -> worker.database.v1.BeginResponse
-	3, // 6: worker.database.v1.TransactionService.Commit:output_type -> worker.database.v1.CommitResponse
-	6, // 7: worker.database.v1.TransactionService.Rollback:output_type -> google.protobuf.Empty
-	5, // [5:8] is the sub-list for method output_type
-	2, // [2:5] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	9,  // 0: worker.database.v1.BeginResponse.started_at:type_name -> google.protobuf.Timestamp
+	9,  // 1: worker.database.v1.CommitResponse.committed_at:type_name -> google.protobuf.Timestamp
+	6,  // 2: worker.database.v1.ExecuteRequest.operations:type_name -> worker.database.v1.Operation
+	10, // 3: worker.database.v1.Operation.create_database:type_name -> worker.database.v1.CreateDatabaseRequest
+	11, // 4: worker.database.v1.Operation.update_database:type_name -> worker.database.v1.UpdateDatabaseRequest
+	12, // 5: worker.database.v1.Operation.delete_database:type_name -> worker.database.v1.DeleteDatabaseRequest
+	13, // 6: worker.database.v1.Operation.create_collection:type_name -> worker.database.v1.CreateCollectionRequest
+	14, // 7: worker.database.v1.Operation.update_collection:type_name -> worker.database.v1.UpdateCollectionRequest
+	15, // 8: worker.database.v1.Operation.delete_collection:type_name -> worker.database.v1.DeleteCollectionRequest
+	16, // 9: worker.database.v1.Operation.create_document:type_name -> worker.database.v1.CreateDocumentRequest
+	17, // 10: worker.database.v1.Operation.update_document:type_name -> worker.database.v1.UpdateDocumentRequest
+	18, // 11: worker.database.v1.Operation.delete_document:type_name -> worker.database.v1.DeleteDocumentRequest
+	19, // 12: worker.database.v1.OperationResult.database_result:type_name -> worker.database.v1.Database
+	20, // 13: worker.database.v1.OperationResult.collection_result:type_name -> worker.database.v1.Collection
+	21, // 14: worker.database.v1.OperationResult.document_result:type_name -> worker.database.v1.Document
+	22, // 15: worker.database.v1.OperationResult.delete_result:type_name -> google.protobuf.Empty
+	7,  // 16: worker.database.v1.ExecuteResponse.results:type_name -> worker.database.v1.OperationResult
+	9,  // 17: worker.database.v1.ExecuteResponse.executed_at:type_name -> google.protobuf.Timestamp
+	0,  // 18: worker.database.v1.TransactionService.Begin:input_type -> worker.database.v1.BeginRequest
+	2,  // 19: worker.database.v1.TransactionService.Commit:input_type -> worker.database.v1.CommitRequest
+	4,  // 20: worker.database.v1.TransactionService.Rollback:input_type -> worker.database.v1.RollbackRequest
+	5,  // 21: worker.database.v1.TransactionService.Execute:input_type -> worker.database.v1.ExecuteRequest
+	1,  // 22: worker.database.v1.TransactionService.Begin:output_type -> worker.database.v1.BeginResponse
+	3,  // 23: worker.database.v1.TransactionService.Commit:output_type -> worker.database.v1.CommitResponse
+	22, // 24: worker.database.v1.TransactionService.Rollback:output_type -> google.protobuf.Empty
+	8,  // 25: worker.database.v1.TransactionService.Execute:output_type -> worker.database.v1.ExecuteResponse
+	22, // [22:26] is the sub-list for method output_type
+	18, // [18:22] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_worker_database_v1_transaction_service_proto_init() }
@@ -322,13 +787,33 @@ func file_worker_database_v1_transaction_service_proto_init() {
 	if File_worker_database_v1_transaction_service_proto != nil {
 		return
 	}
+	file_worker_database_v1_database_service_proto_init()
+	file_worker_database_v1_collection_service_proto_init()
+	file_worker_database_v1_document_service_proto_init()
+	file_worker_database_v1_transaction_service_proto_msgTypes[6].OneofWrappers = []any{
+		(*Operation_CreateDatabase)(nil),
+		(*Operation_UpdateDatabase)(nil),
+		(*Operation_DeleteDatabase)(nil),
+		(*Operation_CreateCollection)(nil),
+		(*Operation_UpdateCollection)(nil),
+		(*Operation_DeleteCollection)(nil),
+		(*Operation_CreateDocument)(nil),
+		(*Operation_UpdateDocument)(nil),
+		(*Operation_DeleteDocument)(nil),
+	}
+	file_worker_database_v1_transaction_service_proto_msgTypes[7].OneofWrappers = []any{
+		(*OperationResult_DatabaseResult)(nil),
+		(*OperationResult_CollectionResult)(nil),
+		(*OperationResult_DocumentResult)(nil),
+		(*OperationResult_DeleteResult)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_worker_database_v1_transaction_service_proto_rawDesc), len(file_worker_database_v1_transaction_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

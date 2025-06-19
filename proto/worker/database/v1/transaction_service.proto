@@ -8,6 +8,10 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "validate/validate.proto";
 
+import "worker/database/v1/database_service.proto";
+import "worker/database/v1/collection_service.proto";
+import "worker/database/v1/document_service.proto";
+
 option java_multiple_files = true;
 option java_package = "com.google.worker.database.v1";
 option go_package = "github.com/10Narratives/distgo-db/pkg/proto/worker/database/v1;dbv1";
@@ -31,6 +35,13 @@ service TransactionService {
     option (google.api.http) = {
       post: "/v1alpha1/transactions:rollback"
       body: "transaction_id"
+    };
+  }
+
+  rpc Execute(ExecuteRequest) returns (ExecuteResponse) {
+    option (google.api.http) = {
+      post: "/v1alpha1/transactions:execute"
+      body: "*"
     };
   }
 }
@@ -64,4 +75,43 @@ message RollbackRequest {
     (validate.rules).string.min_len = 1,
     (google.api.field_behavior) = REQUIRED
   ];
+}
+
+message ExecuteRequest {
+  repeated Operation operations = 10 [
+    (validate.rules).repeated = {
+      min_items: 1,
+      max_items: 1000
+    }
+  ];
+}
+
+message Operation {
+  oneof operation {
+    CreateDatabaseRequest create_database = 1;
+    UpdateDatabaseRequest update_database = 2;
+    DeleteDatabaseRequest delete_database = 3;
+    
+    CreateCollectionRequest create_collection = 4;
+    UpdateCollectionRequest update_collection = 5;
+    DeleteCollectionRequest delete_collection = 6;
+    
+    CreateDocumentRequest create_document = 7;
+    UpdateDocumentRequest update_document = 8;
+    DeleteDocumentRequest delete_document = 9;
+  }
+}
+
+message OperationResult {
+  oneof result {
+    Database database_result = 1;
+    Collection collection_result = 2;
+    Document document_result = 3;
+    google.protobuf.Empty delete_result = 4;
+  }
+}
+
+message ExecuteResponse {
+  repeated OperationResult results = 1;
+  google.protobuf.Timestamp executed_at = 2;
 }
