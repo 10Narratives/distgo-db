@@ -12,7 +12,6 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
-	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -26,27 +25,27 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type BeginTransactionRequest struct {
+type BeginRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Description   string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *BeginTransactionRequest) Reset() {
-	*x = BeginTransactionRequest{}
+func (x *BeginRequest) Reset() {
+	*x = BeginRequest{}
 	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *BeginTransactionRequest) String() string {
+func (x *BeginRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*BeginTransactionRequest) ProtoMessage() {}
+func (*BeginRequest) ProtoMessage() {}
 
-func (x *BeginTransactionRequest) ProtoReflect() protoreflect.Message {
+func (x *BeginRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -58,19 +57,19 @@ func (x *BeginTransactionRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use BeginTransactionRequest.ProtoReflect.Descriptor instead.
-func (*BeginTransactionRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use BeginRequest.ProtoReflect.Descriptor instead.
+func (*BeginRequest) Descriptor() ([]byte, []int) {
 	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *BeginTransactionRequest) GetDescription() string {
+func (x *BeginRequest) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
 }
 
-type BeginTransactionResponse struct {
+type BeginResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
 	StartedAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=started_at,json=startedAt,proto3" json:"started_at,omitempty"`
@@ -78,20 +77,20 @@ type BeginTransactionResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *BeginTransactionResponse) Reset() {
-	*x = BeginTransactionResponse{}
+func (x *BeginResponse) Reset() {
+	*x = BeginResponse{}
 	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *BeginTransactionResponse) String() string {
+func (x *BeginResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*BeginTransactionResponse) ProtoMessage() {}
+func (*BeginResponse) ProtoMessage() {}
 
-func (x *BeginTransactionResponse) ProtoReflect() protoreflect.Message {
+func (x *BeginResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -103,227 +102,47 @@ func (x *BeginTransactionResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use BeginTransactionResponse.ProtoReflect.Descriptor instead.
-func (*BeginTransactionResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use BeginResponse.ProtoReflect.Descriptor instead.
+func (*BeginResponse) Descriptor() ([]byte, []int) {
 	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *BeginTransactionResponse) GetTransactionId() string {
+func (x *BeginResponse) GetTransactionId() string {
 	if x != nil {
 		return x.TransactionId
 	}
 	return ""
 }
 
-func (x *BeginTransactionResponse) GetStartedAt() *timestamppb.Timestamp {
+func (x *BeginResponse) GetStartedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.StartedAt
 	}
 	return nil
 }
 
-type TransactionOperation struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Type          MutationType           `protobuf:"varint,1,opt,name=type,proto3,enum=worker.database.v1.MutationType" json:"type,omitempty"`
-	DocumentPath  string                 `protobuf:"bytes,2,opt,name=document_path,json=documentPath,proto3" json:"document_path,omitempty"`
-	NewValue      []byte                 `protobuf:"bytes,3,opt,name=new_value,json=newValue,proto3" json:"new_value,omitempty"`
-	OldValue      []byte                 `protobuf:"bytes,4,opt,name=old_value,json=oldValue,proto3" json:"old_value,omitempty"`
-	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *TransactionOperation) Reset() {
-	*x = TransactionOperation{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TransactionOperation) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TransactionOperation) ProtoMessage() {}
-
-func (x *TransactionOperation) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TransactionOperation.ProtoReflect.Descriptor instead.
-func (*TransactionOperation) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *TransactionOperation) GetType() MutationType {
-	if x != nil {
-		return x.Type
-	}
-	return MutationType_MUTATION_TYPE_UNSPECIFIED
-}
-
-func (x *TransactionOperation) GetDocumentPath() string {
-	if x != nil {
-		return x.DocumentPath
-	}
-	return ""
-}
-
-func (x *TransactionOperation) GetNewValue() []byte {
-	if x != nil {
-		return x.NewValue
-	}
-	return nil
-}
-
-func (x *TransactionOperation) GetOldValue() []byte {
-	if x != nil {
-		return x.OldValue
-	}
-	return nil
-}
-
-func (x *TransactionOperation) GetUpdateMask() *fieldmaskpb.FieldMask {
-	if x != nil {
-		return x.UpdateMask
-	}
-	return nil
-}
-
-type ExecuteTransactionRequest struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
-	TransactionId string                  `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
-	Operations    []*TransactionOperation `protobuf:"bytes,2,rep,name=operations,proto3" json:"operations,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ExecuteTransactionRequest) Reset() {
-	*x = ExecuteTransactionRequest{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ExecuteTransactionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ExecuteTransactionRequest) ProtoMessage() {}
-
-func (x *ExecuteTransactionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ExecuteTransactionRequest.ProtoReflect.Descriptor instead.
-func (*ExecuteTransactionRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *ExecuteTransactionRequest) GetTransactionId() string {
-	if x != nil {
-		return x.TransactionId
-	}
-	return ""
-}
-
-func (x *ExecuteTransactionRequest) GetOperations() []*TransactionOperation {
-	if x != nil {
-		return x.Operations
-	}
-	return nil
-}
-
-type ExecuteTransactionResponse struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	OperationsExecuted int32                  `protobuf:"varint,1,opt,name=operations_executed,json=operationsExecuted,proto3" json:"operations_executed,omitempty"`
-	ExecutedAt         *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=executed_at,json=executedAt,proto3" json:"executed_at,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
-}
-
-func (x *ExecuteTransactionResponse) Reset() {
-	*x = ExecuteTransactionResponse{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ExecuteTransactionResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ExecuteTransactionResponse) ProtoMessage() {}
-
-func (x *ExecuteTransactionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ExecuteTransactionResponse.ProtoReflect.Descriptor instead.
-func (*ExecuteTransactionResponse) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *ExecuteTransactionResponse) GetOperationsExecuted() int32 {
-	if x != nil {
-		return x.OperationsExecuted
-	}
-	return 0
-}
-
-func (x *ExecuteTransactionResponse) GetExecutedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.ExecutedAt
-	}
-	return nil
-}
-
-type CommitTransactionRequest struct {
+type CommitRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CommitTransactionRequest) Reset() {
-	*x = CommitTransactionRequest{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[5]
+func (x *CommitRequest) Reset() {
+	*x = CommitRequest{}
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CommitTransactionRequest) String() string {
+func (x *CommitRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CommitTransactionRequest) ProtoMessage() {}
+func (*CommitRequest) ProtoMessage() {}
 
-func (x *CommitTransactionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[5]
+func (x *CommitRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -334,40 +153,40 @@ func (x *CommitTransactionRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CommitTransactionRequest.ProtoReflect.Descriptor instead.
-func (*CommitTransactionRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{5}
+// Deprecated: Use CommitRequest.ProtoReflect.Descriptor instead.
+func (*CommitRequest) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *CommitTransactionRequest) GetTransactionId() string {
+func (x *CommitRequest) GetTransactionId() string {
 	if x != nil {
 		return x.TransactionId
 	}
 	return ""
 }
 
-type CommitTransactionResponse struct {
+type CommitResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CommittedAt   *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=committed_at,json=committedAt,proto3" json:"committed_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CommitTransactionResponse) Reset() {
-	*x = CommitTransactionResponse{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[6]
+func (x *CommitResponse) Reset() {
+	*x = CommitResponse{}
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CommitTransactionResponse) String() string {
+func (x *CommitResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CommitTransactionResponse) ProtoMessage() {}
+func (*CommitResponse) ProtoMessage() {}
 
-func (x *CommitTransactionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[6]
+func (x *CommitResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -378,40 +197,40 @@ func (x *CommitTransactionResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CommitTransactionResponse.ProtoReflect.Descriptor instead.
-func (*CommitTransactionResponse) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{6}
+// Deprecated: Use CommitResponse.ProtoReflect.Descriptor instead.
+func (*CommitResponse) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CommitTransactionResponse) GetCommittedAt() *timestamppb.Timestamp {
+func (x *CommitResponse) GetCommittedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CommittedAt
 	}
 	return nil
 }
 
-type RollbackTransactionRequest struct {
+type RollbackRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *RollbackTransactionRequest) Reset() {
-	*x = RollbackTransactionRequest{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[7]
+func (x *RollbackRequest) Reset() {
+	*x = RollbackRequest{}
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RollbackTransactionRequest) String() string {
+func (x *RollbackRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RollbackTransactionRequest) ProtoMessage() {}
+func (*RollbackRequest) ProtoMessage() {}
 
-func (x *RollbackTransactionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[7]
+func (x *RollbackRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -422,12 +241,12 @@ func (x *RollbackTransactionRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RollbackTransactionRequest.ProtoReflect.Descriptor instead.
-func (*RollbackTransactionRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{7}
+// Deprecated: Use RollbackRequest.ProtoReflect.Descriptor instead.
+func (*RollbackRequest) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *RollbackTransactionRequest) GetTransactionId() string {
+func (x *RollbackRequest) GetTransactionId() string {
 	if x != nil {
 		return x.TransactionId
 	}
@@ -438,45 +257,26 @@ var File_worker_database_v1_transaction_service_proto protoreflect.FileDescripto
 
 const file_worker_database_v1_transaction_service_proto_rawDesc = "" +
 	"\n" +
-	",worker/database/v1/transaction_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a google/protobuf/field_mask.proto\x1a\x17validate/validate.proto\x1a'worker/database/v1/operation_type.proto\"E\n" +
-	"\x17BeginTransactionRequest\x12*\n" +
-	"\vdescription\x18\x01 \x01(\tB\b\xfaB\x05r\x03\x18\x80\x04R\vdescription\"\x88\x01\n" +
-	"\x18BeginTransactionResponse\x121\n" +
+	",worker/database/v1/transaction_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\":\n" +
+	"\fBeginRequest\x12*\n" +
+	"\vdescription\x18\x01 \x01(\tB\b\xfaB\x05r\x03\x18\x80\x04R\vdescription\"}\n" +
+	"\rBeginResponse\x121\n" +
 	"\x0etransaction_id\x18\x01 \x01(\tB\n" +
 	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId\x129\n" +
 	"\n" +
-	"started_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tstartedAt\"\x81\x02\n" +
-	"\x14TransactionOperation\x12A\n" +
-	"\x04type\x18\x01 \x01(\x0e2 .worker.database.v1.MutationTypeB\v\xe0A\x02\xfaB\x05\x82\x01\x02\x10\x01R\x04type\x12/\n" +
-	"\rdocument_path\x18\x02 \x01(\tB\n" +
-	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\fdocumentPath\x12\x1b\n" +
-	"\tnew_value\x18\x03 \x01(\fR\bnewValue\x12\x1b\n" +
-	"\told_value\x18\x04 \x01(\fR\boldValue\x12;\n" +
-	"\vupdate_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
-	"updateMask\"\xa7\x01\n" +
-	"\x19ExecuteTransactionRequest\x121\n" +
+	"started_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tstartedAt\"B\n" +
+	"\rCommitRequest\x121\n" +
 	"\x0etransaction_id\x18\x01 \x01(\tB\n" +
-	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId\x12W\n" +
-	"\n" +
-	"operations\x18\x02 \x03(\v2(.worker.database.v1.TransactionOperationB\r\xe0A\x02\xfaB\a\x92\x01\x04\b\x01\x10dR\n" +
-	"operations\"\x8a\x01\n" +
-	"\x1aExecuteTransactionResponse\x12/\n" +
-	"\x13operations_executed\x18\x01 \x01(\x05R\x12operationsExecuted\x12;\n" +
-	"\vexecuted_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"executedAt\"M\n" +
-	"\x18CommitTransactionRequest\x121\n" +
+	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId\"O\n" +
+	"\x0eCommitResponse\x12=\n" +
+	"\fcommitted_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\vcommittedAt\"D\n" +
+	"\x0fRollbackRequest\x121\n" +
 	"\x0etransaction_id\x18\x01 \x01(\tB\n" +
-	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId\"Z\n" +
-	"\x19CommitTransactionResponse\x12=\n" +
-	"\fcommitted_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\vcommittedAt\"O\n" +
-	"\x1aRollbackTransactionRequest\x121\n" +
-	"\x0etransaction_id\x18\x01 \x01(\tB\n" +
-	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId2\x9b\x05\n" +
-	"\x12TransactionService\x12\x96\x01\n" +
-	"\x10BeginTransaction\x12+.worker.database.v1.BeginTransactionRequest\x1a,.worker.database.v1.BeginTransactionResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/v1alpha1/transactions:begin\x12\xa8\x01\n" +
-	"\x12ExecuteTransaction\x12-.worker.database.v1.ExecuteTransactionRequest\x1a..worker.database.v1.ExecuteTransactionResponse\"3\x82\xd3\xe4\x93\x02-:\vtransaction\"\x1e/v1alpha1/transactions:execute\x12\xa7\x01\n" +
-	"\x11CommitTransaction\x12,.worker.database.v1.CommitTransactionRequest\x1a-.worker.database.v1.CommitTransactionResponse\"5\x82\xd3\xe4\x93\x02/:\x0etransaction_id\"\x1d/v1alpha1/transactions:commit\x12\x96\x01\n" +
-	"\x13RollbackTransaction\x12..worker.database.v1.RollbackTransactionRequest\x1a\x16.google.protobuf.Empty\"7\x82\xd3\xe4\x93\x021:\x0etransaction_id\"\x1f/v1alpha1/transactions:rollbackBf\n" +
+	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId2\x97\x03\n" +
+	"\x12TransactionService\x12u\n" +
+	"\x05Begin\x12 .worker.database.v1.BeginRequest\x1a!.worker.database.v1.BeginResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/v1alpha1/transactions:begin\x12\x86\x01\n" +
+	"\x06Commit\x12!.worker.database.v1.CommitRequest\x1a\".worker.database.v1.CommitResponse\"5\x82\xd3\xe4\x93\x02/:\x0etransaction_id\"\x1d/v1alpha1/transactions:commit\x12\x80\x01\n" +
+	"\bRollback\x12#.worker.database.v1.RollbackRequest\x1a\x16.google.protobuf.Empty\"7\x82\xd3\xe4\x93\x021:\x0etransaction_id\"\x1f/v1alpha1/transactions:rollbackBf\n" +
 	"\x1dcom.google.worker.database.v1P\x01ZCgithub.com/10Narratives/distgo-db/pkg/proto/worker/database/v1;dbv1b\x06proto3"
 
 var (
@@ -491,41 +291,30 @@ func file_worker_database_v1_transaction_service_proto_rawDescGZIP() []byte {
 	return file_worker_database_v1_transaction_service_proto_rawDescData
 }
 
-var file_worker_database_v1_transaction_service_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_worker_database_v1_transaction_service_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_worker_database_v1_transaction_service_proto_goTypes = []any{
-	(*BeginTransactionRequest)(nil),    // 0: worker.database.v1.BeginTransactionRequest
-	(*BeginTransactionResponse)(nil),   // 1: worker.database.v1.BeginTransactionResponse
-	(*TransactionOperation)(nil),       // 2: worker.database.v1.TransactionOperation
-	(*ExecuteTransactionRequest)(nil),  // 3: worker.database.v1.ExecuteTransactionRequest
-	(*ExecuteTransactionResponse)(nil), // 4: worker.database.v1.ExecuteTransactionResponse
-	(*CommitTransactionRequest)(nil),   // 5: worker.database.v1.CommitTransactionRequest
-	(*CommitTransactionResponse)(nil),  // 6: worker.database.v1.CommitTransactionResponse
-	(*RollbackTransactionRequest)(nil), // 7: worker.database.v1.RollbackTransactionRequest
-	(*timestamppb.Timestamp)(nil),      // 8: google.protobuf.Timestamp
-	(MutationType)(0),                  // 9: worker.database.v1.MutationType
-	(*fieldmaskpb.FieldMask)(nil),      // 10: google.protobuf.FieldMask
-	(*emptypb.Empty)(nil),              // 11: google.protobuf.Empty
+	(*BeginRequest)(nil),          // 0: worker.database.v1.BeginRequest
+	(*BeginResponse)(nil),         // 1: worker.database.v1.BeginResponse
+	(*CommitRequest)(nil),         // 2: worker.database.v1.CommitRequest
+	(*CommitResponse)(nil),        // 3: worker.database.v1.CommitResponse
+	(*RollbackRequest)(nil),       // 4: worker.database.v1.RollbackRequest
+	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),         // 6: google.protobuf.Empty
 }
 var file_worker_database_v1_transaction_service_proto_depIdxs = []int32{
-	8,  // 0: worker.database.v1.BeginTransactionResponse.started_at:type_name -> google.protobuf.Timestamp
-	9,  // 1: worker.database.v1.TransactionOperation.type:type_name -> worker.database.v1.MutationType
-	10, // 2: worker.database.v1.TransactionOperation.update_mask:type_name -> google.protobuf.FieldMask
-	2,  // 3: worker.database.v1.ExecuteTransactionRequest.operations:type_name -> worker.database.v1.TransactionOperation
-	8,  // 4: worker.database.v1.ExecuteTransactionResponse.executed_at:type_name -> google.protobuf.Timestamp
-	8,  // 5: worker.database.v1.CommitTransactionResponse.committed_at:type_name -> google.protobuf.Timestamp
-	0,  // 6: worker.database.v1.TransactionService.BeginTransaction:input_type -> worker.database.v1.BeginTransactionRequest
-	3,  // 7: worker.database.v1.TransactionService.ExecuteTransaction:input_type -> worker.database.v1.ExecuteTransactionRequest
-	5,  // 8: worker.database.v1.TransactionService.CommitTransaction:input_type -> worker.database.v1.CommitTransactionRequest
-	7,  // 9: worker.database.v1.TransactionService.RollbackTransaction:input_type -> worker.database.v1.RollbackTransactionRequest
-	1,  // 10: worker.database.v1.TransactionService.BeginTransaction:output_type -> worker.database.v1.BeginTransactionResponse
-	4,  // 11: worker.database.v1.TransactionService.ExecuteTransaction:output_type -> worker.database.v1.ExecuteTransactionResponse
-	6,  // 12: worker.database.v1.TransactionService.CommitTransaction:output_type -> worker.database.v1.CommitTransactionResponse
-	11, // 13: worker.database.v1.TransactionService.RollbackTransaction:output_type -> google.protobuf.Empty
-	10, // [10:14] is the sub-list for method output_type
-	6,  // [6:10] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	5, // 0: worker.database.v1.BeginResponse.started_at:type_name -> google.protobuf.Timestamp
+	5, // 1: worker.database.v1.CommitResponse.committed_at:type_name -> google.protobuf.Timestamp
+	0, // 2: worker.database.v1.TransactionService.Begin:input_type -> worker.database.v1.BeginRequest
+	2, // 3: worker.database.v1.TransactionService.Commit:input_type -> worker.database.v1.CommitRequest
+	4, // 4: worker.database.v1.TransactionService.Rollback:input_type -> worker.database.v1.RollbackRequest
+	1, // 5: worker.database.v1.TransactionService.Begin:output_type -> worker.database.v1.BeginResponse
+	3, // 6: worker.database.v1.TransactionService.Commit:output_type -> worker.database.v1.CommitResponse
+	6, // 7: worker.database.v1.TransactionService.Rollback:output_type -> google.protobuf.Empty
+	5, // [5:8] is the sub-list for method output_type
+	2, // [2:5] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_worker_database_v1_transaction_service_proto_init() }
@@ -533,14 +322,13 @@ func file_worker_database_v1_transaction_service_proto_init() {
 	if File_worker_database_v1_transaction_service_proto != nil {
 		return
 	}
-	file_worker_database_v1_operation_type_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_worker_database_v1_transaction_service_proto_rawDesc), len(file_worker_database_v1_transaction_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
