@@ -16,7 +16,12 @@ func (s *Storage) Collection(ctx context.Context, key collectionmodels.Key) (col
 	return val.(collectionmodels.Collection), nil
 }
 
-func (s *Storage) Collections(ctx context.Context, parentKey databasemodels.Key) []collectionmodels.Collection {
+func (s *Storage) Collections(ctx context.Context, parentKey databasemodels.Key) ([]collectionmodels.Collection, error) {
+	_, err := s.Database(ctx, databasemodels.Key{Database: parentKey.Database})
+	if err != nil {
+		return []collectionmodels.Collection{}, err
+	}
+
 	var result []collectionmodels.Collection
 
 	s.collections.Range(func(key, value any) bool {
@@ -27,7 +32,7 @@ func (s *Storage) Collections(ctx context.Context, parentKey databasemodels.Key)
 		return true
 	})
 
-	return result
+	return result, nil
 }
 
 func (s *Storage) CreateCollection(ctx context.Context, key collectionmodels.Key, description string) (collectionmodels.Collection, error) {

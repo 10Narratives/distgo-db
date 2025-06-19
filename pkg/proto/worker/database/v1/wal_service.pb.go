@@ -28,11 +28,15 @@ const (
 type WALEntry struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Target        string                 `protobuf:"bytes,2,opt,name=target,proto3" json:"target,omitempty"`
+	EntityType    EntityType             `protobuf:"varint,2,opt,name=entity_type,json=entityType,proto3,enum=worker.database.v1.EntityType" json:"entity_type,omitempty"`
 	OperationType MutationType           `protobuf:"varint,3,opt,name=operation_type,json=operationType,proto3,enum=worker.database.v1.MutationType" json:"operation_type,omitempty"`
-	OldValue      []byte                 `protobuf:"bytes,4,opt,name=old_value,json=oldValue,proto3" json:"old_value,omitempty"`
-	NewValue      []byte                 `protobuf:"bytes,5,opt,name=new_value,json=newValue,proto3" json:"new_value,omitempty"`
-	Timestamp     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	// Types that are valid to be assigned to Payload:
+	//
+	//	*WALEntry_DatabasePayload
+	//	*WALEntry_CollectionPayload
+	//	*WALEntry_DocumentPayload
+	Payload       isWALEntry_Payload     `protobuf_oneof:"payload"`
+	Timestamp     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -74,11 +78,11 @@ func (x *WALEntry) GetId() string {
 	return ""
 }
 
-func (x *WALEntry) GetTarget() string {
+func (x *WALEntry) GetEntityType() EntityType {
 	if x != nil {
-		return x.Target
+		return x.EntityType
 	}
-	return ""
+	return EntityType_ENTITY_TYPE_UNSPECIFIED
 }
 
 func (x *WALEntry) GetOperationType() MutationType {
@@ -88,16 +92,36 @@ func (x *WALEntry) GetOperationType() MutationType {
 	return MutationType_MUTATION_TYPE_UNSPECIFIED
 }
 
-func (x *WALEntry) GetOldValue() []byte {
+func (x *WALEntry) GetPayload() isWALEntry_Payload {
 	if x != nil {
-		return x.OldValue
+		return x.Payload
 	}
 	return nil
 }
 
-func (x *WALEntry) GetNewValue() []byte {
+func (x *WALEntry) GetDatabasePayload() *DatabasePayload {
 	if x != nil {
-		return x.NewValue
+		if x, ok := x.Payload.(*WALEntry_DatabasePayload); ok {
+			return x.DatabasePayload
+		}
+	}
+	return nil
+}
+
+func (x *WALEntry) GetCollectionPayload() *CollectionPayload {
+	if x != nil {
+		if x, ok := x.Payload.(*WALEntry_CollectionPayload); ok {
+			return x.CollectionPayload
+		}
+	}
+	return nil
+}
+
+func (x *WALEntry) GetDocumentPayload() *DocumentPayload {
+	if x != nil {
+		if x, ok := x.Payload.(*WALEntry_DocumentPayload); ok {
+			return x.DocumentPayload
+		}
 	}
 	return nil
 }
@@ -109,20 +133,223 @@ func (x *WALEntry) GetTimestamp() *timestamppb.Timestamp {
 	return nil
 }
 
-type ListWALEntriesRequest struct {
+type isWALEntry_Payload interface {
+	isWALEntry_Payload()
+}
+
+type WALEntry_DatabasePayload struct {
+	DatabasePayload *DatabasePayload `protobuf:"bytes,4,opt,name=database_payload,json=databasePayload,proto3,oneof"`
+}
+
+type WALEntry_CollectionPayload struct {
+	CollectionPayload *CollectionPayload `protobuf:"bytes,5,opt,name=collection_payload,json=collectionPayload,proto3,oneof"`
+}
+
+type WALEntry_DocumentPayload struct {
+	DocumentPayload *DocumentPayload `protobuf:"bytes,6,opt,name=document_payload,json=documentPayload,proto3,oneof"`
+}
+
+func (*WALEntry_DatabasePayload) isWALEntry_Payload() {}
+
+func (*WALEntry_CollectionPayload) isWALEntry_Payload() {}
+
+func (*WALEntry_DocumentPayload) isWALEntry_Payload() {}
+
+type DatabasePayload struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	StartTime     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	EndTime       *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	TargetFilter  string                 `protobuf:"bytes,5,opt,name=target_filter,json=targetFilter,proto3" json:"target_filter,omitempty"`
+	DatabaseId    string                 `protobuf:"bytes,1,opt,name=database_id,json=databaseId,proto3" json:"database_id,omitempty"`
+	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
+func (x *DatabasePayload) Reset() {
+	*x = DatabasePayload{}
+	mi := &file_worker_database_v1_wal_service_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DatabasePayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DatabasePayload) ProtoMessage() {}
+
+func (x *DatabasePayload) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_wal_service_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DatabasePayload.ProtoReflect.Descriptor instead.
+func (*DatabasePayload) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_wal_service_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *DatabasePayload) GetDatabaseId() string {
+	if x != nil {
+		return x.DatabaseId
+	}
+	return ""
+}
+
+func (x *DatabasePayload) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type CollectionPayload struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DatabaseId    string                 `protobuf:"bytes,1,opt,name=database_id,json=databaseId,proto3" json:"database_id,omitempty"`
+	CollectionId  string                 `protobuf:"bytes,2,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"`
+	Data          []byte                 `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CollectionPayload) Reset() {
+	*x = CollectionPayload{}
+	mi := &file_worker_database_v1_wal_service_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CollectionPayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CollectionPayload) ProtoMessage() {}
+
+func (x *CollectionPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_wal_service_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CollectionPayload.ProtoReflect.Descriptor instead.
+func (*CollectionPayload) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_wal_service_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *CollectionPayload) GetDatabaseId() string {
+	if x != nil {
+		return x.DatabaseId
+	}
+	return ""
+}
+
+func (x *CollectionPayload) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+func (x *CollectionPayload) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type DocumentPayload struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DatabaseId    string                 `protobuf:"bytes,1,opt,name=database_id,json=databaseId,proto3" json:"database_id,omitempty"`
+	CollectionId  string                 `protobuf:"bytes,2,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"`
+	DocumentId    string                 `protobuf:"bytes,3,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	Data          []byte                 `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DocumentPayload) Reset() {
+	*x = DocumentPayload{}
+	mi := &file_worker_database_v1_wal_service_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DocumentPayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DocumentPayload) ProtoMessage() {}
+
+func (x *DocumentPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_wal_service_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DocumentPayload.ProtoReflect.Descriptor instead.
+func (*DocumentPayload) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_wal_service_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *DocumentPayload) GetDatabaseId() string {
+	if x != nil {
+		return x.DatabaseId
+	}
+	return ""
+}
+
+func (x *DocumentPayload) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+func (x *DocumentPayload) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+func (x *DocumentPayload) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type ListWALEntriesRequest struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	PageSize            int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken           string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	StartTime           *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime             *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	EntityTypeFilter    EntityType             `protobuf:"varint,5,opt,name=entity_type_filter,json=entityTypeFilter,proto3,enum=worker.database.v1.EntityType" json:"entity_type_filter,omitempty"`
+	OperationTypeFilter MutationType           `protobuf:"varint,6,opt,name=operation_type_filter,json=operationTypeFilter,proto3,enum=worker.database.v1.MutationType" json:"operation_type_filter,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
 func (x *ListWALEntriesRequest) Reset() {
 	*x = ListWALEntriesRequest{}
-	mi := &file_worker_database_v1_wal_service_proto_msgTypes[1]
+	mi := &file_worker_database_v1_wal_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -134,7 +361,7 @@ func (x *ListWALEntriesRequest) String() string {
 func (*ListWALEntriesRequest) ProtoMessage() {}
 
 func (x *ListWALEntriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_wal_service_proto_msgTypes[1]
+	mi := &file_worker_database_v1_wal_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -147,7 +374,7 @@ func (x *ListWALEntriesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListWALEntriesRequest.ProtoReflect.Descriptor instead.
 func (*ListWALEntriesRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_wal_service_proto_rawDescGZIP(), []int{1}
+	return file_worker_database_v1_wal_service_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ListWALEntriesRequest) GetPageSize() int32 {
@@ -178,11 +405,18 @@ func (x *ListWALEntriesRequest) GetEndTime() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *ListWALEntriesRequest) GetTargetFilter() string {
+func (x *ListWALEntriesRequest) GetEntityTypeFilter() EntityType {
 	if x != nil {
-		return x.TargetFilter
+		return x.EntityTypeFilter
 	}
-	return ""
+	return EntityType_ENTITY_TYPE_UNSPECIFIED
+}
+
+func (x *ListWALEntriesRequest) GetOperationTypeFilter() MutationType {
+	if x != nil {
+		return x.OperationTypeFilter
+	}
+	return MutationType_MUTATION_TYPE_UNSPECIFIED
 }
 
 type ListWALEntriesResponse struct {
@@ -195,7 +429,7 @@ type ListWALEntriesResponse struct {
 
 func (x *ListWALEntriesResponse) Reset() {
 	*x = ListWALEntriesResponse{}
-	mi := &file_worker_database_v1_wal_service_proto_msgTypes[2]
+	mi := &file_worker_database_v1_wal_service_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -207,7 +441,7 @@ func (x *ListWALEntriesResponse) String() string {
 func (*ListWALEntriesResponse) ProtoMessage() {}
 
 func (x *ListWALEntriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_wal_service_proto_msgTypes[2]
+	mi := &file_worker_database_v1_wal_service_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -220,7 +454,7 @@ func (x *ListWALEntriesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListWALEntriesResponse.ProtoReflect.Descriptor instead.
 func (*ListWALEntriesResponse) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_wal_service_proto_rawDescGZIP(), []int{2}
+	return file_worker_database_v1_wal_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListWALEntriesResponse) GetEntries() []*WALEntry {
@@ -246,7 +480,7 @@ type TruncateWALRequest struct {
 
 func (x *TruncateWALRequest) Reset() {
 	*x = TruncateWALRequest{}
-	mi := &file_worker_database_v1_wal_service_proto_msgTypes[3]
+	mi := &file_worker_database_v1_wal_service_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -258,7 +492,7 @@ func (x *TruncateWALRequest) String() string {
 func (*TruncateWALRequest) ProtoMessage() {}
 
 func (x *TruncateWALRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_wal_service_proto_msgTypes[3]
+	mi := &file_worker_database_v1_wal_service_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -271,7 +505,7 @@ func (x *TruncateWALRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TruncateWALRequest.ProtoReflect.Descriptor instead.
 func (*TruncateWALRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_wal_service_proto_rawDescGZIP(), []int{3}
+	return file_worker_database_v1_wal_service_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *TruncateWALRequest) GetBefore() *timestamppb.Timestamp {
@@ -285,15 +519,39 @@ var File_worker_database_v1_wal_service_proto protoreflect.FileDescriptor
 
 const file_worker_database_v1_wal_service_proto_rawDesc = "" +
 	"\n" +
-	"$worker/database/v1/wal_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\x1a'worker/database/v1/operation_type.proto\"\x92\x02\n" +
-	"\bWALEntry\x12\x13\n" +
-	"\x02id\x18\x01 \x01(\tB\x03\xe0A\x03R\x02id\x12\"\n" +
-	"\x06target\x18\x02 \x01(\tB\n" +
-	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\x06target\x12T\n" +
-	"\x0eoperation_type\x18\x03 \x01(\x0e2 .worker.database.v1.MutationTypeB\v\xe0A\x02\xfaB\x05\x82\x01\x02\x10\x01R\roperationType\x12\x1b\n" +
-	"\told_value\x18\x04 \x01(\fR\boldValue\x12\x1b\n" +
-	"\tnew_value\x18\x05 \x01(\fR\bnewValue\x12=\n" +
-	"\ttimestamp\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\ttimestamp\"\xf6\x01\n" +
+	"$worker/database/v1/wal_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\x1a'worker/database/v1/operation_type.proto\x1a$worker/database/v1/entity_type.proto\"\x91\x04\n" +
+	"\bWALEntry\x12\x1b\n" +
+	"\x02id\x18\x01 \x01(\tB\v\xe0A\x03\xfaB\x05r\x03\xb0\x01\x01R\x02id\x12L\n" +
+	"\ventity_type\x18\x02 \x01(\x0e2\x1e.worker.database.v1.EntityTypeB\v\xe0A\x02\xfaB\x05\x82\x01\x02\x10\x01R\n" +
+	"entityType\x12T\n" +
+	"\x0eoperation_type\x18\x03 \x01(\x0e2 .worker.database.v1.MutationTypeB\v\xe0A\x02\xfaB\x05\x82\x01\x02\x10\x01R\roperationType\x12P\n" +
+	"\x10database_payload\x18\x04 \x01(\v2#.worker.database.v1.DatabasePayloadH\x00R\x0fdatabasePayload\x12V\n" +
+	"\x12collection_payload\x18\x05 \x01(\v2%.worker.database.v1.CollectionPayloadH\x00R\x11collectionPayload\x12P\n" +
+	"\x10document_payload\x18\x06 \x01(\v2#.worker.database.v1.DocumentPayloadH\x00R\x0fdocumentPayload\x12=\n" +
+	"\ttimestamp\x18\a \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\ttimestampB\t\n" +
+	"\apayload\"R\n" +
+	"\x0fDatabasePayload\x12+\n" +
+	"\vdatabase_id\x18\x01 \x01(\tB\n" +
+	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\n" +
+	"databaseId\x12\x12\n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\"\x85\x01\n" +
+	"\x11CollectionPayload\x12+\n" +
+	"\vdatabase_id\x18\x01 \x01(\tB\n" +
+	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\n" +
+	"databaseId\x12/\n" +
+	"\rcollection_id\x18\x02 \x01(\tB\n" +
+	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\fcollectionId\x12\x12\n" +
+	"\x04data\x18\x03 \x01(\fR\x04data\"\xb0\x01\n" +
+	"\x0fDocumentPayload\x12+\n" +
+	"\vdatabase_id\x18\x01 \x01(\tB\n" +
+	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\n" +
+	"databaseId\x12/\n" +
+	"\rcollection_id\x18\x02 \x01(\tB\n" +
+	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\fcollectionId\x12+\n" +
+	"\vdocument_id\x18\x03 \x01(\tB\n" +
+	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\n" +
+	"documentId\x12\x12\n" +
+	"\x04data\x18\x04 \x01(\fR\x04data\"\xf5\x02\n" +
 	"\x15ListWALEntriesRequest\x12'\n" +
 	"\tpage_size\x18\x01 \x01(\x05B\n" +
 	"\xfaB\a\x1a\x05\x18\xe8\a(\x00R\bpageSize\x12\x1d\n" +
@@ -301,8 +559,9 @@ const file_worker_database_v1_wal_service_proto_rawDesc = "" +
 	"page_token\x18\x02 \x01(\tR\tpageToken\x129\n" +
 	"\n" +
 	"start_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x125\n" +
-	"\bend_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\x12#\n" +
-	"\rtarget_filter\x18\x05 \x01(\tR\ftargetFilter\"x\n" +
+	"\bend_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\x12L\n" +
+	"\x12entity_type_filter\x18\x05 \x01(\x0e2\x1e.worker.database.v1.EntityTypeR\x10entityTypeFilter\x12T\n" +
+	"\x15operation_type_filter\x18\x06 \x01(\x0e2 .worker.database.v1.MutationTypeR\x13operationTypeFilter\"x\n" +
 	"\x16ListWALEntriesResponse\x126\n" +
 	"\aentries\x18\x01 \x03(\v2\x1c.worker.database.v1.WALEntryR\aentries\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"H\n" +
@@ -326,32 +585,42 @@ func file_worker_database_v1_wal_service_proto_rawDescGZIP() []byte {
 	return file_worker_database_v1_wal_service_proto_rawDescData
 }
 
-var file_worker_database_v1_wal_service_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_worker_database_v1_wal_service_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_worker_database_v1_wal_service_proto_goTypes = []any{
 	(*WALEntry)(nil),               // 0: worker.database.v1.WALEntry
-	(*ListWALEntriesRequest)(nil),  // 1: worker.database.v1.ListWALEntriesRequest
-	(*ListWALEntriesResponse)(nil), // 2: worker.database.v1.ListWALEntriesResponse
-	(*TruncateWALRequest)(nil),     // 3: worker.database.v1.TruncateWALRequest
-	(MutationType)(0),              // 4: worker.database.v1.MutationType
-	(*timestamppb.Timestamp)(nil),  // 5: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),          // 6: google.protobuf.Empty
+	(*DatabasePayload)(nil),        // 1: worker.database.v1.DatabasePayload
+	(*CollectionPayload)(nil),      // 2: worker.database.v1.CollectionPayload
+	(*DocumentPayload)(nil),        // 3: worker.database.v1.DocumentPayload
+	(*ListWALEntriesRequest)(nil),  // 4: worker.database.v1.ListWALEntriesRequest
+	(*ListWALEntriesResponse)(nil), // 5: worker.database.v1.ListWALEntriesResponse
+	(*TruncateWALRequest)(nil),     // 6: worker.database.v1.TruncateWALRequest
+	(EntityType)(0),                // 7: worker.database.v1.EntityType
+	(MutationType)(0),              // 8: worker.database.v1.MutationType
+	(*timestamppb.Timestamp)(nil),  // 9: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),          // 10: google.protobuf.Empty
 }
 var file_worker_database_v1_wal_service_proto_depIdxs = []int32{
-	4, // 0: worker.database.v1.WALEntry.operation_type:type_name -> worker.database.v1.MutationType
-	5, // 1: worker.database.v1.WALEntry.timestamp:type_name -> google.protobuf.Timestamp
-	5, // 2: worker.database.v1.ListWALEntriesRequest.start_time:type_name -> google.protobuf.Timestamp
-	5, // 3: worker.database.v1.ListWALEntriesRequest.end_time:type_name -> google.protobuf.Timestamp
-	0, // 4: worker.database.v1.ListWALEntriesResponse.entries:type_name -> worker.database.v1.WALEntry
-	5, // 5: worker.database.v1.TruncateWALRequest.before:type_name -> google.protobuf.Timestamp
-	1, // 6: worker.database.v1.WALService.ListWALEntries:input_type -> worker.database.v1.ListWALEntriesRequest
-	3, // 7: worker.database.v1.WALService.TruncateWAL:input_type -> worker.database.v1.TruncateWALRequest
-	2, // 8: worker.database.v1.WALService.ListWALEntries:output_type -> worker.database.v1.ListWALEntriesResponse
-	6, // 9: worker.database.v1.WALService.TruncateWAL:output_type -> google.protobuf.Empty
-	8, // [8:10] is the sub-list for method output_type
-	6, // [6:8] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	7,  // 0: worker.database.v1.WALEntry.entity_type:type_name -> worker.database.v1.EntityType
+	8,  // 1: worker.database.v1.WALEntry.operation_type:type_name -> worker.database.v1.MutationType
+	1,  // 2: worker.database.v1.WALEntry.database_payload:type_name -> worker.database.v1.DatabasePayload
+	2,  // 3: worker.database.v1.WALEntry.collection_payload:type_name -> worker.database.v1.CollectionPayload
+	3,  // 4: worker.database.v1.WALEntry.document_payload:type_name -> worker.database.v1.DocumentPayload
+	9,  // 5: worker.database.v1.WALEntry.timestamp:type_name -> google.protobuf.Timestamp
+	9,  // 6: worker.database.v1.ListWALEntriesRequest.start_time:type_name -> google.protobuf.Timestamp
+	9,  // 7: worker.database.v1.ListWALEntriesRequest.end_time:type_name -> google.protobuf.Timestamp
+	7,  // 8: worker.database.v1.ListWALEntriesRequest.entity_type_filter:type_name -> worker.database.v1.EntityType
+	8,  // 9: worker.database.v1.ListWALEntriesRequest.operation_type_filter:type_name -> worker.database.v1.MutationType
+	0,  // 10: worker.database.v1.ListWALEntriesResponse.entries:type_name -> worker.database.v1.WALEntry
+	9,  // 11: worker.database.v1.TruncateWALRequest.before:type_name -> google.protobuf.Timestamp
+	4,  // 12: worker.database.v1.WALService.ListWALEntries:input_type -> worker.database.v1.ListWALEntriesRequest
+	6,  // 13: worker.database.v1.WALService.TruncateWAL:input_type -> worker.database.v1.TruncateWALRequest
+	5,  // 14: worker.database.v1.WALService.ListWALEntries:output_type -> worker.database.v1.ListWALEntriesResponse
+	10, // 15: worker.database.v1.WALService.TruncateWAL:output_type -> google.protobuf.Empty
+	14, // [14:16] is the sub-list for method output_type
+	12, // [12:14] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_worker_database_v1_wal_service_proto_init() }
@@ -360,13 +629,19 @@ func file_worker_database_v1_wal_service_proto_init() {
 		return
 	}
 	file_worker_database_v1_operation_type_proto_init()
+	file_worker_database_v1_entity_type_proto_init()
+	file_worker_database_v1_wal_service_proto_msgTypes[0].OneofWrappers = []any{
+		(*WALEntry_DatabasePayload)(nil),
+		(*WALEntry_CollectionPayload)(nil),
+		(*WALEntry_DocumentPayload)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_worker_database_v1_wal_service_proto_rawDesc), len(file_worker_database_v1_wal_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

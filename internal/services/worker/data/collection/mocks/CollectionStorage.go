@@ -46,7 +46,7 @@ func (_m *CollectionStorage) Collection(ctx context.Context, key collectionmodel
 }
 
 // Collections provides a mock function with given fields: ctx, parentKey
-func (_m *CollectionStorage) Collections(ctx context.Context, parentKey databasemodels.Key) []collectionmodels.Collection {
+func (_m *CollectionStorage) Collections(ctx context.Context, parentKey databasemodels.Key) ([]collectionmodels.Collection, error) {
 	ret := _m.Called(ctx, parentKey)
 
 	if len(ret) == 0 {
@@ -54,6 +54,10 @@ func (_m *CollectionStorage) Collections(ctx context.Context, parentKey database
 	}
 
 	var r0 []collectionmodels.Collection
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, databasemodels.Key) ([]collectionmodels.Collection, error)); ok {
+		return rf(ctx, parentKey)
+	}
 	if rf, ok := ret.Get(0).(func(context.Context, databasemodels.Key) []collectionmodels.Collection); ok {
 		r0 = rf(ctx, parentKey)
 	} else {
@@ -62,7 +66,13 @@ func (_m *CollectionStorage) Collections(ctx context.Context, parentKey database
 		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, databasemodels.Key) error); ok {
+		r1 = rf(ctx, parentKey)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // CreateCollection provides a mock function with given fields: ctx, key, description

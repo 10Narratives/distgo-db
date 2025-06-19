@@ -92,7 +92,7 @@ func (_m *DocumentStorage) Document(ctx context.Context, key documentmodels.Key)
 }
 
 // Documents provides a mock function with given fields: ctx, parent
-func (_m *DocumentStorage) Documents(ctx context.Context, parent collectionmodels.Key) []documentmodels.Document {
+func (_m *DocumentStorage) Documents(ctx context.Context, parent collectionmodels.Key) ([]documentmodels.Document, error) {
 	ret := _m.Called(ctx, parent)
 
 	if len(ret) == 0 {
@@ -100,6 +100,10 @@ func (_m *DocumentStorage) Documents(ctx context.Context, parent collectionmodel
 	}
 
 	var r0 []documentmodels.Document
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, collectionmodels.Key) ([]documentmodels.Document, error)); ok {
+		return rf(ctx, parent)
+	}
 	if rf, ok := ret.Get(0).(func(context.Context, collectionmodels.Key) []documentmodels.Document); ok {
 		r0 = rf(ctx, parent)
 	} else {
@@ -108,7 +112,13 @@ func (_m *DocumentStorage) Documents(ctx context.Context, parent collectionmodel
 		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, collectionmodels.Key) error); ok {
+		r1 = rf(ctx, parent)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // UpdateDocument provides a mock function with given fields: ctx, document

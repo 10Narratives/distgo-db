@@ -34,7 +34,7 @@ func (s *Storage) Database(ctx context.Context, key databasemodels.Key) (databas
 	return val.(databasemodels.Database), nil
 }
 
-func (s *Storage) Databases(ctx context.Context) []databasemodels.Database {
+func (s *Storage) Databases(ctx context.Context) ([]databasemodels.Database, error) {
 	var result []databasemodels.Database
 
 	s.databases.Range(func(_, value any) bool {
@@ -42,7 +42,7 @@ func (s *Storage) Databases(ctx context.Context) []databasemodels.Database {
 		return true
 	})
 
-	return result
+	return result, nil
 }
 
 func (s *Storage) DeleteDatabase(ctx context.Context, key databasemodels.Key) error {

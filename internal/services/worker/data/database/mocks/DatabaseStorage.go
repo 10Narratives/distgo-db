@@ -72,7 +72,7 @@ func (_m *DatabaseStorage) Database(ctx context.Context, key databasemodels.Key)
 }
 
 // Databases provides a mock function with given fields: ctx
-func (_m *DatabaseStorage) Databases(ctx context.Context) []databasemodels.Database {
+func (_m *DatabaseStorage) Databases(ctx context.Context) ([]databasemodels.Database, error) {
 	ret := _m.Called(ctx)
 
 	if len(ret) == 0 {
@@ -80,6 +80,10 @@ func (_m *DatabaseStorage) Databases(ctx context.Context) []databasemodels.Datab
 	}
 
 	var r0 []databasemodels.Database
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]databasemodels.Database, error)); ok {
+		return rf(ctx)
+	}
 	if rf, ok := ret.Get(0).(func(context.Context) []databasemodels.Database); ok {
 		r0 = rf(ctx)
 	} else {
@@ -88,7 +92,13 @@ func (_m *DatabaseStorage) Databases(ctx context.Context) []databasemodels.Datab
 		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // DeleteDatabase provides a mock function with given fields: ctx, key
