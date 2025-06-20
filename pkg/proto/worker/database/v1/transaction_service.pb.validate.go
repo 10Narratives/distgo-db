@@ -57,17 +57,6 @@ func (m *BeginRequest) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetDescription()) > 512 {
-		err := BeginRequestValidationError{
-			field:  "Description",
-			reason: "value length must be at most 512 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
 	if len(errors) > 0 {
 		return BeginRequestMultiError(errors)
 	}
@@ -167,16 +156,7 @@ func (m *BeginResponse) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetTransactionId()) < 1 {
-		err := BeginResponseValidationError{
-			field:  "TransactionId",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for TransactionId
 
 	if all {
 		switch v := interface{}(m.GetStartedAt()).(type) {
@@ -285,357 +265,6 @@ var _ interface {
 	ErrorName() string
 } = BeginResponseValidationError{}
 
-// Validate checks the field values on CommitRequest with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *CommitRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on CommitRequest with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in CommitRequestMultiError, or
-// nil if none found.
-func (m *CommitRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *CommitRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if utf8.RuneCountInString(m.GetTransactionId()) < 1 {
-		err := CommitRequestValidationError{
-			field:  "TransactionId",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if len(errors) > 0 {
-		return CommitRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// CommitRequestMultiError is an error wrapping multiple validation errors
-// returned by CommitRequest.ValidateAll() if the designated constraints
-// aren't met.
-type CommitRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m CommitRequestMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m CommitRequestMultiError) AllErrors() []error { return m }
-
-// CommitRequestValidationError is the validation error returned by
-// CommitRequest.Validate if the designated constraints aren't met.
-type CommitRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e CommitRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e CommitRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e CommitRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e CommitRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e CommitRequestValidationError) ErrorName() string { return "CommitRequestValidationError" }
-
-// Error satisfies the builtin error interface
-func (e CommitRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sCommitRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = CommitRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = CommitRequestValidationError{}
-
-// Validate checks the field values on CommitResponse with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *CommitResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on CommitResponse with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in CommitResponseMultiError,
-// or nil if none found.
-func (m *CommitResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *CommitResponse) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if all {
-		switch v := interface{}(m.GetCommittedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CommitResponseValidationError{
-					field:  "CommittedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CommitResponseValidationError{
-					field:  "CommittedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetCommittedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CommitResponseValidationError{
-				field:  "CommittedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if len(errors) > 0 {
-		return CommitResponseMultiError(errors)
-	}
-
-	return nil
-}
-
-// CommitResponseMultiError is an error wrapping multiple validation errors
-// returned by CommitResponse.ValidateAll() if the designated constraints
-// aren't met.
-type CommitResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m CommitResponseMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m CommitResponseMultiError) AllErrors() []error { return m }
-
-// CommitResponseValidationError is the validation error returned by
-// CommitResponse.Validate if the designated constraints aren't met.
-type CommitResponseValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e CommitResponseValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e CommitResponseValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e CommitResponseValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e CommitResponseValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e CommitResponseValidationError) ErrorName() string { return "CommitResponseValidationError" }
-
-// Error satisfies the builtin error interface
-func (e CommitResponseValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sCommitResponse.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = CommitResponseValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = CommitResponseValidationError{}
-
-// Validate checks the field values on RollbackRequest with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *RollbackRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on RollbackRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// RollbackRequestMultiError, or nil if none found.
-func (m *RollbackRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *RollbackRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if utf8.RuneCountInString(m.GetTransactionId()) < 1 {
-		err := RollbackRequestValidationError{
-			field:  "TransactionId",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if len(errors) > 0 {
-		return RollbackRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// RollbackRequestMultiError is an error wrapping multiple validation errors
-// returned by RollbackRequest.ValidateAll() if the designated constraints
-// aren't met.
-type RollbackRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m RollbackRequestMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m RollbackRequestMultiError) AllErrors() []error { return m }
-
-// RollbackRequestValidationError is the validation error returned by
-// RollbackRequest.Validate if the designated constraints aren't met.
-type RollbackRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e RollbackRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e RollbackRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e RollbackRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e RollbackRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e RollbackRequestValidationError) ErrorName() string { return "RollbackRequestValidationError" }
-
-// Error satisfies the builtin error interface
-func (e RollbackRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sRollbackRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = RollbackRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = RollbackRequestValidationError{}
-
 // Validate checks the field values on ExecuteRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -657,6 +286,8 @@ func (m *ExecuteRequest) validate(all bool) error {
 	}
 
 	var errors []error
+
+	// no validation rules for TransactionId
 
 	if l := len(m.GetOperations()); l < 1 || l > 1000 {
 		err := ExecuteRequestValidationError{
@@ -1685,3 +1316,354 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ExecuteResponseValidationError{}
+
+// Validate checks the field values on CommitRequest with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *CommitRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CommitRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in CommitRequestMultiError, or
+// nil if none found.
+func (m *CommitRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CommitRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if utf8.RuneCountInString(m.GetTransactionId()) < 1 {
+		err := CommitRequestValidationError{
+			field:  "TransactionId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return CommitRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// CommitRequestMultiError is an error wrapping multiple validation errors
+// returned by CommitRequest.ValidateAll() if the designated constraints
+// aren't met.
+type CommitRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CommitRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CommitRequestMultiError) AllErrors() []error { return m }
+
+// CommitRequestValidationError is the validation error returned by
+// CommitRequest.Validate if the designated constraints aren't met.
+type CommitRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CommitRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CommitRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CommitRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CommitRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CommitRequestValidationError) ErrorName() string { return "CommitRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e CommitRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCommitRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CommitRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CommitRequestValidationError{}
+
+// Validate checks the field values on CommitResponse with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *CommitResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CommitResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in CommitResponseMultiError,
+// or nil if none found.
+func (m *CommitResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CommitResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetCommittedAt()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CommitResponseValidationError{
+					field:  "CommittedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CommitResponseValidationError{
+					field:  "CommittedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCommittedAt()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CommitResponseValidationError{
+				field:  "CommittedAt",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return CommitResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// CommitResponseMultiError is an error wrapping multiple validation errors
+// returned by CommitResponse.ValidateAll() if the designated constraints
+// aren't met.
+type CommitResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CommitResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CommitResponseMultiError) AllErrors() []error { return m }
+
+// CommitResponseValidationError is the validation error returned by
+// CommitResponse.Validate if the designated constraints aren't met.
+type CommitResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CommitResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CommitResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CommitResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CommitResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CommitResponseValidationError) ErrorName() string { return "CommitResponseValidationError" }
+
+// Error satisfies the builtin error interface
+func (e CommitResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCommitResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CommitResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CommitResponseValidationError{}
+
+// Validate checks the field values on RollbackRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *RollbackRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on RollbackRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// RollbackRequestMultiError, or nil if none found.
+func (m *RollbackRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *RollbackRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if utf8.RuneCountInString(m.GetTransactionId()) < 1 {
+		err := RollbackRequestValidationError{
+			field:  "TransactionId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return RollbackRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// RollbackRequestMultiError is an error wrapping multiple validation errors
+// returned by RollbackRequest.ValidateAll() if the designated constraints
+// aren't met.
+type RollbackRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RollbackRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RollbackRequestMultiError) AllErrors() []error { return m }
+
+// RollbackRequestValidationError is the validation error returned by
+// RollbackRequest.Validate if the designated constraints aren't met.
+type RollbackRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RollbackRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RollbackRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RollbackRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RollbackRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RollbackRequestValidationError) ErrorName() string { return "RollbackRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e RollbackRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRollbackRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RollbackRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RollbackRequestValidationError{}

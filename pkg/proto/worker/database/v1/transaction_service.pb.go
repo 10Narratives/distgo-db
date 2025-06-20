@@ -27,7 +27,6 @@ const (
 
 type BeginRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Description   string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -60,13 +59,6 @@ func (x *BeginRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use BeginRequest.ProtoReflect.Descriptor instead.
 func (*BeginRequest) Descriptor() ([]byte, []int) {
 	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *BeginRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
 }
 
 type BeginResponse struct {
@@ -121,148 +113,17 @@ func (x *BeginResponse) GetStartedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-type CommitRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CommitRequest) Reset() {
-	*x = CommitRequest{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CommitRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CommitRequest) ProtoMessage() {}
-
-func (x *CommitRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CommitRequest.ProtoReflect.Descriptor instead.
-func (*CommitRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *CommitRequest) GetTransactionId() string {
-	if x != nil {
-		return x.TransactionId
-	}
-	return ""
-}
-
-type CommitResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CommittedAt   *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=committed_at,json=committedAt,proto3" json:"committed_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CommitResponse) Reset() {
-	*x = CommitResponse{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CommitResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CommitResponse) ProtoMessage() {}
-
-func (x *CommitResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CommitResponse.ProtoReflect.Descriptor instead.
-func (*CommitResponse) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *CommitResponse) GetCommittedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CommittedAt
-	}
-	return nil
-}
-
-type RollbackRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RollbackRequest) Reset() {
-	*x = RollbackRequest{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RollbackRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RollbackRequest) ProtoMessage() {}
-
-func (x *RollbackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RollbackRequest.ProtoReflect.Descriptor instead.
-func (*RollbackRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *RollbackRequest) GetTransactionId() string {
-	if x != nil {
-		return x.TransactionId
-	}
-	return ""
-}
-
 type ExecuteRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Operations    []*Operation           `protobuf:"bytes,10,rep,name=operations,proto3" json:"operations,omitempty"`
+	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	Operations    []*Operation           `protobuf:"bytes,2,rep,name=operations,proto3" json:"operations,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ExecuteRequest) Reset() {
 	*x = ExecuteRequest{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[5]
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -274,7 +135,7 @@ func (x *ExecuteRequest) String() string {
 func (*ExecuteRequest) ProtoMessage() {}
 
 func (x *ExecuteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[5]
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -287,7 +148,14 @@ func (x *ExecuteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecuteRequest.ProtoReflect.Descriptor instead.
 func (*ExecuteRequest) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{5}
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ExecuteRequest) GetTransactionId() string {
+	if x != nil {
+		return x.TransactionId
+	}
+	return ""
 }
 
 func (x *ExecuteRequest) GetOperations() []*Operation {
@@ -317,7 +185,7 @@ type Operation struct {
 
 func (x *Operation) Reset() {
 	*x = Operation{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[6]
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -329,7 +197,7 @@ func (x *Operation) String() string {
 func (*Operation) ProtoMessage() {}
 
 func (x *Operation) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[6]
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -342,7 +210,7 @@ func (x *Operation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Operation.ProtoReflect.Descriptor instead.
 func (*Operation) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{6}
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Operation) GetOperation() isOperation_Operation {
@@ -506,7 +374,7 @@ type OperationResult struct {
 
 func (x *OperationResult) Reset() {
 	*x = OperationResult{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[7]
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -518,7 +386,7 @@ func (x *OperationResult) String() string {
 func (*OperationResult) ProtoMessage() {}
 
 func (x *OperationResult) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[7]
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -531,7 +399,7 @@ func (x *OperationResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OperationResult.ProtoReflect.Descriptor instead.
 func (*OperationResult) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{7}
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *OperationResult) GetResult() isOperationResult_Result {
@@ -615,7 +483,7 @@ type ExecuteResponse struct {
 
 func (x *ExecuteResponse) Reset() {
 	*x = ExecuteResponse{}
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[8]
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -627,7 +495,7 @@ func (x *ExecuteResponse) String() string {
 func (*ExecuteResponse) ProtoMessage() {}
 
 func (x *ExecuteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[8]
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -640,7 +508,7 @@ func (x *ExecuteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecuteResponse.ProtoReflect.Descriptor instead.
 func (*ExecuteResponse) Descriptor() ([]byte, []int) {
-	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{8}
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ExecuteResponse) GetResults() []*OperationResult {
@@ -657,30 +525,152 @@ func (x *ExecuteResponse) GetExecutedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type CommitRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CommitRequest) Reset() {
+	*x = CommitRequest{}
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommitRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommitRequest) ProtoMessage() {}
+
+func (x *CommitRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommitRequest.ProtoReflect.Descriptor instead.
+func (*CommitRequest) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *CommitRequest) GetTransactionId() string {
+	if x != nil {
+		return x.TransactionId
+	}
+	return ""
+}
+
+type CommitResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CommittedAt   *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=committed_at,json=committedAt,proto3" json:"committed_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CommitResponse) Reset() {
+	*x = CommitResponse{}
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommitResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommitResponse) ProtoMessage() {}
+
+func (x *CommitResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommitResponse.ProtoReflect.Descriptor instead.
+func (*CommitResponse) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *CommitResponse) GetCommittedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CommittedAt
+	}
+	return nil
+}
+
+type RollbackRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RollbackRequest) Reset() {
+	*x = RollbackRequest{}
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RollbackRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RollbackRequest) ProtoMessage() {}
+
+func (x *RollbackRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_database_v1_transaction_service_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RollbackRequest.ProtoReflect.Descriptor instead.
+func (*RollbackRequest) Descriptor() ([]byte, []int) {
+	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *RollbackRequest) GetTransactionId() string {
+	if x != nil {
+		return x.TransactionId
+	}
+	return ""
+}
+
 var File_worker_database_v1_transaction_service_proto protoreflect.FileDescriptor
 
 const file_worker_database_v1_transaction_service_proto_rawDesc = "" +
 	"\n" +
-	",worker/database/v1/transaction_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\x1a)worker/database/v1/database_service.proto\x1a+worker/database/v1/collection_service.proto\x1a)worker/database/v1/document_service.proto\":\n" +
-	"\fBeginRequest\x12*\n" +
-	"\vdescription\x18\x01 \x01(\tB\b\xfaB\x05r\x03\x18\x80\x04R\vdescription\"}\n" +
-	"\rBeginResponse\x121\n" +
-	"\x0etransaction_id\x18\x01 \x01(\tB\n" +
-	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId\x129\n" +
+	",worker/database/v1/transaction_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\x1a)worker/database/v1/database_service.proto\x1a+worker/database/v1/collection_service.proto\x1a)worker/database/v1/document_service.proto\"\x0e\n" +
+	"\fBeginRequest\"q\n" +
+	"\rBeginResponse\x12%\n" +
+	"\x0etransaction_id\x18\x01 \x01(\tR\rtransactionId\x129\n" +
 	"\n" +
-	"started_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tstartedAt\"B\n" +
-	"\rCommitRequest\x121\n" +
-	"\x0etransaction_id\x18\x01 \x01(\tB\n" +
-	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId\"O\n" +
-	"\x0eCommitResponse\x12=\n" +
-	"\fcommitted_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\vcommittedAt\"D\n" +
-	"\x0fRollbackRequest\x121\n" +
-	"\x0etransaction_id\x18\x01 \x01(\tB\n" +
-	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId\"\\\n" +
-	"\x0eExecuteRequest\x12J\n" +
+	"started_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tstartedAt\"\x83\x01\n" +
+	"\x0eExecuteRequest\x12%\n" +
+	"\x0etransaction_id\x18\x01 \x01(\tR\rtransactionId\x12J\n" +
 	"\n" +
-	"operations\x18\n" +
-	" \x03(\v2\x1d.worker.database.v1.OperationB\v\xfaB\b\x92\x01\x05\b\x01\x10\xe8\aR\n" +
+	"operations\x18\x02 \x03(\v2\x1d.worker.database.v1.OperationB\v\xfaB\b\x92\x01\x05\b\x01\x10\xe8\aR\n" +
 	"operations\"\xb0\x06\n" +
 	"\tOperation\x12T\n" +
 	"\x0fcreate_database\x18\x01 \x01(\v2).worker.database.v1.CreateDatabaseRequestH\x00R\x0ecreateDatabase\x12T\n" +
@@ -702,7 +692,15 @@ const file_worker_database_v1_transaction_service_proto_rawDesc = "" +
 	"\x0fExecuteResponse\x12=\n" +
 	"\aresults\x18\x01 \x03(\v2#.worker.database.v1.OperationResultR\aresults\x12;\n" +
 	"\vexecuted_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"executedAt2\x96\x04\n" +
+	"executedAt\"B\n" +
+	"\rCommitRequest\x121\n" +
+	"\x0etransaction_id\x18\x01 \x01(\tB\n" +
+	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId\"O\n" +
+	"\x0eCommitResponse\x12=\n" +
+	"\fcommitted_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\vcommittedAt\"D\n" +
+	"\x0fRollbackRequest\x121\n" +
+	"\x0etransaction_id\x18\x01 \x01(\tB\n" +
+	"\xe0A\x02\xfaB\x04r\x02\x10\x01R\rtransactionId2\x96\x04\n" +
 	"\x12TransactionService\x12u\n" +
 	"\x05Begin\x12 .worker.database.v1.BeginRequest\x1a!.worker.database.v1.BeginResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/v1alpha1/transactions:begin\x12\x86\x01\n" +
 	"\x06Commit\x12!.worker.database.v1.CommitRequest\x1a\".worker.database.v1.CommitResponse\"5\x82\xd3\xe4\x93\x02/:\x0etransaction_id\"\x1d/v1alpha1/transactions:commit\x12\x80\x01\n" +
@@ -726,13 +724,13 @@ var file_worker_database_v1_transaction_service_proto_msgTypes = make([]protoimp
 var file_worker_database_v1_transaction_service_proto_goTypes = []any{
 	(*BeginRequest)(nil),            // 0: worker.database.v1.BeginRequest
 	(*BeginResponse)(nil),           // 1: worker.database.v1.BeginResponse
-	(*CommitRequest)(nil),           // 2: worker.database.v1.CommitRequest
-	(*CommitResponse)(nil),          // 3: worker.database.v1.CommitResponse
-	(*RollbackRequest)(nil),         // 4: worker.database.v1.RollbackRequest
-	(*ExecuteRequest)(nil),          // 5: worker.database.v1.ExecuteRequest
-	(*Operation)(nil),               // 6: worker.database.v1.Operation
-	(*OperationResult)(nil),         // 7: worker.database.v1.OperationResult
-	(*ExecuteResponse)(nil),         // 8: worker.database.v1.ExecuteResponse
+	(*ExecuteRequest)(nil),          // 2: worker.database.v1.ExecuteRequest
+	(*Operation)(nil),               // 3: worker.database.v1.Operation
+	(*OperationResult)(nil),         // 4: worker.database.v1.OperationResult
+	(*ExecuteResponse)(nil),         // 5: worker.database.v1.ExecuteResponse
+	(*CommitRequest)(nil),           // 6: worker.database.v1.CommitRequest
+	(*CommitResponse)(nil),          // 7: worker.database.v1.CommitResponse
+	(*RollbackRequest)(nil),         // 8: worker.database.v1.RollbackRequest
 	(*timestamppb.Timestamp)(nil),   // 9: google.protobuf.Timestamp
 	(*CreateDatabaseRequest)(nil),   // 10: worker.database.v1.CreateDatabaseRequest
 	(*UpdateDatabaseRequest)(nil),   // 11: worker.database.v1.UpdateDatabaseRequest
@@ -750,31 +748,31 @@ var file_worker_database_v1_transaction_service_proto_goTypes = []any{
 }
 var file_worker_database_v1_transaction_service_proto_depIdxs = []int32{
 	9,  // 0: worker.database.v1.BeginResponse.started_at:type_name -> google.protobuf.Timestamp
-	9,  // 1: worker.database.v1.CommitResponse.committed_at:type_name -> google.protobuf.Timestamp
-	6,  // 2: worker.database.v1.ExecuteRequest.operations:type_name -> worker.database.v1.Operation
-	10, // 3: worker.database.v1.Operation.create_database:type_name -> worker.database.v1.CreateDatabaseRequest
-	11, // 4: worker.database.v1.Operation.update_database:type_name -> worker.database.v1.UpdateDatabaseRequest
-	12, // 5: worker.database.v1.Operation.delete_database:type_name -> worker.database.v1.DeleteDatabaseRequest
-	13, // 6: worker.database.v1.Operation.create_collection:type_name -> worker.database.v1.CreateCollectionRequest
-	14, // 7: worker.database.v1.Operation.update_collection:type_name -> worker.database.v1.UpdateCollectionRequest
-	15, // 8: worker.database.v1.Operation.delete_collection:type_name -> worker.database.v1.DeleteCollectionRequest
-	16, // 9: worker.database.v1.Operation.create_document:type_name -> worker.database.v1.CreateDocumentRequest
-	17, // 10: worker.database.v1.Operation.update_document:type_name -> worker.database.v1.UpdateDocumentRequest
-	18, // 11: worker.database.v1.Operation.delete_document:type_name -> worker.database.v1.DeleteDocumentRequest
-	19, // 12: worker.database.v1.OperationResult.database_result:type_name -> worker.database.v1.Database
-	20, // 13: worker.database.v1.OperationResult.collection_result:type_name -> worker.database.v1.Collection
-	21, // 14: worker.database.v1.OperationResult.document_result:type_name -> worker.database.v1.Document
-	22, // 15: worker.database.v1.OperationResult.delete_result:type_name -> google.protobuf.Empty
-	7,  // 16: worker.database.v1.ExecuteResponse.results:type_name -> worker.database.v1.OperationResult
-	9,  // 17: worker.database.v1.ExecuteResponse.executed_at:type_name -> google.protobuf.Timestamp
+	3,  // 1: worker.database.v1.ExecuteRequest.operations:type_name -> worker.database.v1.Operation
+	10, // 2: worker.database.v1.Operation.create_database:type_name -> worker.database.v1.CreateDatabaseRequest
+	11, // 3: worker.database.v1.Operation.update_database:type_name -> worker.database.v1.UpdateDatabaseRequest
+	12, // 4: worker.database.v1.Operation.delete_database:type_name -> worker.database.v1.DeleteDatabaseRequest
+	13, // 5: worker.database.v1.Operation.create_collection:type_name -> worker.database.v1.CreateCollectionRequest
+	14, // 6: worker.database.v1.Operation.update_collection:type_name -> worker.database.v1.UpdateCollectionRequest
+	15, // 7: worker.database.v1.Operation.delete_collection:type_name -> worker.database.v1.DeleteCollectionRequest
+	16, // 8: worker.database.v1.Operation.create_document:type_name -> worker.database.v1.CreateDocumentRequest
+	17, // 9: worker.database.v1.Operation.update_document:type_name -> worker.database.v1.UpdateDocumentRequest
+	18, // 10: worker.database.v1.Operation.delete_document:type_name -> worker.database.v1.DeleteDocumentRequest
+	19, // 11: worker.database.v1.OperationResult.database_result:type_name -> worker.database.v1.Database
+	20, // 12: worker.database.v1.OperationResult.collection_result:type_name -> worker.database.v1.Collection
+	21, // 13: worker.database.v1.OperationResult.document_result:type_name -> worker.database.v1.Document
+	22, // 14: worker.database.v1.OperationResult.delete_result:type_name -> google.protobuf.Empty
+	4,  // 15: worker.database.v1.ExecuteResponse.results:type_name -> worker.database.v1.OperationResult
+	9,  // 16: worker.database.v1.ExecuteResponse.executed_at:type_name -> google.protobuf.Timestamp
+	9,  // 17: worker.database.v1.CommitResponse.committed_at:type_name -> google.protobuf.Timestamp
 	0,  // 18: worker.database.v1.TransactionService.Begin:input_type -> worker.database.v1.BeginRequest
-	2,  // 19: worker.database.v1.TransactionService.Commit:input_type -> worker.database.v1.CommitRequest
-	4,  // 20: worker.database.v1.TransactionService.Rollback:input_type -> worker.database.v1.RollbackRequest
-	5,  // 21: worker.database.v1.TransactionService.Execute:input_type -> worker.database.v1.ExecuteRequest
+	6,  // 19: worker.database.v1.TransactionService.Commit:input_type -> worker.database.v1.CommitRequest
+	8,  // 20: worker.database.v1.TransactionService.Rollback:input_type -> worker.database.v1.RollbackRequest
+	2,  // 21: worker.database.v1.TransactionService.Execute:input_type -> worker.database.v1.ExecuteRequest
 	1,  // 22: worker.database.v1.TransactionService.Begin:output_type -> worker.database.v1.BeginResponse
-	3,  // 23: worker.database.v1.TransactionService.Commit:output_type -> worker.database.v1.CommitResponse
+	7,  // 23: worker.database.v1.TransactionService.Commit:output_type -> worker.database.v1.CommitResponse
 	22, // 24: worker.database.v1.TransactionService.Rollback:output_type -> google.protobuf.Empty
-	8,  // 25: worker.database.v1.TransactionService.Execute:output_type -> worker.database.v1.ExecuteResponse
+	5,  // 25: worker.database.v1.TransactionService.Execute:output_type -> worker.database.v1.ExecuteResponse
 	22, // [22:26] is the sub-list for method output_type
 	18, // [18:22] is the sub-list for method input_type
 	18, // [18:18] is the sub-list for extension type_name
@@ -790,7 +788,7 @@ func file_worker_database_v1_transaction_service_proto_init() {
 	file_worker_database_v1_database_service_proto_init()
 	file_worker_database_v1_collection_service_proto_init()
 	file_worker_database_v1_document_service_proto_init()
-	file_worker_database_v1_transaction_service_proto_msgTypes[6].OneofWrappers = []any{
+	file_worker_database_v1_transaction_service_proto_msgTypes[3].OneofWrappers = []any{
 		(*Operation_CreateDatabase)(nil),
 		(*Operation_UpdateDatabase)(nil),
 		(*Operation_DeleteDatabase)(nil),
@@ -801,7 +799,7 @@ func file_worker_database_v1_transaction_service_proto_init() {
 		(*Operation_UpdateDocument)(nil),
 		(*Operation_DeleteDocument)(nil),
 	}
-	file_worker_database_v1_transaction_service_proto_msgTypes[7].OneofWrappers = []any{
+	file_worker_database_v1_transaction_service_proto_msgTypes[4].OneofWrappers = []any{
 		(*OperationResult_DatabaseResult)(nil),
 		(*OperationResult_CollectionResult)(nil),
 		(*OperationResult_DocumentResult)(nil),

@@ -13,12 +13,12 @@ type DataStorage struct {
 	mock.Mock
 }
 
-// RecoverCollection provides a mock function with given fields: entry
-func (_m *DataStorage) RecoverCollection(entry walmodels.WALEntry) error {
+// ApplyToCollection provides a mock function with given fields: entry
+func (_m *DataStorage) ApplyToCollection(entry walmodels.WALEntry) error {
 	ret := _m.Called(entry)
 
 	if len(ret) == 0 {
-		panic("no return value specified for RecoverCollection")
+		panic("no return value specified for ApplyToCollection")
 	}
 
 	var r0 error
@@ -31,12 +31,12 @@ func (_m *DataStorage) RecoverCollection(entry walmodels.WALEntry) error {
 	return r0
 }
 
-// RecoverDatabase provides a mock function with given fields: entry
-func (_m *DataStorage) RecoverDatabase(entry walmodels.WALEntry) error {
+// ApplyToDatabase provides a mock function with given fields: entry
+func (_m *DataStorage) ApplyToDatabase(entry walmodels.WALEntry) error {
 	ret := _m.Called(entry)
 
 	if len(ret) == 0 {
-		panic("no return value specified for RecoverDatabase")
+		panic("no return value specified for ApplyToDatabase")
 	}
 
 	var r0 error
@@ -49,12 +49,12 @@ func (_m *DataStorage) RecoverDatabase(entry walmodels.WALEntry) error {
 	return r0
 }
 
-// RecoverDocument provides a mock function with given fields: entry
-func (_m *DataStorage) RecoverDocument(entry walmodels.WALEntry) error {
+// ApplyToDocument provides a mock function with given fields: entry
+func (_m *DataStorage) ApplyToDocument(entry walmodels.WALEntry) error {
 	ret := _m.Called(entry)
 
 	if len(ret) == 0 {
-		panic("no return value specified for RecoverDocument")
+		panic("no return value specified for ApplyToDocument")
 	}
 
 	var r0 error
