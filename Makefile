@@ -24,7 +24,7 @@ generate: clean install deps
 			-I$(GOOGLEAPIS) \
 			-I$(PGV_DIR) \
 		$(PROTO_DIR)worker/database/v1/*.proto $(PROTO_DIR)worker/replication/v1/*.proto \
-		$(PROTO_DIR)master/cluster/v1/*.proto \
+		$(PROTO_DIR)master/cluster/v1/*.proto $(PROTO_DIR)master/database/v1/*.proto \
 		--go_out=$(PROTO_OUT_DIR) --go_opt=paths=source_relative \
 		--go-grpc_out=$(PROTO_OUT_DIR) --go-grpc_opt=paths=source_relative \
 		--validate_out="lang=go,paths=source_relative:$(PROTO_OUT_DIR)"
