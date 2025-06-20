@@ -1,0 +1,12 @@
+name: database_001
+grpc:
+  port: 55055
+  timeout: 4s
+logging:
+  level: info
+  format: pretty
+  output: stdout
+wal:
+  path: "logs/database_001.log"
+master:
+  port: 55054
