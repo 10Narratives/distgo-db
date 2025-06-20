@@ -453,7 +453,7 @@ const file_master_database_v1_collection_service_proto_rawDesc = "" +
 	"\x10UpdateCollection\x12+.master.database.v1.UpdateCollectionRequest\x1a\x1e.master.database.v1.Collection\"I\x82\xd3\xe4\x93\x02C:\n" +
 	"collection25/v1alpha1/{collection.name=databases/*/collections/*}\x12\x8b\x01\n" +
 	"\x10DeleteCollection\x12+.master.database.v1.DeleteCollectionRequest\x1a\x16.google.protobuf.Empty\"2\x82\xd3\xe4\x93\x02,**/v1alpha1/{name=databases/*/collections/*}Bg\n" +
-	"\x1dcom.google.worker.database.v1P\x01ZDgithub.com/10Narratives/distgo-db/pkg/proto/master/database/v1;mdbv1b\x06proto3"
+	"\x1dcom.google.master.database.v1P\x01ZDgithub.com/10Narratives/distgo-db/pkg/proto/master/database/v1;mdbv1b\x06proto3"
 
 var (
 	file_master_database_v1_collection_service_proto_rawDescOnce sync.Once

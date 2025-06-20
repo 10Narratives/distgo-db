@@ -5,5 +5,3 @@ logging:
   level: info
   format: pretty
   output: stdout
-worker:
-  port: 55055

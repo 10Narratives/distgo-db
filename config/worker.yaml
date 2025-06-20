@@ -8,3 +8,7 @@ logging:
   output: stdout
 wal:
   path: "logs/worker_1.log"
+master:
+  port: 55054
+data:
+  name: "database_003"

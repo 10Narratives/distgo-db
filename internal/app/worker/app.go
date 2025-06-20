@@ -26,7 +26,7 @@ type App struct {
 }
 
 func New(log *slog.Logger, cfg workercfg.Config) *App {
-	grpcApp := workergrpc.New(log, cfg.GRPC.Port)
+	grpcApp := workergrpc.New(log, cfg.GRPC.Port, cfg.Master.Port, cfg.Database.Name)
 
 	walStorage, err := walstorage.New(cfg.WAL.Path)
 	if err != nil {

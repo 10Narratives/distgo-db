@@ -95,14 +95,10 @@ func (s *Storage) ApplyToCollection(entry walmodels.WALEntry) error {
 }
 
 func (s *Storage) ApplyToDocument(entry walmodels.WALEntry) error {
-	fmt.Println("\n\n\n\nentry", string(entry.Payload), "\n\n\n\n")
-
 	var payload walmodels.DocumentPayload
 	if err := json.Unmarshal(entry.Payload, &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal document payload: %w", err)
 	}
-
-	fmt.Println("\n\n\n\n", payload, "\n\n\n\n")
 
 	switch entry.Mutation {
 	case commonmodels.MutationTypeCreate, commonmodels.MutationTypeUpdate:

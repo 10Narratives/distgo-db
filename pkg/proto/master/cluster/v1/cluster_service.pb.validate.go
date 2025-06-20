@@ -34,3 +34,730 @@ var (
 	_ = anypb.Any{}
 	_ = sort.Sort
 )
+
+// define the regex for a UUID once up-front
+var _cluster_service_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+
+// Validate checks the field values on RegisterRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *RegisterRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on RegisterRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// RegisterRequestMultiError, or nil if none found.
+func (m *RegisterRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *RegisterRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if l := utf8.RuneCountInString(m.GetDatabaseName()); l < 1 || l > 50 {
+		err := RegisterRequestValidationError{
+			field:  "DatabaseName",
+			reason: "value length must be between 1 and 50 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetAddress()) < 1 {
+		err := RegisterRequestValidationError{
+			field:  "Address",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return RegisterRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// RegisterRequestMultiError is an error wrapping multiple validation errors
+// returned by RegisterRequest.ValidateAll() if the designated constraints
+// aren't met.
+type RegisterRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RegisterRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RegisterRequestMultiError) AllErrors() []error { return m }
+
+// RegisterRequestValidationError is the validation error returned by
+// RegisterRequest.Validate if the designated constraints aren't met.
+type RegisterRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RegisterRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RegisterRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RegisterRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RegisterRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RegisterRequestValidationError) ErrorName() string { return "RegisterRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e RegisterRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRegisterRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RegisterRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RegisterRequestValidationError{}
+
+// Validate checks the field values on ListWorkersRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListWorkersRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListWorkersRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListWorkersRequestMultiError, or nil if none found.
+func (m *ListWorkersRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListWorkersRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return ListWorkersRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListWorkersRequestMultiError is an error wrapping multiple validation errors
+// returned by ListWorkersRequest.ValidateAll() if the designated constraints
+// aren't met.
+type ListWorkersRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListWorkersRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListWorkersRequestMultiError) AllErrors() []error { return m }
+
+// ListWorkersRequestValidationError is the validation error returned by
+// ListWorkersRequest.Validate if the designated constraints aren't met.
+type ListWorkersRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListWorkersRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListWorkersRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListWorkersRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListWorkersRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListWorkersRequestValidationError) ErrorName() string {
+	return "ListWorkersRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListWorkersRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListWorkersRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListWorkersRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListWorkersRequestValidationError{}
+
+// Validate checks the field values on ListWorkersResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListWorkersResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListWorkersResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListWorkersResponseMultiError, or nil if none found.
+func (m *ListWorkersResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListWorkersResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetWorkers() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListWorkersResponseValidationError{
+						field:  fmt.Sprintf("Workers[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListWorkersResponseValidationError{
+						field:  fmt.Sprintf("Workers[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListWorkersResponseValidationError{
+					field:  fmt.Sprintf("Workers[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ListWorkersResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListWorkersResponseMultiError is an error wrapping multiple validation
+// errors returned by ListWorkersResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ListWorkersResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListWorkersResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListWorkersResponseMultiError) AllErrors() []error { return m }
+
+// ListWorkersResponseValidationError is the validation error returned by
+// ListWorkersResponse.Validate if the designated constraints aren't met.
+type ListWorkersResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListWorkersResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListWorkersResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListWorkersResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListWorkersResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListWorkersResponseValidationError) ErrorName() string {
+	return "ListWorkersResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListWorkersResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListWorkersResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListWorkersResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListWorkersResponseValidationError{}
+
+// Validate checks the field values on Worker with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Worker) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Worker with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in WorkerMultiError, or nil if none found.
+func (m *Worker) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Worker) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if err := m._validateUuid(m.GetWorkerId()); err != nil {
+		err = WorkerValidationError{
+			field:  "WorkerId",
+			reason: "value must be a valid UUID",
+			cause:  err,
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetAddress()) < 1 {
+		err := WorkerValidationError{
+			field:  "Address",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if l := utf8.RuneCountInString(m.GetDatabaseName()); l < 1 || l > 50 {
+		err := WorkerValidationError{
+			field:  "DatabaseName",
+			reason: "value length must be between 1 and 50 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return WorkerMultiError(errors)
+	}
+
+	return nil
+}
+
+func (m *Worker) _validateUuid(uuid string) error {
+	if matched := _cluster_service_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
+	}
+
+	return nil
+}
+
+// WorkerMultiError is an error wrapping multiple validation errors returned by
+// Worker.ValidateAll() if the designated constraints aren't met.
+type WorkerMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m WorkerMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m WorkerMultiError) AllErrors() []error { return m }
+
+// WorkerValidationError is the validation error returned by Worker.Validate if
+// the designated constraints aren't met.
+type WorkerValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e WorkerValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e WorkerValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e WorkerValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e WorkerValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e WorkerValidationError) ErrorName() string { return "WorkerValidationError" }
+
+// Error satisfies the builtin error interface
+func (e WorkerValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sWorker.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = WorkerValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = WorkerValidationError{}
+
+// Validate checks the field values on UnregisterRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *UnregisterRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UnregisterRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UnregisterRequestMultiError, or nil if none found.
+func (m *UnregisterRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UnregisterRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if err := m._validateUuid(m.GetWorkerId()); err != nil {
+		err = UnregisterRequestValidationError{
+			field:  "WorkerId",
+			reason: "value must be a valid UUID",
+			cause:  err,
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return UnregisterRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+func (m *UnregisterRequest) _validateUuid(uuid string) error {
+	if matched := _cluster_service_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
+	}
+
+	return nil
+}
+
+// UnregisterRequestMultiError is an error wrapping multiple validation errors
+// returned by UnregisterRequest.ValidateAll() if the designated constraints
+// aren't met.
+type UnregisterRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UnregisterRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UnregisterRequestMultiError) AllErrors() []error { return m }
+
+// UnregisterRequestValidationError is the validation error returned by
+// UnregisterRequest.Validate if the designated constraints aren't met.
+type UnregisterRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UnregisterRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UnregisterRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UnregisterRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UnregisterRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UnregisterRequestValidationError) ErrorName() string {
+	return "UnregisterRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UnregisterRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUnregisterRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UnregisterRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UnregisterRequestValidationError{}
+
+// Validate checks the field values on RegisterResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *RegisterResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on RegisterResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// RegisterResponseMultiError, or nil if none found.
+func (m *RegisterResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *RegisterResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for WorkerId
+
+	if len(errors) > 0 {
+		return RegisterResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// RegisterResponseMultiError is an error wrapping multiple validation errors
+// returned by RegisterResponse.ValidateAll() if the designated constraints
+// aren't met.
+type RegisterResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RegisterResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RegisterResponseMultiError) AllErrors() []error { return m }
+
+// RegisterResponseValidationError is the validation error returned by
+// RegisterResponse.Validate if the designated constraints aren't met.
+type RegisterResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RegisterResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RegisterResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RegisterResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RegisterResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RegisterResponseValidationError) ErrorName() string { return "RegisterResponseValidationError" }
+
+// Error satisfies the builtin error interface
+func (e RegisterResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRegisterResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RegisterResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RegisterResponseValidationError{}

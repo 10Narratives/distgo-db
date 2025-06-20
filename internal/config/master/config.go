@@ -8,14 +8,9 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
-type WorkerConfig struct {
-	Port int `yaml:"port"`
-}
-
 type Config struct {
 	GRPC    config.GRPCConfig   `yaml:"grpc"`
 	Logging config.LoggerConfig `yaml:"logging"`
-	Worker  WorkerConfig        `yaml:"worker"`
 }
 
 func MustLoad() *Config {

@@ -12,11 +12,21 @@ type WALConfig struct {
 	Path string `yaml:"path" env-required:"true"`
 }
 
+type MasterConfig struct {
+	Port int `yaml:"port" env-required:"true"`
+}
+
+type DatabaseConfig struct {
+	Name string `yaml:"name"`
+}
+
 type Config struct {
-	Name    string              `yaml:"name" env-required:"true"`
-	GRPC    config.GRPCConfig   `yaml:"grpc"`
-	Logging config.LoggerConfig `yaml:"logging"`
-	WAL     WALConfig           `yaml:"wal"`
+	Name     string              `yaml:"name" env-required:"true"`
+	GRPC     config.GRPCConfig   `yaml:"grpc"`
+	Logging  config.LoggerConfig `yaml:"logging"`
+	WAL      WALConfig           `yaml:"wal"`
+	Master   MasterConfig        `yaml:"master"`
+	Database DatabaseConfig      `yaml:"data"`
 }
 
 func MustLoad() *Config {
