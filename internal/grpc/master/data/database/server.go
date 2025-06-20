@@ -11,19 +11,27 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type ServerAPI struct {
-	mdbv1.UnimplementedDatabaseServiceServer
-	client dbv1.DatabaseServiceClient
+type DatabaseRedirector interface {
+	CreateDatabase(context.Context, *dbv1.CreateDatabaseRequest) (*dbv1.Database, error)
+	DeleteDatabase(context.Context, *dbv1.DeleteDatabaseRequest) (*emptypb.Empty, error)
+	GetDatabase(context.Context, *dbv1.GetDatabaseRequest) (*dbv1.Database, error)
+	ListDatabases(context.Context, *dbv1.ListDatabasesRequest) (*dbv1.ListDatabasesResponse, error)
+	UpdateDatabase(context.Context, *dbv1.UpdateDatabaseRequest) (*dbv1.Database, error)
 }
 
-func New(client dbv1.DatabaseServiceClient) *ServerAPI {
+type ServerAPI struct {
+	mdbv1.UnimplementedDatabaseServiceServer
+	redirector DatabaseRedirector
+}
+
+func New(redirector DatabaseRedirector) *ServerAPI {
 	return &ServerAPI{
-		client: client,
+		redirector: redirector,
 	}
 }
 
-func Register(server *grpc.Server, client dbv1.DatabaseServiceClient) {
-	mdbv1.RegisterDatabaseServiceServer(server, &ServerAPI{client: client})
+func Register(server *grpc.Server, redirector DatabaseRedirector) {
+	mdbv1.RegisterDatabaseServiceServer(server, New(redirector))
 }
 
 func (s *ServerAPI) CreateDatabase(ctx context.Context, req *mdbv1.CreateDatabaseRequest) (*mdbv1.Database, error) {
@@ -31,24 +39,12 @@ func (s *ServerAPI) CreateDatabase(ctx context.Context, req *mdbv1.CreateDatabas
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	clientReq := &dbv1.CreateDatabaseRequest{
+	resp, err := s.redirector.CreateDatabase(ctx, &dbv1.CreateDatabaseRequest{
 		DatabaseId: req.DatabaseId,
-		Database: &dbv1.Database{
-			DisplayName: req.Database.DisplayName,
-		},
-	}
+		Database:   convertDatabaseFromGRPC(req.Database),
+	})
 
-	resp, err := s.client.CreateDatabase(ctx, clientReq)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to create database: %v", err)
-	}
-
-	return &mdbv1.Database{
-		Name:        resp.Name,
-		DisplayName: resp.DisplayName,
-		CreatedAt:   resp.CreatedAt,
-		UpdatedAt:   resp.UpdatedAt,
-	}, nil
+	return convertDatabaseToGRPC(resp), err
 }
 
 func (s *ServerAPI) DeleteDatabase(ctx context.Context, req *mdbv1.DeleteDatabaseRequest) (*emptypb.Empty, error) {
@@ -56,16 +52,9 @@ func (s *ServerAPI) DeleteDatabase(ctx context.Context, req *mdbv1.DeleteDatabas
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	clientReq := &dbv1.DeleteDatabaseRequest{
-		Name: req.Name,
-	}
-
-	_, err := s.client.DeleteDatabase(ctx, clientReq)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to delete database: %v", err)
-	}
-
-	return &emptypb.Empty{}, nil
+	return s.redirector.DeleteDatabase(ctx, &dbv1.DeleteDatabaseRequest{
+		Name: req.GetName(),
+	})
 }
 
 func (s *ServerAPI) GetDatabase(ctx context.Context, req *mdbv1.GetDatabaseRequest) (*mdbv1.Database, error) {
@@ -73,21 +62,11 @@ func (s *ServerAPI) GetDatabase(ctx context.Context, req *mdbv1.GetDatabaseReque
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	clientReq := &dbv1.GetDatabaseRequest{
-		Name: req.Name,
-	}
+	resp, err := s.redirector.GetDatabase(ctx, &dbv1.GetDatabaseRequest{
+		Name: req.GetName(),
+	})
 
-	resp, err := s.client.GetDatabase(ctx, clientReq)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to get database: %v", err)
-	}
-
-	return &mdbv1.Database{
-		Name:        resp.Name,
-		DisplayName: resp.DisplayName,
-		CreatedAt:   resp.CreatedAt,
-		UpdatedAt:   resp.UpdatedAt,
-	}, nil
+	return convertDatabaseToGRPC(resp), err
 }
 
 func (s *ServerAPI) ListDatabases(ctx context.Context, req *mdbv1.ListDatabasesRequest) (*mdbv1.ListDatabasesResponse, error) {
@@ -95,30 +74,20 @@ func (s *ServerAPI) ListDatabases(ctx context.Context, req *mdbv1.ListDatabasesR
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	clientReq := &dbv1.ListDatabasesRequest{
-		PageSize:  req.PageSize,
-		PageToken: req.PageToken,
-	}
+	resp, err := s.redirector.ListDatabases(ctx, &dbv1.ListDatabasesRequest{
+		PageSize:  req.GetPageSize(),
+		PageToken: req.GetPageToken(),
+	})
 
-	resp, err := s.client.ListDatabases(ctx, clientReq)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to list databases: %v", err)
-	}
-
-	databases := make([]*mdbv1.Database, len(resp.Databases))
-	for i, db := range resp.Databases {
-		databases[i] = &mdbv1.Database{
-			Name:        db.Name,
-			DisplayName: db.DisplayName,
-			CreatedAt:   db.CreatedAt,
-			UpdatedAt:   db.UpdatedAt,
-		}
+	listed := make([]*mdbv1.Database, 0, len(resp.Databases))
+	for _, database := range resp.Databases {
+		listed = append(listed, convertDatabaseToGRPC(database))
 	}
 
 	return &mdbv1.ListDatabasesResponse{
-		Databases:     databases,
+		Databases:     listed,
 		NextPageToken: resp.NextPageToken,
-	}, nil
+	}, err
 }
 
 func (s *ServerAPI) UpdateDatabase(ctx context.Context, req *mdbv1.UpdateDatabaseRequest) (*mdbv1.Database, error) {
@@ -126,23 +95,30 @@ func (s *ServerAPI) UpdateDatabase(ctx context.Context, req *mdbv1.UpdateDatabas
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	clientReq := &dbv1.UpdateDatabaseRequest{
-		Database: &dbv1.Database{
-			Name:        req.Database.Name,
-			DisplayName: req.Database.DisplayName,
-		},
-		UpdateMask: req.UpdateMask,
-	}
+	resp, err := s.redirector.UpdateDatabase(ctx, &dbv1.UpdateDatabaseRequest{
+		Database:   convertDatabaseFromGRPC(req.GetDatabase()),
+		UpdateMask: req.GetUpdateMask(),
+	})
 
-	resp, err := s.client.UpdateDatabase(ctx, clientReq)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to update database: %v", err)
-	}
+	return convertDatabaseToGRPC(resp), err
+}
 
+func convertDatabaseFromGRPC(db *mdbv1.Database) *dbv1.Database {
+	if db == nil {
+		return nil
+	}
+	return &dbv1.Database{
+		Name:        db.GetName(),
+		DisplayName: db.GetDisplayName(),
+	}
+}
+
+func convertDatabaseToGRPC(db *dbv1.Database) *mdbv1.Database {
+	if db == nil {
+		return nil
+	}
 	return &mdbv1.Database{
-		Name:        resp.Name,
-		DisplayName: resp.DisplayName,
-		CreatedAt:   resp.CreatedAt,
-		UpdatedAt:   resp.UpdatedAt,
-	}, nil
+		Name:        db.GetName(),
+		DisplayName: db.GetDisplayName(),
+	}
 }
