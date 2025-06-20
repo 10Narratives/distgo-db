@@ -6,11 +6,13 @@ import (
 
 	workergrpc "github.com/10Narratives/distgo-db/internal/app/worker/grpc"
 	workercfg "github.com/10Narratives/distgo-db/internal/config/worker"
+	clustergrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/cluster"
 	collectiongrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/collection"
 	databasegrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/database"
 	documentgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/document"
 	transactiongrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/transaction"
 	walgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/wal"
+	clustersrv "github.com/10Narratives/distgo-db/internal/services/worker/cluster"
 	collectionsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/collection"
 	databasesrv "github.com/10Narratives/distgo-db/internal/services/worker/data/database"
 	documentsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/document"
@@ -22,11 +24,12 @@ import (
 )
 
 type App struct {
-	GRPC *workergrpc.App
+	GRPC           *workergrpc.App
+	ClusterService *clustersrv.Service
 }
 
 func New(log *slog.Logger, cfg workercfg.Config) *App {
-	grpcApp := workergrpc.New(log, cfg.GRPC.Port)
+	grpcApp := workergrpc.New(log, cfg.GRPC.Port, cfg.Master.Port, cfg.Name)
 
 	walStorage, err := walstorage.New(cfg.WAL.Path)
 	if err != nil {
@@ -56,5 +59,8 @@ func New(log *slog.Logger, cfg workercfg.Config) *App {
 	txService := transactionsrv.New(txStorage, dataStorage)
 	transactiongrpc.Register(grpcApp.GRPCServer, txService)
 
-	return &App{GRPC: grpcApp}
+	clusterService := clustersrv.New(cfg.Master.Port)
+	clustergrpc.Register(grpcApp.GRPCServer, clusterService)
+
+	return &App{GRPC: grpcApp, ClusterService: clusterService}
 }

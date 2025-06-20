@@ -1,4 +1,4 @@
-package workergrpc
+package mastergrpc
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net"
 
-	clusterv1 "github.com/10Narratives/distgo-db/pkg/proto/master/cluster/v1"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
@@ -15,19 +14,14 @@ import (
 )
 
 type App struct {
-	log            *slog.Logger
-	GRPCServer     *grpc.Server
-	port           int
-	clusterService clusterv1.ClusterServiceClient
-	Master         *grpc.ClientConn
-	WorkerID       string
+	log        *slog.Logger
+	GRPCServer *grpc.Server
+	port       int
 }
 
 func New(
 	log *slog.Logger,
 	port int,
-	masterPort int,
-	databaseName string,
 ) *App {
 	loggingOpts := []logging.Option{
 		logging.WithLogOnEvents(
@@ -47,13 +41,11 @@ func New(
 		logging.UnaryServerInterceptor(InterceptorLogger(log), loggingOpts...),
 	))
 
-	app := &App{
+	return &App{
 		log:        log,
 		GRPCServer: gRPCServer,
 		port:       port,
 	}
-
-	return app
 }
 
 func InterceptorLogger(l *slog.Logger) logging.Logger {

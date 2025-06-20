@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package master.database.v1;
+
+import "google/protobuf/empty.proto";
+
+import "worker/database/v1/mutation_type.proto";
+import "worker/database/v1/entity_type.proto";
+
+option java_multiple_files = true;
+option java_package = "com.google.master.database.v1";
+option go_package = "github.com/10Narratives/distgo-db/pkg/proto/master/database/v1;mdbv1";
+
+service TransactionService {
+  rpc Begin (BeginRequest) returns (BeginResponse);
+  rpc Execute (ExecuteRequest) returns (google.protobuf.Empty);
+  rpc Commit (CommitRequest) returns (google.protobuf.Empty);
+  rpc Rollback (RollbackRequest) returns (google.protobuf.Empty);
+}
+
+message BeginRequest {}
+
+message BeginResponse {
+  string transaction_id = 1;
+}
+
+message Operation {
+  worker.database.v1.MutationType mutation_type = 1;
+  worker.database.v1.EntityType entity_type = 2;
+  string name = 3;
+  string value = 4;
+}
+
+message ExecuteRequest {
+  string transaction_id = 1;
+  repeated Operation operations = 2;
+}
+
+message CommitRequest {
+  string transaction_id = 1;
+}
+
+message RollbackRequest {
+  string transaction_id = 1;
+}

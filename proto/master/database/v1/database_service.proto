@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package master.database.v1;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/resource.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/field_mask.proto";
+import "validate/validate.proto";
+
+option java_multiple_files = true;
+option java_package = "com.google.master.database.v1";
+option go_package = "github.com/10Narratives/distgo-db/pkg/proto/master/database/v1;mdbv1";
+
+service DatabaseService {
+  rpc ListDatabases(ListDatabasesRequest) returns (ListDatabasesResponse) {
+    option (google.api.http) = {
+      get: "/v1alpha1/databases"
+    };
+  }
+
+  rpc GetDatabase(GetDatabaseRequest) returns (Database) {
+    option (google.api.http) = {
+      get: "/v1alpha1/{name=databases/*}"
+    };
+  }
+
+  rpc CreateDatabase(CreateDatabaseRequest) returns (Database) {
+    option (google.api.http) = {
+      post: "/v1alpha1/databases"
+      body: "database"
+    };
+  }
+
+  rpc UpdateDatabase(UpdateDatabaseRequest) returns (Database) {
+    option (google.api.http) = {
+      patch: "/v1alpha1/{database.name=databases/*}"
+      body: "database"
+    };
+  }
+
+  rpc DeleteDatabase(DeleteDatabaseRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1alpha1/{name=databases/*}"
+    };
+  }
+}
+
+message Database {
+  option (google.api.resource) = {
+    type: "worker.database.v1/Database"
+    pattern: "databases/{database}"
+  };
+
+  string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  string display_name = 2 [
+    (validate.rules).string = {
+      min_len: 1,
+      max_len: 255
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  google.protobuf.Timestamp created_at = 3 [(google.api.field_behavior) = OUTPUT_ONLY];
+  google.protobuf.Timestamp updated_at = 4 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+message ListDatabasesRequest {
+  int32 page_size = 1 [
+    (validate.rules).int32 = {
+      gte: 0,
+      lte: 1000
+    }
+  ];
+  string page_token = 2;
+}
+
+message ListDatabasesResponse {
+  repeated Database databases = 1;
+  string next_page_token = 2;
+}
+
+message GetDatabaseRequest {
+  string name = 1 [
+    (validate.rules).string.pattern = "^databases\\/[^\\/]+$",
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message CreateDatabaseRequest {
+  string database_id = 1 [
+    (validate.rules).string = {
+      ignore_empty: true,
+      min_len: 1,
+      max_len: 64,
+      pattern: "^[a-z0-9\\-_.]*$"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+
+  Database database = 2 [
+    (validate.rules).message = { required: true },
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message UpdateDatabaseRequest {
+  Database database = 1 [
+    (validate.rules).message = { required: true },
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message DeleteDatabaseRequest {
+  string name = 1 [
+    (validate.rules).string.pattern = "^databases\\/[^\\/]+$",
+    (google.api.field_behavior) = REQUIRED
+  ];
+}

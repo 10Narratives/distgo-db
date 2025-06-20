@@ -7,9 +7,12 @@
 package clusterv1
 
 import (
+	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
+	sync "sync"
 	unsafe "unsafe"
 )
 
@@ -20,19 +23,346 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type RegisterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DatabaseName  string                 `protobuf:"bytes,1,opt,name=database_name,json=databaseName,proto3" json:"database_name,omitempty"`
+	Address       string                 `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegisterRequest) Reset() {
+	*x = RegisterRequest{}
+	mi := &file_master_cluster_v1_cluster_service_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RegisterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RegisterRequest) ProtoMessage() {}
+
+func (x *RegisterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_master_cluster_v1_cluster_service_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RegisterRequest.ProtoReflect.Descriptor instead.
+func (*RegisterRequest) Descriptor() ([]byte, []int) {
+	return file_master_cluster_v1_cluster_service_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *RegisterRequest) GetDatabaseName() string {
+	if x != nil {
+		return x.DatabaseName
+	}
+	return ""
+}
+
+func (x *RegisterRequest) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+type ListWorkersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListWorkersRequest) Reset() {
+	*x = ListWorkersRequest{}
+	mi := &file_master_cluster_v1_cluster_service_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListWorkersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListWorkersRequest) ProtoMessage() {}
+
+func (x *ListWorkersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_master_cluster_v1_cluster_service_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListWorkersRequest.ProtoReflect.Descriptor instead.
+func (*ListWorkersRequest) Descriptor() ([]byte, []int) {
+	return file_master_cluster_v1_cluster_service_proto_rawDescGZIP(), []int{1}
+}
+
+type ListWorkersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Workers       []*Worker              `protobuf:"bytes,1,rep,name=workers,proto3" json:"workers,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListWorkersResponse) Reset() {
+	*x = ListWorkersResponse{}
+	mi := &file_master_cluster_v1_cluster_service_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListWorkersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListWorkersResponse) ProtoMessage() {}
+
+func (x *ListWorkersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_master_cluster_v1_cluster_service_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListWorkersResponse.ProtoReflect.Descriptor instead.
+func (*ListWorkersResponse) Descriptor() ([]byte, []int) {
+	return file_master_cluster_v1_cluster_service_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ListWorkersResponse) GetWorkers() []*Worker {
+	if x != nil {
+		return x.Workers
+	}
+	return nil
+}
+
+type Worker struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WorkerId      string                 `protobuf:"bytes,1,opt,name=worker_id,json=workerId,proto3" json:"worker_id,omitempty"`
+	Address       string                 `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	DatabaseName  string                 `protobuf:"bytes,3,opt,name=database_name,json=databaseName,proto3" json:"database_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Worker) Reset() {
+	*x = Worker{}
+	mi := &file_master_cluster_v1_cluster_service_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Worker) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Worker) ProtoMessage() {}
+
+func (x *Worker) ProtoReflect() protoreflect.Message {
+	mi := &file_master_cluster_v1_cluster_service_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Worker.ProtoReflect.Descriptor instead.
+func (*Worker) Descriptor() ([]byte, []int) {
+	return file_master_cluster_v1_cluster_service_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Worker) GetWorkerId() string {
+	if x != nil {
+		return x.WorkerId
+	}
+	return ""
+}
+
+func (x *Worker) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *Worker) GetDatabaseName() string {
+	if x != nil {
+		return x.DatabaseName
+	}
+	return ""
+}
+
+type UnregisterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WorkerId      string                 `protobuf:"bytes,1,opt,name=worker_id,json=workerId,proto3" json:"worker_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnregisterRequest) Reset() {
+	*x = UnregisterRequest{}
+	mi := &file_master_cluster_v1_cluster_service_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnregisterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnregisterRequest) ProtoMessage() {}
+
+func (x *UnregisterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_master_cluster_v1_cluster_service_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnregisterRequest.ProtoReflect.Descriptor instead.
+func (*UnregisterRequest) Descriptor() ([]byte, []int) {
+	return file_master_cluster_v1_cluster_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *UnregisterRequest) GetWorkerId() string {
+	if x != nil {
+		return x.WorkerId
+	}
+	return ""
+}
+
+type RegisterResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WorkerId      string                 `protobuf:"bytes,1,opt,name=worker_id,json=workerId,proto3" json:"worker_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegisterResponse) Reset() {
+	*x = RegisterResponse{}
+	mi := &file_master_cluster_v1_cluster_service_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RegisterResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RegisterResponse) ProtoMessage() {}
+
+func (x *RegisterResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_master_cluster_v1_cluster_service_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RegisterResponse.ProtoReflect.Descriptor instead.
+func (*RegisterResponse) Descriptor() ([]byte, []int) {
+	return file_master_cluster_v1_cluster_service_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *RegisterResponse) GetWorkerId() string {
+	if x != nil {
+		return x.WorkerId
+	}
+	return ""
+}
+
 var File_master_cluster_v1_cluster_service_proto protoreflect.FileDescriptor
 
 const file_master_cluster_v1_cluster_service_proto_rawDesc = "" +
 	"\n" +
-	"'master/cluster/v1/cluster_service.proto\x12\x11master.cluster.v1BIZGgithub.com/10Narratives/distgo-db/pkg/proto/master/cluster/v1;clusterv1b\x06proto3"
+	"'master/cluster/v1/cluster_service.proto\x12\x11master.cluster.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x17validate/validate.proto\"d\n" +
+	"\x0fRegisterRequest\x12.\n" +
+	"\rdatabase_name\x18\x01 \x01(\tB\t\xfaB\x06r\x04\x10\x01\x182R\fdatabaseName\x12!\n" +
+	"\aaddress\x18\x02 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\aaddress\"\x14\n" +
+	"\x12ListWorkersRequest\"J\n" +
+	"\x13ListWorkersResponse\x123\n" +
+	"\aworkers\x18\x01 \x03(\v2\x19.master.cluster.v1.WorkerR\aworkers\"\x82\x01\n" +
+	"\x06Worker\x12%\n" +
+	"\tworker_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\bworkerId\x12!\n" +
+	"\aaddress\x18\x02 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\aaddress\x12.\n" +
+	"\rdatabase_name\x18\x03 \x01(\tB\t\xfaB\x06r\x04\x10\x01\x182R\fdatabaseName\":\n" +
+	"\x11UnregisterRequest\x12%\n" +
+	"\tworker_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\bworkerId\"/\n" +
+	"\x10RegisterResponse\x12\x1b\n" +
+	"\tworker_id\x18\x01 \x01(\tR\bworkerId2\x8f\x02\n" +
+	"\x0eClusterService\x12S\n" +
+	"\bRegister\x12\".master.cluster.v1.RegisterRequest\x1a#.master.cluster.v1.RegisterResponse\x12\\\n" +
+	"\vListWorkers\x12%.master.cluster.v1.ListWorkersRequest\x1a&.master.cluster.v1.ListWorkersResponse\x12J\n" +
+	"\n" +
+	"Unregister\x12$.master.cluster.v1.UnregisterRequest\x1a\x16.google.protobuf.EmptyBIZGgithub.com/10Narratives/distgo-db/pkg/proto/master/cluster/v1;clusterv1b\x06proto3"
 
-var file_master_cluster_v1_cluster_service_proto_goTypes = []any{}
+var (
+	file_master_cluster_v1_cluster_service_proto_rawDescOnce sync.Once
+	file_master_cluster_v1_cluster_service_proto_rawDescData []byte
+)
+
+func file_master_cluster_v1_cluster_service_proto_rawDescGZIP() []byte {
+	file_master_cluster_v1_cluster_service_proto_rawDescOnce.Do(func() {
+		file_master_cluster_v1_cluster_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_master_cluster_v1_cluster_service_proto_rawDesc), len(file_master_cluster_v1_cluster_service_proto_rawDesc)))
+	})
+	return file_master_cluster_v1_cluster_service_proto_rawDescData
+}
+
+var file_master_cluster_v1_cluster_service_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_master_cluster_v1_cluster_service_proto_goTypes = []any{
+	(*RegisterRequest)(nil),     // 0: master.cluster.v1.RegisterRequest
+	(*ListWorkersRequest)(nil),  // 1: master.cluster.v1.ListWorkersRequest
+	(*ListWorkersResponse)(nil), // 2: master.cluster.v1.ListWorkersResponse
+	(*Worker)(nil),              // 3: master.cluster.v1.Worker
+	(*UnregisterRequest)(nil),   // 4: master.cluster.v1.UnregisterRequest
+	(*RegisterResponse)(nil),    // 5: master.cluster.v1.RegisterResponse
+	(*emptypb.Empty)(nil),       // 6: google.protobuf.Empty
+}
 var file_master_cluster_v1_cluster_service_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	3, // 0: master.cluster.v1.ListWorkersResponse.workers:type_name -> master.cluster.v1.Worker
+	0, // 1: master.cluster.v1.ClusterService.Register:input_type -> master.cluster.v1.RegisterRequest
+	1, // 2: master.cluster.v1.ClusterService.ListWorkers:input_type -> master.cluster.v1.ListWorkersRequest
+	4, // 3: master.cluster.v1.ClusterService.Unregister:input_type -> master.cluster.v1.UnregisterRequest
+	5, // 4: master.cluster.v1.ClusterService.Register:output_type -> master.cluster.v1.RegisterResponse
+	2, // 5: master.cluster.v1.ClusterService.ListWorkers:output_type -> master.cluster.v1.ListWorkersResponse
+	6, // 6: master.cluster.v1.ClusterService.Unregister:output_type -> google.protobuf.Empty
+	4, // [4:7] is the sub-list for method output_type
+	1, // [1:4] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_master_cluster_v1_cluster_service_proto_init() }
@@ -46,12 +376,13 @@ func file_master_cluster_v1_cluster_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_master_cluster_v1_cluster_service_proto_rawDesc), len(file_master_cluster_v1_cluster_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   0,
+			NumMessages:   6,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_master_cluster_v1_cluster_service_proto_goTypes,
 		DependencyIndexes: file_master_cluster_v1_cluster_service_proto_depIdxs,
+		MessageInfos:      file_master_cluster_v1_cluster_service_proto_msgTypes,
 	}.Build()
 	File_master_cluster_v1_cluster_service_proto = out.File
 	file_master_cluster_v1_cluster_service_proto_goTypes = nil

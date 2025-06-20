@@ -1,4 +1,4 @@
-name: worker_1
+name: database_001
 grpc:
   port: 55055
   timeout: 4s
@@ -7,4 +7,6 @@ logging:
   format: pretty
   output: stdout
 wal:
-  path: "logs/worker_1.log"
+  path: "logs/database_001.log"
+master:
+  port: 55054
