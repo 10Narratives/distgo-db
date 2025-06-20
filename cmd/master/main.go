@@ -31,6 +31,7 @@ func main() {
 
 	<-stop
 
+	app.ForgetAllWorkers()
 	app.GRPC.Stop()
 
 	log.Info("Master is stopped")

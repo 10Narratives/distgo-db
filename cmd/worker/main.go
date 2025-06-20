@@ -21,6 +21,7 @@ func main() {
 	log.Info(cfg.Name + " is online")
 
 	app := workerapp.New(log, *cfg)
+	app.ClusterService.MustRegister(cfg.GRPC.Port, cfg.Name)
 
 	go func() {
 		app.GRPC.MustRun()
@@ -30,6 +31,11 @@ func main() {
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
 	<-stop
+
+	err := app.ClusterService.Unregister()
+	if err != nil {
+		log.Error(err.Error())
+	}
 
 	app.GRPC.Stop()
 	log.Info(cfg.Name + " is stopped")
