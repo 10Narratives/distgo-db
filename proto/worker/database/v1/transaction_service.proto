@@ -46,39 +46,16 @@ service TransactionService {
   }
 }
 
-message BeginRequest {
-  string description = 1 [(validate.rules).string.max_len = 512];
-}
+message BeginRequest {}
 
 message BeginResponse {
-  string transaction_id = 1 [
-    (validate.rules).string.min_len = 1,
-    (google.api.field_behavior) = REQUIRED
-  ];
-
+  string transaction_id = 1;
   google.protobuf.Timestamp started_at = 2;
 }
 
-message CommitRequest {
-  string transaction_id = 1 [
-    (validate.rules).string.min_len = 1,
-    (google.api.field_behavior) = REQUIRED
-  ];
-}
-
-message CommitResponse {
-  google.protobuf.Timestamp committed_at = 1;
-}
-
-message RollbackRequest {
-  string transaction_id = 1 [
-    (validate.rules).string.min_len = 1,
-    (google.api.field_behavior) = REQUIRED
-  ];
-}
-
 message ExecuteRequest {
-  repeated Operation operations = 10 [
+  string transaction_id = 1;
+  repeated Operation operations = 2 [
     (validate.rules).repeated = {
       min_items: 1,
       max_items: 1000
@@ -115,3 +92,22 @@ message ExecuteResponse {
   repeated OperationResult results = 1;
   google.protobuf.Timestamp executed_at = 2;
 }
+
+message CommitRequest {
+  string transaction_id = 1 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message CommitResponse {
+  google.protobuf.Timestamp committed_at = 1;
+}
+
+message RollbackRequest {
+  string transaction_id = 1 [
+    (validate.rules).string.min_len = 1,
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
