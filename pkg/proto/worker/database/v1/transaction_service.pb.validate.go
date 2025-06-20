@@ -158,35 +158,6 @@ func (m *BeginResponse) validate(all bool) error {
 
 	// no validation rules for TransactionId
 
-	if all {
-		switch v := interface{}(m.GetStartedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, BeginResponseValidationError{
-					field:  "StartedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, BeginResponseValidationError{
-					field:  "StartedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetStartedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return BeginResponseValidationError{
-				field:  "StartedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
 	if len(errors) > 0 {
 		return BeginResponseMultiError(errors)
 	}
@@ -265,6 +236,113 @@ var _ interface {
 	ErrorName() string
 } = BeginResponseValidationError{}
 
+// Validate checks the field values on Operation with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Operation) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Operation with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in OperationMultiError, or nil
+// if none found.
+func (m *Operation) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Operation) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for MutationType
+
+	// no validation rules for EntityType
+
+	// no validation rules for Name
+
+	// no validation rules for Value
+
+	if len(errors) > 0 {
+		return OperationMultiError(errors)
+	}
+
+	return nil
+}
+
+// OperationMultiError is an error wrapping multiple validation errors returned
+// by Operation.ValidateAll() if the designated constraints aren't met.
+type OperationMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m OperationMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m OperationMultiError) AllErrors() []error { return m }
+
+// OperationValidationError is the validation error returned by
+// Operation.Validate if the designated constraints aren't met.
+type OperationValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e OperationValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e OperationValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e OperationValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e OperationValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e OperationValidationError) ErrorName() string { return "OperationValidationError" }
+
+// Error satisfies the builtin error interface
+func (e OperationValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sOperation.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = OperationValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = OperationValidationError{}
+
 // Validate checks the field values on ExecuteRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -288,17 +366,6 @@ func (m *ExecuteRequest) validate(all bool) error {
 	var errors []error
 
 	// no validation rules for TransactionId
-
-	if l := len(m.GetOperations()); l < 1 || l > 1000 {
-		err := ExecuteRequestValidationError{
-			field:  "Operations",
-			reason: "value must contain between 1 and 1000 items, inclusive",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
 
 	for idx, item := range m.GetOperations() {
 		_, _ = idx, item
@@ -412,911 +479,6 @@ var _ interface {
 	ErrorName() string
 } = ExecuteRequestValidationError{}
 
-// Validate checks the field values on Operation with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *Operation) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Operation with the rules defined in
-// the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in OperationMultiError, or nil
-// if none found.
-func (m *Operation) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Operation) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	switch v := m.Operation.(type) {
-	case *Operation_CreateDatabase:
-		if v == nil {
-			err := OperationValidationError{
-				field:  "Operation",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetCreateDatabase()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "CreateDatabase",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "CreateDatabase",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetCreateDatabase()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationValidationError{
-					field:  "CreateDatabase",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *Operation_UpdateDatabase:
-		if v == nil {
-			err := OperationValidationError{
-				field:  "Operation",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetUpdateDatabase()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "UpdateDatabase",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "UpdateDatabase",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetUpdateDatabase()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationValidationError{
-					field:  "UpdateDatabase",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *Operation_DeleteDatabase:
-		if v == nil {
-			err := OperationValidationError{
-				field:  "Operation",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetDeleteDatabase()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "DeleteDatabase",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "DeleteDatabase",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetDeleteDatabase()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationValidationError{
-					field:  "DeleteDatabase",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *Operation_CreateCollection:
-		if v == nil {
-			err := OperationValidationError{
-				field:  "Operation",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetCreateCollection()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "CreateCollection",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "CreateCollection",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetCreateCollection()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationValidationError{
-					field:  "CreateCollection",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *Operation_UpdateCollection:
-		if v == nil {
-			err := OperationValidationError{
-				field:  "Operation",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetUpdateCollection()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "UpdateCollection",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "UpdateCollection",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetUpdateCollection()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationValidationError{
-					field:  "UpdateCollection",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *Operation_DeleteCollection:
-		if v == nil {
-			err := OperationValidationError{
-				field:  "Operation",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetDeleteCollection()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "DeleteCollection",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "DeleteCollection",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetDeleteCollection()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationValidationError{
-					field:  "DeleteCollection",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *Operation_CreateDocument:
-		if v == nil {
-			err := OperationValidationError{
-				field:  "Operation",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetCreateDocument()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "CreateDocument",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "CreateDocument",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetCreateDocument()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationValidationError{
-					field:  "CreateDocument",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *Operation_UpdateDocument:
-		if v == nil {
-			err := OperationValidationError{
-				field:  "Operation",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetUpdateDocument()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "UpdateDocument",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "UpdateDocument",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetUpdateDocument()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationValidationError{
-					field:  "UpdateDocument",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *Operation_DeleteDocument:
-		if v == nil {
-			err := OperationValidationError{
-				field:  "Operation",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetDeleteDocument()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "DeleteDocument",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationValidationError{
-						field:  "DeleteDocument",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetDeleteDocument()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationValidationError{
-					field:  "DeleteDocument",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	default:
-		_ = v // ensures v is used
-	}
-
-	if len(errors) > 0 {
-		return OperationMultiError(errors)
-	}
-
-	return nil
-}
-
-// OperationMultiError is an error wrapping multiple validation errors returned
-// by Operation.ValidateAll() if the designated constraints aren't met.
-type OperationMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m OperationMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m OperationMultiError) AllErrors() []error { return m }
-
-// OperationValidationError is the validation error returned by
-// Operation.Validate if the designated constraints aren't met.
-type OperationValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e OperationValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e OperationValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e OperationValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e OperationValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e OperationValidationError) ErrorName() string { return "OperationValidationError" }
-
-// Error satisfies the builtin error interface
-func (e OperationValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sOperation.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = OperationValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = OperationValidationError{}
-
-// Validate checks the field values on OperationResult with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *OperationResult) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on OperationResult with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// OperationResultMultiError, or nil if none found.
-func (m *OperationResult) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *OperationResult) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	switch v := m.Result.(type) {
-	case *OperationResult_DatabaseResult:
-		if v == nil {
-			err := OperationResultValidationError{
-				field:  "Result",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetDatabaseResult()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationResultValidationError{
-						field:  "DatabaseResult",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationResultValidationError{
-						field:  "DatabaseResult",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetDatabaseResult()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationResultValidationError{
-					field:  "DatabaseResult",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *OperationResult_CollectionResult:
-		if v == nil {
-			err := OperationResultValidationError{
-				field:  "Result",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetCollectionResult()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationResultValidationError{
-						field:  "CollectionResult",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationResultValidationError{
-						field:  "CollectionResult",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetCollectionResult()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationResultValidationError{
-					field:  "CollectionResult",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *OperationResult_DocumentResult:
-		if v == nil {
-			err := OperationResultValidationError{
-				field:  "Result",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetDocumentResult()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationResultValidationError{
-						field:  "DocumentResult",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationResultValidationError{
-						field:  "DocumentResult",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetDocumentResult()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationResultValidationError{
-					field:  "DocumentResult",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	case *OperationResult_DeleteResult:
-		if v == nil {
-			err := OperationResultValidationError{
-				field:  "Result",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-		if all {
-			switch v := interface{}(m.GetDeleteResult()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, OperationResultValidationError{
-						field:  "DeleteResult",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, OperationResultValidationError{
-						field:  "DeleteResult",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetDeleteResult()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return OperationResultValidationError{
-					field:  "DeleteResult",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	default:
-		_ = v // ensures v is used
-	}
-
-	if len(errors) > 0 {
-		return OperationResultMultiError(errors)
-	}
-
-	return nil
-}
-
-// OperationResultMultiError is an error wrapping multiple validation errors
-// returned by OperationResult.ValidateAll() if the designated constraints
-// aren't met.
-type OperationResultMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m OperationResultMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m OperationResultMultiError) AllErrors() []error { return m }
-
-// OperationResultValidationError is the validation error returned by
-// OperationResult.Validate if the designated constraints aren't met.
-type OperationResultValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e OperationResultValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e OperationResultValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e OperationResultValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e OperationResultValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e OperationResultValidationError) ErrorName() string { return "OperationResultValidationError" }
-
-// Error satisfies the builtin error interface
-func (e OperationResultValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sOperationResult.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = OperationResultValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = OperationResultValidationError{}
-
-// Validate checks the field values on ExecuteResponse with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *ExecuteResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on ExecuteResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// ExecuteResponseMultiError, or nil if none found.
-func (m *ExecuteResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *ExecuteResponse) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	for idx, item := range m.GetResults() {
-		_, _ = idx, item
-
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ExecuteResponseValidationError{
-						field:  fmt.Sprintf("Results[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, ExecuteResponseValidationError{
-						field:  fmt.Sprintf("Results[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ExecuteResponseValidationError{
-					field:  fmt.Sprintf("Results[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	if all {
-		switch v := interface{}(m.GetExecutedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ExecuteResponseValidationError{
-					field:  "ExecutedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ExecuteResponseValidationError{
-					field:  "ExecutedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetExecutedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ExecuteResponseValidationError{
-				field:  "ExecutedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if len(errors) > 0 {
-		return ExecuteResponseMultiError(errors)
-	}
-
-	return nil
-}
-
-// ExecuteResponseMultiError is an error wrapping multiple validation errors
-// returned by ExecuteResponse.ValidateAll() if the designated constraints
-// aren't met.
-type ExecuteResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ExecuteResponseMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ExecuteResponseMultiError) AllErrors() []error { return m }
-
-// ExecuteResponseValidationError is the validation error returned by
-// ExecuteResponse.Validate if the designated constraints aren't met.
-type ExecuteResponseValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e ExecuteResponseValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e ExecuteResponseValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e ExecuteResponseValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e ExecuteResponseValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e ExecuteResponseValidationError) ErrorName() string { return "ExecuteResponseValidationError" }
-
-// Error satisfies the builtin error interface
-func (e ExecuteResponseValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sExecuteResponse.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = ExecuteResponseValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = ExecuteResponseValidationError{}
-
 // Validate checks the field values on CommitRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -1339,16 +501,7 @@ func (m *CommitRequest) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetTransactionId()) < 1 {
-		err := CommitRequestValidationError{
-			field:  "TransactionId",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for TransactionId
 
 	if len(errors) > 0 {
 		return CommitRequestMultiError(errors)
@@ -1428,135 +581,6 @@ var _ interface {
 	ErrorName() string
 } = CommitRequestValidationError{}
 
-// Validate checks the field values on CommitResponse with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *CommitResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on CommitResponse with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in CommitResponseMultiError,
-// or nil if none found.
-func (m *CommitResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *CommitResponse) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if all {
-		switch v := interface{}(m.GetCommittedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CommitResponseValidationError{
-					field:  "CommittedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CommitResponseValidationError{
-					field:  "CommittedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetCommittedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CommitResponseValidationError{
-				field:  "CommittedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if len(errors) > 0 {
-		return CommitResponseMultiError(errors)
-	}
-
-	return nil
-}
-
-// CommitResponseMultiError is an error wrapping multiple validation errors
-// returned by CommitResponse.ValidateAll() if the designated constraints
-// aren't met.
-type CommitResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m CommitResponseMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m CommitResponseMultiError) AllErrors() []error { return m }
-
-// CommitResponseValidationError is the validation error returned by
-// CommitResponse.Validate if the designated constraints aren't met.
-type CommitResponseValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e CommitResponseValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e CommitResponseValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e CommitResponseValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e CommitResponseValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e CommitResponseValidationError) ErrorName() string { return "CommitResponseValidationError" }
-
-// Error satisfies the builtin error interface
-func (e CommitResponseValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sCommitResponse.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = CommitResponseValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = CommitResponseValidationError{}
-
 // Validate checks the field values on RollbackRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
@@ -1579,16 +603,7 @@ func (m *RollbackRequest) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetTransactionId()) < 1 {
-		err := RollbackRequestValidationError{
-			field:  "TransactionId",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for TransactionId
 
 	if len(errors) > 0 {
 		return RollbackRequestMultiError(errors)

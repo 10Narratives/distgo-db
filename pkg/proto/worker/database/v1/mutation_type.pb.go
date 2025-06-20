@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v5.29.3
-// source: worker/database/v1/operation_type.proto
+// source: worker/database/v1/mutation_type.proto
 
 package dbv1
 
@@ -57,11 +57,11 @@ func (x MutationType) String() string {
 }
 
 func (MutationType) Descriptor() protoreflect.EnumDescriptor {
-	return file_worker_database_v1_operation_type_proto_enumTypes[0].Descriptor()
+	return file_worker_database_v1_mutation_type_proto_enumTypes[0].Descriptor()
 }
 
 func (MutationType) Type() protoreflect.EnumType {
-	return &file_worker_database_v1_operation_type_proto_enumTypes[0]
+	return &file_worker_database_v1_mutation_type_proto_enumTypes[0]
 }
 
 func (x MutationType) Number() protoreflect.EnumNumber {
@@ -70,14 +70,14 @@ func (x MutationType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use MutationType.Descriptor instead.
 func (MutationType) EnumDescriptor() ([]byte, []int) {
-	return file_worker_database_v1_operation_type_proto_rawDescGZIP(), []int{0}
+	return file_worker_database_v1_mutation_type_proto_rawDescGZIP(), []int{0}
 }
 
-var File_worker_database_v1_operation_type_proto protoreflect.FileDescriptor
+var File_worker_database_v1_mutation_type_proto protoreflect.FileDescriptor
 
-const file_worker_database_v1_operation_type_proto_rawDesc = "" +
+const file_worker_database_v1_mutation_type_proto_rawDesc = "" +
 	"\n" +
-	"'worker/database/v1/operation_type.proto\x12\x12worker.database.v1*{\n" +
+	"&worker/database/v1/mutation_type.proto\x12\x12worker.database.v1*{\n" +
 	"\fMutationType\x12\x1d\n" +
 	"\x19MUTATION_TYPE_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14MUTATION_TYPE_CREATE\x10\x01\x12\x18\n" +
@@ -86,22 +86,22 @@ const file_worker_database_v1_operation_type_proto_rawDesc = "" +
 	"\x1dcom.google.worker.database.v1P\x01ZCgithub.com/10Narratives/distgo-db/pkg/proto/worker/database/v1;dbv1b\x06proto3"
 
 var (
-	file_worker_database_v1_operation_type_proto_rawDescOnce sync.Once
-	file_worker_database_v1_operation_type_proto_rawDescData []byte
+	file_worker_database_v1_mutation_type_proto_rawDescOnce sync.Once
+	file_worker_database_v1_mutation_type_proto_rawDescData []byte
 )
 
-func file_worker_database_v1_operation_type_proto_rawDescGZIP() []byte {
-	file_worker_database_v1_operation_type_proto_rawDescOnce.Do(func() {
-		file_worker_database_v1_operation_type_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_worker_database_v1_operation_type_proto_rawDesc), len(file_worker_database_v1_operation_type_proto_rawDesc)))
+func file_worker_database_v1_mutation_type_proto_rawDescGZIP() []byte {
+	file_worker_database_v1_mutation_type_proto_rawDescOnce.Do(func() {
+		file_worker_database_v1_mutation_type_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_worker_database_v1_mutation_type_proto_rawDesc), len(file_worker_database_v1_mutation_type_proto_rawDesc)))
 	})
-	return file_worker_database_v1_operation_type_proto_rawDescData
+	return file_worker_database_v1_mutation_type_proto_rawDescData
 }
 
-var file_worker_database_v1_operation_type_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_worker_database_v1_operation_type_proto_goTypes = []any{
+var file_worker_database_v1_mutation_type_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_worker_database_v1_mutation_type_proto_goTypes = []any{
 	(MutationType)(0), // 0: worker.database.v1.MutationType
 }
-var file_worker_database_v1_operation_type_proto_depIdxs = []int32{
+var file_worker_database_v1_mutation_type_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -109,26 +109,26 @@ var file_worker_database_v1_operation_type_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_worker_database_v1_operation_type_proto_init() }
-func file_worker_database_v1_operation_type_proto_init() {
-	if File_worker_database_v1_operation_type_proto != nil {
+func init() { file_worker_database_v1_mutation_type_proto_init() }
+func file_worker_database_v1_mutation_type_proto_init() {
+	if File_worker_database_v1_mutation_type_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_worker_database_v1_operation_type_proto_rawDesc), len(file_worker_database_v1_operation_type_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_worker_database_v1_mutation_type_proto_rawDesc), len(file_worker_database_v1_mutation_type_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   0,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_worker_database_v1_operation_type_proto_goTypes,
-		DependencyIndexes: file_worker_database_v1_operation_type_proto_depIdxs,
-		EnumInfos:         file_worker_database_v1_operation_type_proto_enumTypes,
+		GoTypes:           file_worker_database_v1_mutation_type_proto_goTypes,
+		DependencyIndexes: file_worker_database_v1_mutation_type_proto_depIdxs,
+		EnumInfos:         file_worker_database_v1_mutation_type_proto_enumTypes,
 	}.Build()
-	File_worker_database_v1_operation_type_proto = out.File
-	file_worker_database_v1_operation_type_proto_goTypes = nil
-	file_worker_database_v1_operation_type_proto_depIdxs = nil
+	File_worker_database_v1_mutation_type_proto = out.File
+	file_worker_database_v1_mutation_type_proto_goTypes = nil
+	file_worker_database_v1_mutation_type_proto_depIdxs = nil
 }
