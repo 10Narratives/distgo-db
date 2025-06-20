@@ -29,15 +29,15 @@ func (s *Storage) RecoverFromFile(ctx context.Context, filePath string) error {
 
 		switch entry.Entity {
 		case walmodels.EntityTypeDatabase:
-			if err := s.recoverDatabase(entry); err != nil {
+			if err := s.ApplyToDatabase(entry); err != nil {
 				return fmt.Errorf("failed to recover database: %w", err)
 			}
 		case walmodels.EntityTypeCollection:
-			if err := s.recoverCollection(entry); err != nil {
+			if err := s.ApplyToCollection(entry); err != nil {
 				return fmt.Errorf("failed to recover collection: %w", err)
 			}
 		case walmodels.EntityTypeDocument:
-			if err := s.recoverDocument(entry); err != nil {
+			if err := s.ApplyToDocument(entry); err != nil {
 				return fmt.Errorf("failed to recover document: %w", err)
 			}
 		default:
@@ -52,7 +52,7 @@ func (s *Storage) RecoverFromFile(ctx context.Context, filePath string) error {
 	return nil
 }
 
-func (s *Storage) recoverDatabase(entry walmodels.WALEntry) error {
+func (s *Storage) ApplyToDatabase(entry walmodels.WALEntry) error {
 	var payload walmodels.DatabasePayload
 	if err := json.Unmarshal(entry.Payload, &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal database payload: %w", err)
@@ -73,7 +73,7 @@ func (s *Storage) recoverDatabase(entry walmodels.WALEntry) error {
 	return nil
 }
 
-func (s *Storage) recoverCollection(entry walmodels.WALEntry) error {
+func (s *Storage) ApplyToCollection(entry walmodels.WALEntry) error {
 	var payload walmodels.CollectionPayload
 	if err := json.Unmarshal(entry.Payload, &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal collection payload: %w", err)
@@ -94,11 +94,15 @@ func (s *Storage) recoverCollection(entry walmodels.WALEntry) error {
 	return nil
 }
 
-func (s *Storage) recoverDocument(entry walmodels.WALEntry) error {
+func (s *Storage) ApplyToDocument(entry walmodels.WALEntry) error {
+	fmt.Println("\n\n\n\nentry", string(entry.Payload), "\n\n\n\n")
+
 	var payload walmodels.DocumentPayload
 	if err := json.Unmarshal(entry.Payload, &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal document payload: %w", err)
 	}
+
+	fmt.Println("\n\n\n\n", payload, "\n\n\n\n")
 
 	switch entry.Mutation {
 	case commonmodels.MutationTypeCreate, commonmodels.MutationTypeUpdate:

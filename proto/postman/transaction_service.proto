@@ -4,8 +4,6 @@ package worker.database.v1;
 
 import "google/protobuf/empty.proto";
 
-import "worker/database/v1/mutation_type.proto";
-import "worker/database/v1/entity_type.proto";
 
 option java_multiple_files = true;
 option java_package = "com.google.worker.database.v1";
@@ -42,4 +40,18 @@ message CommitRequest {
 
 message RollbackRequest {
   string transaction_id = 1;
+}
+
+enum MutationType {
+  MUTATION_TYPE_UNSPECIFIED = 0;
+  MUTATION_TYPE_CREATE = 1;
+  MUTATION_TYPE_UPDATE = 2;
+  MUTATION_TYPE_DELETE = 3;
+}
+
+enum EntityType {
+  ENTITY_TYPE_UNSPECIFIED = 0;
+  ENTITY_TYPE_DATABASE = 1;
+  ENTITY_TYPE_COLLECTION = 2;
+  ENTITY_TYPE_DOCUMENT = 3;
 }

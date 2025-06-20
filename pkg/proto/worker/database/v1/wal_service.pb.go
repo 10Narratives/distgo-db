@@ -519,7 +519,7 @@ var File_worker_database_v1_wal_service_proto protoreflect.FileDescriptor
 
 const file_worker_database_v1_wal_service_proto_rawDesc = "" +
 	"\n" +
-	"$worker/database/v1/wal_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\x1a'worker/database/v1/operation_type.proto\x1a$worker/database/v1/entity_type.proto\"\x91\x04\n" +
+	"$worker/database/v1/wal_service.proto\x12\x12worker.database.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\x1a&worker/database/v1/mutation_type.proto\x1a$worker/database/v1/entity_type.proto\"\x91\x04\n" +
 	"\bWALEntry\x12\x1b\n" +
 	"\x02id\x18\x01 \x01(\tB\v\xe0A\x03\xfaB\x05r\x03\xb0\x01\x01R\x02id\x12L\n" +
 	"\ventity_type\x18\x02 \x01(\x0e2\x1e.worker.database.v1.EntityTypeB\v\xe0A\x02\xfaB\x05\x82\x01\x02\x10\x01R\n" +
@@ -628,7 +628,7 @@ func file_worker_database_v1_wal_service_proto_init() {
 	if File_worker_database_v1_wal_service_proto != nil {
 		return
 	}
-	file_worker_database_v1_operation_type_proto_init()
+	file_worker_database_v1_mutation_type_proto_init()
 	file_worker_database_v1_entity_type_proto_init()
 	file_worker_database_v1_wal_service_proto_msgTypes[0].OneofWrappers = []any{
 		(*WALEntry_DatabasePayload)(nil),
