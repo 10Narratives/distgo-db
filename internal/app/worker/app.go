@@ -39,7 +39,7 @@ func New(log *slog.Logger, cfg workercfg.Config) *App {
 	dataStorage := datastorage.New()
 	err = dataStorage.RecoverFromFile(context.Background(), cfg.WAL.Path)
 	if err != nil {
-		panic("cannot recover data storage from wal log")
+		panic("cannot recover data storage from wal log\n" + err.Error())
 	}
 
 	txStorage := transactionstorage.New()

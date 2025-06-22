@@ -7,6 +7,7 @@
 package dbv1
 
 import (
+	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -24,6 +25,7 @@ const (
 
 type BeginRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	DatabaseName  string                 `protobuf:"bytes,1,opt,name=database_name,json=databaseName,proto3" json:"database_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -56,6 +58,13 @@ func (x *BeginRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use BeginRequest.ProtoReflect.Descriptor instead.
 func (*BeginRequest) Descriptor() ([]byte, []int) {
 	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *BeginRequest) GetDatabaseName() string {
+	if x != nil {
+		return x.DatabaseName
+	}
+	return ""
 }
 
 type BeginResponse struct {
@@ -172,8 +181,9 @@ func (x *Operation) GetValue() string {
 
 type ExecuteRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
-	Operations    []*Operation           `protobuf:"bytes,2,rep,name=operations,proto3" json:"operations,omitempty"`
+	DatabaseName  string                 `protobuf:"bytes,1,opt,name=database_name,json=databaseName,proto3" json:"database_name,omitempty"`
+	TransactionId string                 `protobuf:"bytes,2,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	Operations    []*Operation           `protobuf:"bytes,3,rep,name=operations,proto3" json:"operations,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -208,6 +218,13 @@ func (*ExecuteRequest) Descriptor() ([]byte, []int) {
 	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{3}
 }
 
+func (x *ExecuteRequest) GetDatabaseName() string {
+	if x != nil {
+		return x.DatabaseName
+	}
+	return ""
+}
+
 func (x *ExecuteRequest) GetTransactionId() string {
 	if x != nil {
 		return x.TransactionId
@@ -224,7 +241,8 @@ func (x *ExecuteRequest) GetOperations() []*Operation {
 
 type CommitRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	DatabaseName  string                 `protobuf:"bytes,1,opt,name=database_name,json=databaseName,proto3" json:"database_name,omitempty"`
+	TransactionId string                 `protobuf:"bytes,2,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -259,6 +277,13 @@ func (*CommitRequest) Descriptor() ([]byte, []int) {
 	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{4}
 }
 
+func (x *CommitRequest) GetDatabaseName() string {
+	if x != nil {
+		return x.DatabaseName
+	}
+	return ""
+}
+
 func (x *CommitRequest) GetTransactionId() string {
 	if x != nil {
 		return x.TransactionId
@@ -268,7 +293,8 @@ func (x *CommitRequest) GetTransactionId() string {
 
 type RollbackRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	DatabaseName  string                 `protobuf:"bytes,1,opt,name=database_name,json=databaseName,proto3" json:"database_name,omitempty"`
+	TransactionId string                 `protobuf:"bytes,2,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -303,6 +329,13 @@ func (*RollbackRequest) Descriptor() ([]byte, []int) {
 	return file_worker_database_v1_transaction_service_proto_rawDescGZIP(), []int{5}
 }
 
+func (x *RollbackRequest) GetDatabaseName() string {
+	if x != nil {
+		return x.DatabaseName
+	}
+	return ""
+}
+
 func (x *RollbackRequest) GetTransactionId() string {
 	if x != nil {
 		return x.TransactionId
@@ -314,25 +347,29 @@ var File_worker_database_v1_transaction_service_proto protoreflect.FileDescripto
 
 const file_worker_database_v1_transaction_service_proto_rawDesc = "" +
 	"\n" +
-	",worker/database/v1/transaction_service.proto\x12\x12worker.database.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a&worker/database/v1/mutation_type.proto\x1a$worker/database/v1/entity_type.proto\"\x0e\n" +
-	"\fBeginRequest\"6\n" +
-	"\rBeginResponse\x12%\n" +
-	"\x0etransaction_id\x18\x01 \x01(\tR\rtransactionId\"\xbd\x01\n" +
-	"\tOperation\x12E\n" +
-	"\rmutation_type\x18\x01 \x01(\x0e2 .worker.database.v1.MutationTypeR\fmutationType\x12?\n" +
-	"\ventity_type\x18\x02 \x01(\x0e2\x1e.worker.database.v1.EntityTypeR\n" +
-	"entityType\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
-	"\x05value\x18\x04 \x01(\tR\x05value\"v\n" +
-	"\x0eExecuteRequest\x12%\n" +
-	"\x0etransaction_id\x18\x01 \x01(\tR\rtransactionId\x12=\n" +
+	",worker/database/v1/transaction_service.proto\x12\x12worker.database.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x17validate/validate.proto\x1a&worker/database/v1/mutation_type.proto\x1a$worker/database/v1/entity_type.proto\"<\n" +
+	"\fBeginRequest\x12,\n" +
+	"\rdatabase_name\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\fdatabaseName\"?\n" +
+	"\rBeginResponse\x12.\n" +
+	"\x0etransaction_id\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\rtransactionId\"\xda\x01\n" +
+	"\tOperation\x12O\n" +
+	"\rmutation_type\x18\x01 \x01(\x0e2 .worker.database.v1.MutationTypeB\b\xfaB\x05\x82\x01\x02\x10\x01R\fmutationType\x12I\n" +
+	"\ventity_type\x18\x02 \x01(\x0e2\x1e.worker.database.v1.EntityTypeB\b\xfaB\x05\x82\x01\x02\x10\x01R\n" +
+	"entityType\x12\x1b\n" +
+	"\x04name\x18\x03 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x04name\x12\x14\n" +
+	"\x05value\x18\x04 \x01(\tR\x05value\"\xbe\x01\n" +
+	"\x0eExecuteRequest\x12,\n" +
+	"\rdatabase_name\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\fdatabaseName\x12.\n" +
+	"\x0etransaction_id\x18\x02 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\rtransactionId\x12N\n" +
 	"\n" +
-	"operations\x18\x02 \x03(\v2\x1d.worker.database.v1.OperationR\n" +
-	"operations\"6\n" +
-	"\rCommitRequest\x12%\n" +
-	"\x0etransaction_id\x18\x01 \x01(\tR\rtransactionId\"8\n" +
-	"\x0fRollbackRequest\x12%\n" +
-	"\x0etransaction_id\x18\x01 \x01(\tR\rtransactionId2\xb7\x02\n" +
+	"operations\x18\x03 \x03(\v2\x1d.worker.database.v1.OperationB\x0f\xfaB\f\x92\x01\t\b\x01\"\x05\x8a\x01\x02\x10\x01R\n" +
+	"operations\"m\n" +
+	"\rCommitRequest\x12,\n" +
+	"\rdatabase_name\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\fdatabaseName\x12.\n" +
+	"\x0etransaction_id\x18\x02 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\rtransactionId\"o\n" +
+	"\x0fRollbackRequest\x12,\n" +
+	"\rdatabase_name\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\fdatabaseName\x12.\n" +
+	"\x0etransaction_id\x18\x02 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\rtransactionId2\xb7\x02\n" +
 	"\x12TransactionService\x12L\n" +
 	"\x05Begin\x12 .worker.database.v1.BeginRequest\x1a!.worker.database.v1.BeginResponse\x12E\n" +
 	"\aExecute\x12\".worker.database.v1.ExecuteRequest\x1a\x16.google.protobuf.Empty\x12C\n" +
