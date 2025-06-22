@@ -57,6 +57,17 @@ func (m *BeginRequest) validate(all bool) error {
 
 	var errors []error
 
+	if utf8.RuneCountInString(m.GetDatabaseName()) < 1 {
+		err := BeginRequestValidationError{
+			field:  "DatabaseName",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
 	if len(errors) > 0 {
 		return BeginRequestMultiError(errors)
 	}
@@ -156,7 +167,16 @@ func (m *BeginResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for TransactionId
+	if utf8.RuneCountInString(m.GetTransactionId()) < 1 {
+		err := BeginResponseValidationError{
+			field:  "TransactionId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return BeginResponseMultiError(errors)
@@ -258,11 +278,38 @@ func (m *Operation) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for MutationType
+	if _, ok := MutationType_name[int32(m.GetMutationType())]; !ok {
+		err := OperationValidationError{
+			field:  "MutationType",
+			reason: "value must be one of the defined enum values",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for EntityType
+	if _, ok := EntityType_name[int32(m.GetEntityType())]; !ok {
+		err := OperationValidationError{
+			field:  "EntityType",
+			reason: "value must be one of the defined enum values",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for Name
+	if utf8.RuneCountInString(m.GetName()) < 1 {
+		err := OperationValidationError{
+			field:  "Name",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	// no validation rules for Value
 
@@ -365,10 +412,52 @@ func (m *ExecuteRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for TransactionId
+	if utf8.RuneCountInString(m.GetDatabaseName()) < 1 {
+		err := ExecuteRequestValidationError{
+			field:  "DatabaseName",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetTransactionId()) < 1 {
+		err := ExecuteRequestValidationError{
+			field:  "TransactionId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(m.GetOperations()) < 1 {
+		err := ExecuteRequestValidationError{
+			field:  "Operations",
+			reason: "value must contain at least 1 item(s)",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	for idx, item := range m.GetOperations() {
 		_, _ = idx, item
+
+		if item == nil {
+			err := ExecuteRequestValidationError{
+				field:  fmt.Sprintf("Operations[%v]", idx),
+				reason: "value is required",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
 
 		if all {
 			switch v := interface{}(item).(type) {
@@ -501,7 +590,27 @@ func (m *CommitRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for TransactionId
+	if utf8.RuneCountInString(m.GetDatabaseName()) < 1 {
+		err := CommitRequestValidationError{
+			field:  "DatabaseName",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetTransactionId()) < 1 {
+		err := CommitRequestValidationError{
+			field:  "TransactionId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return CommitRequestMultiError(errors)
@@ -603,7 +712,27 @@ func (m *RollbackRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for TransactionId
+	if utf8.RuneCountInString(m.GetDatabaseName()) < 1 {
+		err := RollbackRequestValidationError{
+			field:  "DatabaseName",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetTransactionId()) < 1 {
+		err := RollbackRequestValidationError{
+			field:  "TransactionId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return RollbackRequestMultiError(errors)

@@ -10,10 +10,12 @@ import (
 	collectionapi "github.com/10Narratives/distgo-db/internal/grpc/master/data/collection"
 	databaseapi "github.com/10Narratives/distgo-db/internal/grpc/master/data/database"
 	documentapi "github.com/10Narratives/distgo-db/internal/grpc/master/data/document"
+	transactionapi "github.com/10Narratives/distgo-db/internal/grpc/master/data/transaction"
 	clustersrv "github.com/10Narratives/distgo-db/internal/services/master/cluster"
 	collectioncdr "github.com/10Narratives/distgo-db/internal/services/master/data/collection"
 	databaserdr "github.com/10Narratives/distgo-db/internal/services/master/data/database"
 	documentcdr "github.com/10Narratives/distgo-db/internal/services/master/data/document"
+	transactioncdr "github.com/10Narratives/distgo-db/internal/services/master/data/transaction"
 	clusterstorage "github.com/10Narratives/distgo-db/internal/storages/cluster"
 	wclusterv1 "github.com/10Narratives/distgo-db/pkg/proto/worker/cluster/v1"
 )
@@ -39,6 +41,9 @@ func New(log *slog.Logger, cfg mastercfg.Config) *App {
 
 	documentCoordinator := documentcdr.New(clusterStorage)
 	documentapi.Register(grpcApp.GRPCServer, documentCoordinator)
+
+	transactionCoordinator := transactioncdr.New(clusterStorage)
+	transactionapi.Register(grpcApp.GRPCServer, transactionCoordinator)
 
 	return &App{GRPC: grpcApp, clusterStorage: clusterStorage}
 }
