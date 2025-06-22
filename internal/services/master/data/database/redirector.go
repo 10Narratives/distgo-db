@@ -8,15 +8,11 @@ import (
 	clustermodels "github.com/10Narratives/distgo-db/internal/models/master/cluster"
 	databasemodels "github.com/10Narratives/distgo-db/internal/models/worker/data/database"
 	dbv1 "github.com/10Narratives/distgo-db/pkg/proto/worker/database/v1"
-	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type ClusterStorage interface {
-	CreateWorker(databaseName string, conn *grpc.ClientConn) (clustermodels.Worker, error)
-	DeleteWorker(workerID string) error
 	Worker(databaseName string) (clustermodels.Worker, error)
-	Workers() []clustermodels.Worker
 }
 
 type Redirector struct {
