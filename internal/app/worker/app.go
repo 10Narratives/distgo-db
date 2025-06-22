@@ -10,16 +10,13 @@ import (
 	collectiongrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/collection"
 	databasegrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/database"
 	documentgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/document"
-	transactiongrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/transaction"
 	walgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/wal"
 	clustersrv "github.com/10Narratives/distgo-db/internal/services/worker/cluster"
 	collectionsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/collection"
 	databasesrv "github.com/10Narratives/distgo-db/internal/services/worker/data/database"
 	documentsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/document"
-	transactionsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/transaction"
 	walsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/wal"
 	datastorage "github.com/10Narratives/distgo-db/internal/storages/data"
-	transactionstorage "github.com/10Narratives/distgo-db/internal/storages/transaction"
 	walstorage "github.com/10Narratives/distgo-db/internal/storages/wal"
 )
 
@@ -42,8 +39,6 @@ func New(log *slog.Logger, cfg workercfg.Config) *App {
 		panic("cannot recover data storage from wal log\n" + err.Error())
 	}
 
-	txStorage := transactionstorage.New()
-
 	walService := walsrv.New(walStorage)
 	walgrpc.Register(grpcApp.GRPCServer, walService)
 
@@ -55,9 +50,6 @@ func New(log *slog.Logger, cfg workercfg.Config) *App {
 
 	documentSrv := documentsrv.New(dataStorage, walService)
 	documentgrpc.Register(grpcApp.GRPCServer, documentSrv)
-
-	txService := transactionsrv.New(txStorage, dataStorage)
-	transactiongrpc.Register(grpcApp.GRPCServer, txService)
 
 	clusterService := clustersrv.New(cfg.Master.Port)
 	clustergrpc.Register(grpcApp.GRPCServer, clusterService)

@@ -1,71 +1,49 @@
 package transactionstorage
 
-import (
-	"context"
-	"fmt"
-	"sync"
+// import (
+// 	"sync"
 
-	transactionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/transaction"
-	transactionsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/transaction"
-)
+// 	commonmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/common"
+// 	transactionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/transaction"
+// 	transactionsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/transaction"
+// )
 
-type Storage struct {
-	mu           sync.Mutex
-	transactions map[string][]transactionmodels.TransactionEntry
-}
+// type Storage struct {
+// 	mu           sync.Mutex
+// 	transactions map[string]*transactionmodels.Transaction
+// }
 
-var _ transactionsrv.TransactionStorage = &Storage{}
+// var _ transactionsrv.TransactionStorage = &Storage{}
 
-func New() *Storage {
-	return &Storage{
-		transactions: make(map[string][]transactionmodels.TransactionEntry),
-	}
-}
+// func New() *Storage {
+// 	return &Storage{
+// 		transactions: make(map[string]*transactionmodels.Transaction),
+// 	}
+// }
 
-func (s *Storage) Activate(txID string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+// func (s *Storage) Add(txID string, operations []commonmodels.Operation) {
+// 	s.mu.Lock()
+// 	defer s.mu.Unlock()
 
-	if _, exists := s.transactions[txID]; exists {
-		return fmt.Errorf("transaction with ID %s already exists", txID)
-	}
+// 	if _, exists := s.transactions[txID]; !exists {
+// 		s.transactions[txID] = &transactionmodels.Transaction{
+// 			ID: txID,
+// 		}
+// 	}
+// 	s.transactions[txID].Operations = append(s.transactions[txID].Operations, operations...)
+// }
 
-	s.transactions[txID] = []transactionmodels.TransactionEntry{}
-	return nil
-}
+// func (s *Storage) Delete(txID string) {
+// 	s.mu.Lock()
+// 	defer s.mu.Unlock()
 
-func (s *Storage) Append(ctx context.Context, entry transactionmodels.TransactionEntry) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+// 	delete(s.transactions, txID)
+// }
 
-	if _, exists := s.transactions[entry.TransactionID]; !exists {
-		return fmt.Errorf("transaction with ID %s does not exist", entry.TransactionID)
-	}
+// func (s *Storage) Get(txID string) (*transactionmodels.Transaction, bool) {
+// 	s.mu.Lock()
+// 	defer s.mu.Unlock()
 
-	s.transactions[entry.TransactionID] = append(s.transactions[entry.TransactionID], entry)
-	return nil
-}
-
-func (s *Storage) GetAllByTxID(ctx context.Context, txID string) ([]transactionmodels.TransactionEntry, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	entries, exists := s.transactions[txID]
-	if !exists {
-		return nil, fmt.Errorf("transaction with ID %s does not exist", txID)
-	}
-
-	return entries, nil
-}
-
-func (s *Storage) Remove(txID string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	if _, exists := s.transactions[txID]; !exists {
-		return fmt.Errorf("transaction with ID %s does not exist", txID)
-	}
-
-	delete(s.transactions, txID)
-	return nil
-}
+// 	tx, exists := s.transactions[txID]
+// 	return tx, exists
+// }
