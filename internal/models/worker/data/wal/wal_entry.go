@@ -16,16 +16,8 @@ type WALEntry struct {
 	Timestamp time.Time                 `json:"timestamp"`
 	Mutation  commonmodels.MutationType `json:"mutation"`
 	Payload   json.RawMessage           `json:"payload"`
-	Entity    EntityType                `json:"entity"`
+	Entity    commonmodels.EntityType   `json:"entity"`
 }
-
-type EntityType int
-
-const (
-	EntityTypeDatabase EntityType = iota
-	EntityTypeCollection
-	EntityTypeDocument
-)
 
 type DatabasePayload struct {
 	Key      databasemodels.Key       `json:"key"`
@@ -40,4 +32,8 @@ type CollectionPayload struct {
 type DocumentPayload struct {
 	Key      documentmodels.Key       `json:"key"`
 	Document *documentmodels.Document `json:"document,omitempty"`
+}
+
+type TransactionPayload struct {
+	Operations []commonmodels.Operation `json:"operations"`
 }

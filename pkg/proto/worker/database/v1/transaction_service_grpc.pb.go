@@ -20,20 +20,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TransactionService_Begin_FullMethodName    = "/worker.database.v1.TransactionService/Begin"
-	TransactionService_Execute_FullMethodName  = "/worker.database.v1.TransactionService/Execute"
-	TransactionService_Commit_FullMethodName   = "/worker.database.v1.TransactionService/Commit"
-	TransactionService_Rollback_FullMethodName = "/worker.database.v1.TransactionService/Rollback"
+	TransactionService_Execute_FullMethodName = "/worker.database.v1.TransactionService/Execute"
 )
 
 // TransactionServiceClient is the client API for TransactionService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TransactionServiceClient interface {
-	Begin(ctx context.Context, in *BeginRequest, opts ...grpc.CallOption) (*BeginResponse, error)
 	Execute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	Commit(ctx context.Context, in *CommitRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	Rollback(ctx context.Context, in *RollbackRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type transactionServiceClient struct {
@@ -42,16 +36,6 @@ type transactionServiceClient struct {
 
 func NewTransactionServiceClient(cc grpc.ClientConnInterface) TransactionServiceClient {
 	return &transactionServiceClient{cc}
-}
-
-func (c *transactionServiceClient) Begin(ctx context.Context, in *BeginRequest, opts ...grpc.CallOption) (*BeginResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(BeginResponse)
-	err := c.cc.Invoke(ctx, TransactionService_Begin_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *transactionServiceClient) Execute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
@@ -64,34 +48,11 @@ func (c *transactionServiceClient) Execute(ctx context.Context, in *ExecuteReque
 	return out, nil
 }
 
-func (c *transactionServiceClient) Commit(ctx context.Context, in *CommitRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, TransactionService_Commit_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *transactionServiceClient) Rollback(ctx context.Context, in *RollbackRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, TransactionService_Rollback_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // TransactionServiceServer is the server API for TransactionService service.
 // All implementations must embed UnimplementedTransactionServiceServer
 // for forward compatibility.
 type TransactionServiceServer interface {
-	Begin(context.Context, *BeginRequest) (*BeginResponse, error)
 	Execute(context.Context, *ExecuteRequest) (*emptypb.Empty, error)
-	Commit(context.Context, *CommitRequest) (*emptypb.Empty, error)
-	Rollback(context.Context, *RollbackRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedTransactionServiceServer()
 }
 
@@ -102,17 +63,8 @@ type TransactionServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedTransactionServiceServer struct{}
 
-func (UnimplementedTransactionServiceServer) Begin(context.Context, *BeginRequest) (*BeginResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Begin not implemented")
-}
 func (UnimplementedTransactionServiceServer) Execute(context.Context, *ExecuteRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Execute not implemented")
-}
-func (UnimplementedTransactionServiceServer) Commit(context.Context, *CommitRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Commit not implemented")
-}
-func (UnimplementedTransactionServiceServer) Rollback(context.Context, *RollbackRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Rollback not implemented")
 }
 func (UnimplementedTransactionServiceServer) mustEmbedUnimplementedTransactionServiceServer() {}
 func (UnimplementedTransactionServiceServer) testEmbeddedByValue()                            {}
@@ -135,24 +87,6 @@ func RegisterTransactionServiceServer(s grpc.ServiceRegistrar, srv TransactionSe
 	s.RegisterService(&TransactionService_ServiceDesc, srv)
 }
 
-func _TransactionService_Begin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BeginRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TransactionServiceServer).Begin(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TransactionService_Begin_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransactionServiceServer).Begin(ctx, req.(*BeginRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _TransactionService_Execute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ExecuteRequest)
 	if err := dec(in); err != nil {
@@ -171,42 +105,6 @@ func _TransactionService_Execute_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TransactionService_Commit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CommitRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TransactionServiceServer).Commit(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TransactionService_Commit_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransactionServiceServer).Commit(ctx, req.(*CommitRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TransactionService_Rollback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RollbackRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TransactionServiceServer).Rollback(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TransactionService_Rollback_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransactionServiceServer).Rollback(ctx, req.(*RollbackRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // TransactionService_ServiceDesc is the grpc.ServiceDesc for TransactionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -215,20 +113,8 @@ var TransactionService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*TransactionServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Begin",
-			Handler:    _TransactionService_Begin_Handler,
-		},
-		{
 			MethodName: "Execute",
 			Handler:    _TransactionService_Execute_Handler,
-		},
-		{
-			MethodName: "Commit",
-			Handler:    _TransactionService_Commit_Handler,
-		},
-		{
-			MethodName: "Rollback",
-			Handler:    _TransactionService_Rollback_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

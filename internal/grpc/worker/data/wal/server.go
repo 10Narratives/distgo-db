@@ -56,7 +56,7 @@ func (s *ServerAPI) ListWALEntries(ctx context.Context, req *dbv1.ListWALEntries
 		}
 
 		switch entry.Entity {
-		case walmodels.EntityTypeDatabase:
+		case commonmodels.EntityTypeDatabase:
 			var payload walmodels.DatabasePayload
 			if err := json.Unmarshal(entry.Payload, &payload); err != nil {
 				return nil, status.Errorf(codes.Internal, "failed to unmarshal database payload: %s", err.Error())
@@ -68,7 +68,7 @@ func (s *ServerAPI) ListWALEntries(ctx context.Context, req *dbv1.ListWALEntries
 				},
 			}
 
-		case walmodels.EntityTypeCollection:
+		case commonmodels.EntityTypeCollection:
 			var payload walmodels.CollectionPayload
 			if err := json.Unmarshal(entry.Payload, &payload); err != nil {
 				return nil, status.Errorf(codes.Internal, "failed to unmarshal collection payload: %s", err.Error())
@@ -81,7 +81,7 @@ func (s *ServerAPI) ListWALEntries(ctx context.Context, req *dbv1.ListWALEntries
 				},
 			}
 
-		case walmodels.EntityTypeDocument:
+		case commonmodels.EntityTypeDocument:
 			var payload walmodels.DocumentPayload
 			if err := json.Unmarshal(entry.Payload, &payload); err != nil {
 				return nil, status.Errorf(codes.Internal, "failed to unmarshal document payload: %s", err.Error())
@@ -131,13 +131,13 @@ func mutationTypeToGRPC(typ commonmodels.MutationType) dbv1.MutationType {
 	}
 }
 
-func entityTypeToGRPC(typ walmodels.EntityType) dbv1.EntityType {
+func entityTypeToGRPC(typ commonmodels.EntityType) dbv1.EntityType {
 	switch typ {
-	case walmodels.EntityTypeDatabase:
+	case commonmodels.EntityTypeDatabase:
 		return dbv1.EntityType_ENTITY_TYPE_DATABASE
-	case walmodels.EntityTypeCollection:
+	case commonmodels.EntityTypeCollection:
 		return dbv1.EntityType_ENTITY_TYPE_COLLECTION
-	case walmodels.EntityTypeDocument:
+	case commonmodels.EntityTypeDocument:
 		return dbv1.EntityType_ENTITY_TYPE_DOCUMENT
 	default:
 		return dbv1.EntityType_ENTITY_TYPE_UNSPECIFIED

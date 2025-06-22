@@ -28,15 +28,15 @@ func (s *Storage) RecoverFromFile(ctx context.Context, filePath string) error {
 		}
 
 		switch entry.Entity {
-		case walmodels.EntityTypeDatabase:
+		case commonmodels.EntityTypeDatabase:
 			if err := s.ApplyToDatabase(entry); err != nil {
 				return fmt.Errorf("failed to recover database: %w", err)
 			}
-		case walmodels.EntityTypeCollection:
+		case commonmodels.EntityTypeCollection:
 			if err := s.ApplyToCollection(entry); err != nil {
 				return fmt.Errorf("failed to recover collection: %w", err)
 			}
-		case walmodels.EntityTypeDocument:
+		case commonmodels.EntityTypeDocument:
 			if err := s.ApplyToDocument(entry); err != nil {
 				return fmt.Errorf("failed to recover document: %w", err)
 			}

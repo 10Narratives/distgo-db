@@ -4,22 +4,26 @@ package worker.database.v1;
 
 import "google/protobuf/empty.proto";
 
-
 option java_multiple_files = true;
 option java_package = "com.google.worker.database.v1";
 option go_package = "github.com/10Narratives/distgo-db/pkg/proto/worker/database/v1;dbv1";
 
-service TransactionService {
-  rpc Begin (BeginRequest) returns (BeginResponse);
-  rpc Execute (ExecuteRequest) returns (google.protobuf.Empty);
-  rpc Commit (CommitRequest) returns (google.protobuf.Empty);
-  rpc Rollback (RollbackRequest) returns (google.protobuf.Empty);
+enum EntityType {
+  ENTITY_TYPE_UNSPECIFIED = 0;
+  ENTITY_TYPE_DATABASE = 1;
+  ENTITY_TYPE_COLLECTION = 2;
+  ENTITY_TYPE_DOCUMENT = 3;
 }
 
-message BeginRequest {}
+enum MutationType {
+  MUTATION_TYPE_UNSPECIFIED = 0;
+  MUTATION_TYPE_CREATE = 1;
+  MUTATION_TYPE_UPDATE = 2;
+  MUTATION_TYPE_DELETE = 3;
+}
 
-message BeginResponse {
-  string transaction_id = 1;
+service TransactionService {
+  rpc Execute (ExecuteRequest) returns (google.protobuf.Empty);
 }
 
 message Operation {
@@ -30,28 +34,6 @@ message Operation {
 }
 
 message ExecuteRequest {
-  string transaction_id = 1;
+  string database_name = 1;
   repeated Operation operations = 2;
-}
-
-message CommitRequest {
-  string transaction_id = 1;
-}
-
-message RollbackRequest {
-  string transaction_id = 1;
-}
-
-enum MutationType {
-  MUTATION_TYPE_UNSPECIFIED = 0;
-  MUTATION_TYPE_CREATE = 1;
-  MUTATION_TYPE_UPDATE = 2;
-  MUTATION_TYPE_DELETE = 3;
-}
-
-enum EntityType {
-  ENTITY_TYPE_UNSPECIFIED = 0;
-  ENTITY_TYPE_DATABASE = 1;
-  ENTITY_TYPE_COLLECTION = 2;
-  ENTITY_TYPE_DOCUMENT = 3;
 }

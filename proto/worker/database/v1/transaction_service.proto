@@ -12,22 +12,7 @@ option java_package = "com.google.worker.database.v1";
 option go_package = "github.com/10Narratives/distgo-db/pkg/proto/worker/database/v1;dbv1";
 
 service TransactionService {
-  rpc Begin (BeginRequest) returns (BeginResponse);
   rpc Execute (ExecuteRequest) returns (google.protobuf.Empty);
-  rpc Commit (CommitRequest) returns (google.protobuf.Empty);
-  rpc Rollback (RollbackRequest) returns (google.protobuf.Empty);
-}
-
-message BeginRequest {
-  string database_name = 1 [
-    (validate.rules).string.min_len = 1
-  ];
-}
-
-message BeginResponse {
-  string transaction_id = 1 [
-    (validate.rules).string.min_len = 1
-  ];
 }
 
 message Operation {
@@ -51,34 +36,10 @@ message ExecuteRequest {
     (validate.rules).string.min_len = 1
   ];
   
-  string transaction_id = 2 [
-    (validate.rules).string.min_len = 1
-  ];
-  
-  repeated Operation operations = 3 [
+  repeated Operation operations = 2 [
     (validate.rules).repeated = {
       min_items: 1,
       items: { message: { required: true } }
     }
-  ];
-}
-
-message CommitRequest {
-  string database_name = 1 [
-    (validate.rules).string.min_len = 1
-  ];
-  
-  string transaction_id = 2 [
-    (validate.rules).string.min_len = 1
-  ];
-}
-
-message RollbackRequest {
-  string database_name = 1 [
-    (validate.rules).string.min_len = 1
-  ];
-  
-  string transaction_id = 2 [
-    (validate.rules).string.min_len = 1
   ];
 }

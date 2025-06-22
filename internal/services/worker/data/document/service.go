@@ -2,14 +2,19 @@ package documentsrv
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
-	"time"
+	"fmt"
 
 	documentgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/document"
 	collectionmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/collection"
 	commonmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/common"
 	documentmodels "github.com/10Narratives/distgo-db/internal/models/worker/data/document"
 )
+
+type TransactionService interface {
+	Execute(ctx context.Context, operations []commonmodels.Operation) error
+}
 
 //go:generate mockery --name DocumentStorage --output ./mocks/
 type DocumentStorage interface {
@@ -28,14 +33,16 @@ type WALService interface {
 type Service struct {
 	documentStorage DocumentStorage
 	walService      WALService
+	transactionSrv  TransactionService
 }
 
 var _ documentgrpc.DocumentService = &Service{}
 
-func New(documentStorage DocumentStorage, walService WALService) *Service {
+func New(documentStorage DocumentStorage, walService WALService, transactionService TransactionService) *Service {
 	return &Service{
 		documentStorage: documentStorage,
 		walService:      walService,
+		transactionSrv:  transactionService,
 	}
 }
 
@@ -79,67 +86,91 @@ func (s *Service) Documents(ctx context.Context, parent string, size int32, toke
 
 	return page, nextPageToken, nil
 }
-
 func (s *Service) CreateDocument(ctx context.Context, parent string, documentID string, value string) (documentmodels.Document, error) {
-	key := documentmodels.NewKey(parent + "/documents/" + documentID)
-
-	newDoc := documentmodels.Document{
-		Name:      parent + "/documents/" + documentID,
-		ID:        documentID,
-		Value:     []byte(value),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Parent:    parent,
+	collKey := collectionmodels.NewKey(parent)
+	if collKey.Database == "" || collKey.Collection == "" {
+		return documentmodels.Document{}, errors.New("invalid collection name")
 	}
 
-	if err := s.walService.CreateDocumentEntry(ctx, commonmodels.MutationTypeCreate, key, &newDoc); err != nil {
-		return documentmodels.Document{}, errors.New("failed to create WAL entry: " + err.Error())
+	docKey := documentmodels.Key{
+		Database:   collKey.Database,
+		Collection: collKey.Collection,
+		Document:   documentID,
 	}
 
-	doc, err := s.documentStorage.CreateDocument(ctx, key, value)
+	fullName := docKey.FullName()
+
+	valueJSON, err := json.Marshal(value)
 	if err != nil {
-		return documentmodels.Document{}, err
+		return documentmodels.Document{}, fmt.Errorf("value serialization failed: %w", err)
 	}
 
-	return doc, nil
+	op := commonmodels.Operation{
+		Mutation: commonmodels.MutationTypeCreate,
+		Entity:   commonmodels.EntityTypeDocument,
+		Name:     fullName,
+		Value:    valueJSON,
+	}
+
+	if err := s.transactionSrv.Execute(ctx, []commonmodels.Operation{op}); err != nil {
+		return documentmodels.Document{}, fmt.Errorf("transaction failed: %w", err)
+	}
+
+	return s.documentStorage.Document(ctx, docKey)
 }
 
 func (s *Service) DeleteDocument(ctx context.Context, name string) error {
 	key := documentmodels.NewKey(name)
-
-	if err := s.walService.CreateDocumentEntry(ctx, commonmodels.MutationTypeDelete, key, nil); err != nil {
-		return errors.New("failed to create WAL entry: " + err.Error())
-	}
-
-	if err := s.documentStorage.DeleteDocument(ctx, key); err != nil {
+	if err := key.Validate(); err != nil {
 		return err
 	}
 
-	return nil
+	op := commonmodels.Operation{
+		Mutation: commonmodels.MutationTypeDelete,
+		Entity:   commonmodels.EntityTypeDocument,
+		Name:     key.FullName(),
+		Value:    json.RawMessage("null"),
+	}
+
+	return s.transactionSrv.Execute(ctx, []commonmodels.Operation{op})
 }
 
 func (s *Service) UpdateDocument(ctx context.Context, document documentmodels.Document, paths []string) (documentmodels.Document, error) {
 	key := documentmodels.NewKey(document.Name)
+	if err := key.Validate(); err != nil {
+		return documentmodels.Document{}, err
+	}
 
-	for _, path := range paths {
-		switch path {
-		case "value":
-			updatedDoc := document
-			updatedDoc.UpdatedAt = time.Now()
+	valueJSON, err := json.Marshal(string(document.Value))
+	if err != nil {
+		return documentmodels.Document{}, fmt.Errorf("value serialization failed: %w", err)
+	}
 
-			if err := s.walService.CreateDocumentEntry(ctx, commonmodels.MutationTypeUpdate, key, &updatedDoc); err != nil {
-				return documentmodels.Document{}, errors.New("failed to create WAL entry: " + err.Error())
-			}
+	op := commonmodels.Operation{
+		Mutation: commonmodels.MutationTypeUpdate,
+		Entity:   commonmodels.EntityTypeDocument,
+		Name:     key.FullName(),
+		Value:    valueJSON,
+	}
 
-			if err := s.documentStorage.UpdateDocument(ctx, updatedDoc); err != nil {
-				return documentmodels.Document{}, err
-			}
+	if err := s.transactionSrv.Execute(ctx, []commonmodels.Operation{op}); err != nil {
+		return documentmodels.Document{}, fmt.Errorf("transaction failed: %w", err)
+	}
 
-			return updatedDoc, nil
-		default:
-			return documentmodels.Document{}, errors.New("unknown field: " + path)
+	return s.documentStorage.Document(ctx, key)
+}
+func (s *Service) BatchUpdate(ctx context.Context, operations []commonmodels.Operation) error {
+
+	for i, op := range operations {
+		if op.Entity != commonmodels.EntityTypeDocument {
+			return fmt.Errorf("unsupported entity type: %s at index %d", op.Entity, i)
+		}
+
+		key := documentmodels.NewKey(op.Name)
+		if key.Database == "" || key.Collection == "" || key.Document == "" {
+			return fmt.Errorf("invalid document name: %s at index %d", op.Name, i)
 		}
 	}
 
-	return document, nil
+	return s.transactionSrv.Execute(ctx, operations)
 }

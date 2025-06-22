@@ -7,4 +7,5 @@ const (
 	EntityTypeDatabase
 	EntityTypeCollection
 	EntityTypeDocument
+	EntityTypeTransaction
 )

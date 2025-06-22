@@ -42,35 +42,10 @@ func (c *Coordinator) getClient(databaseName string) (dbv1.TransactionServiceCli
 	c.knownClients[databaseName] = client
 	return client, nil
 }
-
-func (c *Coordinator) Begin(ctx context.Context, req *dbv1.BeginRequest) (*dbv1.BeginResponse, error) {
-	client, err := c.getClient(req.GetDatabaseName())
-	if err != nil {
-		return nil, err
-	}
-	return client.Begin(ctx, req)
-}
-
-func (c *Coordinator) Commit(ctx context.Context, req *dbv1.CommitRequest) (*emptypb.Empty, error) {
-	client, err := c.getClient(req.GetDatabaseName())
-	if err != nil {
-		return nil, err
-	}
-	return client.Commit(ctx, req)
-}
-
 func (c *Coordinator) Execute(ctx context.Context, req *dbv1.ExecuteRequest) (*emptypb.Empty, error) {
 	client, err := c.getClient(req.GetDatabaseName())
 	if err != nil {
 		return nil, err
 	}
 	return client.Execute(ctx, req)
-}
-
-func (c *Coordinator) Rollback(ctx context.Context, req *dbv1.RollbackRequest) (*emptypb.Empty, error) {
-	client, err := c.getClient(req.GetDatabaseName())
-	if err != nil {
-		return nil, err
-	}
-	return client.Rollback(ctx, req)
 }

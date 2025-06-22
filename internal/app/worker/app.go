@@ -10,11 +10,13 @@ import (
 	collectiongrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/collection"
 	databasegrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/database"
 	documentgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/document"
+	transactiongrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/transaction"
 	walgrpc "github.com/10Narratives/distgo-db/internal/grpc/worker/data/wal"
 	clustersrv "github.com/10Narratives/distgo-db/internal/services/worker/cluster"
 	collectionsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/collection"
 	databasesrv "github.com/10Narratives/distgo-db/internal/services/worker/data/database"
 	documentsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/document"
+	transactionsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/transaction"
 	walsrv "github.com/10Narratives/distgo-db/internal/services/worker/data/wal"
 	datastorage "github.com/10Narratives/distgo-db/internal/storages/data"
 	walstorage "github.com/10Narratives/distgo-db/internal/storages/wal"
@@ -42,13 +44,16 @@ func New(log *slog.Logger, cfg workercfg.Config) *App {
 	walService := walsrv.New(walStorage)
 	walgrpc.Register(grpcApp.GRPCServer, walService)
 
+	txService := transactionsrv.New(dataStorage, walService)
+	transactiongrpc.Register(grpcApp.GRPCServer, txService)
+
 	databaseSrv := databasesrv.New(dataStorage, walService)
 	databasegrpc.Register(grpcApp.GRPCServer, databaseSrv)
 
 	collectionSrv := collectionsrv.New(dataStorage, walService)
 	collectiongrpc.Register(grpcApp.GRPCServer, collectionSrv)
 
-	documentSrv := documentsrv.New(dataStorage, walService)
+	documentSrv := documentsrv.New(dataStorage, walService, txService)
 	documentgrpc.Register(grpcApp.GRPCServer, documentSrv)
 
 	clusterService := clustersrv.New(cfg.Master.Port)

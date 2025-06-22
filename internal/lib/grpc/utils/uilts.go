@@ -11,20 +11,20 @@ type ParsedName struct {
 }
 
 func ParseName(name string) ParsedName {
-	parts := strings.Split(strings.TrimSpace(name), "/")
+	parts := strings.Split(name, "/")
+	result := ParsedName{}
 
-	db, col, doc := "", "", ""
-	if len(parts) == 6 {
-		db, col, doc = parts[1], parts[3], parts[5]
-	} else if len(parts) == 4 {
-		db, col = parts[1], parts[3]
-	} else if len(parts) == 2 {
-		db = parts[1]
+	if len(parts) >= 2 && parts[0] == "databases" {
+		result.DatabaseID = parts[1]
 	}
 
-	return ParsedName{
-		DatabaseID:   db,
-		CollectionID: col,
-		DocumentID:   doc,
+	if len(parts) >= 4 && parts[2] == "collections" {
+		result.CollectionID = parts[3]
 	}
+
+	if len(parts) >= 6 && parts[4] == "documents" {
+		result.DocumentID = parts[5]
+	}
+
+	return result
 }

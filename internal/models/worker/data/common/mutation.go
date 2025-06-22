@@ -7,4 +7,5 @@ const (
 	MutationTypeCreate
 	MutationTypeUpdate
 	MutationTypeDelete
+	MutationTypeTransaction
 )

@@ -12,9 +12,10 @@ import (
 )
 
 type Storage struct {
-	databases   sync.Map // databasemodels.Key -> databasemodels.Database
-	collections sync.Map // collectionmodels.Key -> collectionmodels.Collection
-	documents   sync.Map // documentmodels.key -> documentmodels.Document
+	databases    sync.Map // databasemodels.Key -> databasemodels.Database
+	collections  sync.Map // collectionmodels.Key -> collectionmodels.Collection
+	documents    sync.Map // documentmodels.key -> documentmodels.Document
+	transactions sync.Map // string -> Transaction
 }
 
 func New() *Storage {
@@ -28,9 +29,10 @@ func NewOf(
 	initialDocuments map[documentmodels.Key]documentmodels.Document,
 ) *Storage {
 	storage := &Storage{
-		databases:   sync.Map{},
-		collections: sync.Map{},
-		documents:   sync.Map{},
+		databases:    sync.Map{},
+		collections:  sync.Map{},
+		documents:    sync.Map{},
+		transactions: sync.Map{},
 	}
 
 	for key, db := range initialDatabases {
