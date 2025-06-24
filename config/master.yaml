@@ -1,7 +1,0 @@
-grpc:
-  port: 55054
-  timeout: 4s
-logging:
-  level: info
-  format: pretty
-  output: stdout
