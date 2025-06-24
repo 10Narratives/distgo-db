@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  master:
+    build:
+      context: .
+      dockerfile: docker/master/Dockerfile
+    ports:
+      - "50051-50053:50051"
+    environment:
+      - CONFIG_PATH=/config/master/config.yaml
+    volumes:
+      - ./internal/config/master:/config/master
+    networks:
+      - app-network
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/worker/Dockerfile
+    environment:
+      - CONFIG_PATH=/config/worker/config.yaml
+    volumes:
+      - ./internal/config/worker:/config/worker
+    depends_on:
+      - master
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

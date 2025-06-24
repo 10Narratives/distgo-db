@@ -1,0 +1,8 @@
+grpc:
+  host: 0.0.0.0
+  port: 55055
+  timeout: 10s
+logging:
+  level: debug
+  format: pretty
+  output: stdout
